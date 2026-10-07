@@ -72,36 +72,19 @@
             }
         }
 
-        // Fonction cryptographique pour hacher le mot de passe
-        async function hashPassword(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        // Configuration initiale de la base de données sécurisée (Simulée)
-        const SECURE_DB = {
-            'admin': {
-                user: 'mastor',
-                // Hash SHA-256 exact de "M stor"
-                hash: '17db552fb821ff4fbc11fde8ef922ce87e791e847cbb64de3910c2fc98ba4e41'
-            },
-            'tresorier': { user: 'treso', hash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92' }, // Hash de "123456" (A changer)
-            'secretaire': { user: 'secret', hash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92' }
-        };
-
-        async function handleLogin(e) {
+        function handleLogin(e) {
             e.preventDefault();
             const role = document.getElementById('role').value;
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
-            
-            const inputHash = await hashPassword(pass);
-            const validAccount = SECURE_DB[role];
 
-            if (validAccount && user === validAccount.user && inputHash === validAccount.hash) {
-                // Création de la session
+            // Validation directe des accès
+            let isValid = false;
+            if (role === 'admin' && user === 'mastor' && pass === 'M stor') isValid = true;
+            if (role === 'tresorier' && user === 'treso' && pass === '123456') isValid = true;
+            if (role === 'secretaire' && user === 'secret' && pass === '123456') isValid = true;
+
+            if (isValid) {
                 sessionStorage.setItem('las_session_role', role);
                 sessionStorage.setItem('las_session_user', user);
                 window.location.href = 'index.html';
