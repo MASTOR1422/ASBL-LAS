@@ -1,12 +1,10 @@
 // ============================================================
-//  ASBL LAS — GESTION DES IDENTIFIANTS, AUTHENTIFICATION ET RÔLES (auth.js)
+//  ASBL LAS — GESTION EXCLUSIVE DES IDENTIFIANTS ET RÔLES (auth.js)
 // ============================================================
 
-const SESSION_KEY = "las_session_v1";
+const SESSION_KEY = "las_session_v2";
 
-// Identifiants exclusifs des Administrateurs ayant le pouvoir de modifier, uploader et supprimer :
-// - ID 2  : Ananias KASANDA (Coordonnateur)
-// - ID 17 : Serge KITA (Secrétaire Général / Trésorier)
+// Liste stricte des ID Membres administrateurs (Ananias KASANDA: ID 2, Serge KITA: ID 17)
 const ADMIN_MEMBER_IDS = [2, 17];
 
 function getSession(){
@@ -19,100 +17,140 @@ function getSession(){
 
 let SESSION = getSession();
 
-// Par défaut, connexion automatique sur le compte Coordonnateur (Ananias KASANDA)
+// Par défaut, si aucune session valide n'est trouvée, connexion Coordonnateur (Ananias KASANDA)
 if (!SESSION || !SESSION.user){
   SESSION = { user: "Ananias KASANDA", role: "admin", memberId: 2, label: "Coordonnateur (Admin)" };
   try { localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION)); } catch(e){}
 }
 
 let ROLE = (SESSION && SESSION.role) || "admin";
-let MEMBER_ID = (SESSION && SESSION.memberId) || null;
+let MEMBER_ID = (SESSION && SESSION.memberId) || 2;
 
-// --- REGLE DE SÉCURITÉ : VÉRIFICATION STRICTE DE L'ADMINISTRATEUR ---
+// Vérification stricte des droits d'administration
 function isAdmin(){
-  if (!SESSION || !SESSION.user) return false;
-  if (SESSION.role === 'admin' || SESSION.user.toLowerCase() === 'root') return true;
-  if (ADMIN_MEMBER_IDS.includes(SESSION.memberId)) return true;
-  return false;
+  if (!SESSION || !SESSION.memberId) return false;
+  return ADMIN_MEMBER_IDS.includes(SESSION.memberId);
 }
 
 function canEdit(){ return isAdmin(); }
 function canPay(){ return isAdmin(); }
 function canDelete(){ return isAdmin(); }
 
+// Action sur le bouton "Quitter" : Réinitialise la session et réouvre la modale de connexion
 function logout(){
   if (confirm("Voulez-vous vous déconnecter du portail ?")){
     localStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(SESSION_KEY);
-    window.location.reload();
+    SESSION = null;
+    openLoginModal();
   }
+}
+
+// Extraction du premier prénom en minuscule
+function extractFirstName(fullName){
+  if (!fullName) return "";
+  const parts = fullName.trim().split(/\s+/);
+  return parts[0].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+// Génération de l'identifiant et du mot de passe
+function getCredentialsForMember(m){
+  const username = extractFirstName(m.name);
+  const password = username + "2026";
+  return { username, password };
 }
 
 // Modal d'authentification
 function openLoginModal(){
+  const userInput = document.getElementById('login-username-input');
+  const passInput = document.getElementById('login-pass-input');
+
+  // Purge et effacement strict des champs de saisie
+  if (userInput) userInput.value = "";
+  if (passInput) passInput.value = "";
+
   const selMember = document.getElementById('login-member-select');
   if (selMember && typeof membersData !== 'undefined') {
     selMember.innerHTML = membersData.map(m => {
-      const isAdminTag = ADMIN_MEMBER_IDS.includes(m.id) ? " (Admin)" : "";
-      return `<option value="${m.id}">N° ${m.id} — ${escapeHTML(m.name)}${isAdminTag}</option>`;
+      const creds = getCredentialsForMember(m);
+      const isAdminTag = ADMIN_MEMBER_IDS.includes(m.id) ? " [ADMIN]" : "";
+      return `<option value="${m.id}">N° ${m.id} — ${escapeHTML(m.name)}${isAdminTag} (Login: ${creds.username})</option>`;
     }).join('');
+    
+    if (MEMBER_ID) selMember.value = MEMBER_ID;
   }
 
-  const roleSel = document.getElementById('login-role-select');
-  if (roleSel) roleSel.value = (SESSION.memberId === 0) ? 'root' : 'membre';
-  if (MEMBER_ID && selMember && MEMBER_ID !== 0) selMember.value = MEMBER_ID;
-
-  toggleLoginMemberSelect();
   document.getElementById('login-modal').classList.remove('hidden');
 }
 
 function closeLoginModal(){
+  if (!SESSION || !SESSION.user) {
+    alert("Veuillez vous connecter pour accéder à l'application.");
+    return;
+  }
   document.getElementById('login-modal').classList.add('hidden');
 }
 
-function toggleLoginMemberSelect(){
-  const role = document.getElementById('login-role-select').value;
-  const grp = document.getElementById('login-member-group');
-  if (role === 'membre') {
-    grp.classList.remove('hidden');
-  } else {
-    grp.classList.add('hidden');
+function onMemberSelectChange(){
+  const selMember = document.getElementById('login-member-select');
+  const userInput = document.getElementById('login-username-input');
+  const passInput = document.getElementById('login-pass-input');
+  
+  if (userInput) userInput.value = "";
+  if (passInput) passInput.value = "";
+
+  if (selMember && typeof membersData !== 'undefined') {
+    const memId = parseInt(selMember.value);
+    const m = membersData.find(x => x.id === memId);
+    if (m && userInput) {
+      const creds = getCredentialsForMember(m);
+      userInput.placeholder = `Identifiant ex: ${creds.username}`;
+    }
   }
 }
 
 function applyUserLogin(){
-  const roleSelect = document.getElementById('login-role-select').value;
-  const pinInput = document.getElementById('login-pin-input').value.trim();
+  const userInput = document.getElementById('login-username-input').value.trim().toLowerCase();
+  const passInput = document.getElementById('login-pass-input').value.trim();
+  const memId = parseInt(document.getElementById('login-member-select').value);
 
-  if (roleSelect === 'root') {
-    if (pinInput === '0000' || pinInput === 'root') {
-      SESSION = { user: "Root Principal", role: "admin", memberId: 0, label: "Root Principal (Admin)" };
-    } else {
-      alert("Mot de passe Root incorrect. (Code PIN par défaut: 0000)");
-      return;
-    }
+  if (typeof membersData === 'undefined') {
+    alert("Base de données indisponible.");
+    return;
+  }
+
+  const m = membersData.find(x => x.id === memId);
+  if (!m) {
+    alert("Membre sélectionné introuvable.");
+    return;
+  }
+
+  const creds = getCredentialsForMember(m);
+
+  if (userInput !== creds.username) {
+    alert(`Identifiant incorrect pour ${m.name}. L'identifiant attendu est son prénom en minuscules : "${creds.username}"`);
+    return;
+  }
+
+  if (passInput !== creds.password) {
+    alert(`Mot de passe incorrect. Le mot de passe par défaut est : "${creds.password}"`);
+    return;
+  }
+
+  // Attribution des rôles
+  if (ADMIN_MEMBER_IDS.includes(m.id)) {
+    const labelRole = (m.id === 2) ? "Coordonnateur (Admin)" : "Secrétaire Général / Trésorier (Admin)";
+    SESSION = { user: m.name, role: "admin", memberId: m.id, label: labelRole };
   } else {
-    const memId = parseInt(document.getElementById('login-member-select').value);
-    const m = typeof membersData !== 'undefined' ? membersData.find(x => x.id === memId) : null;
-
-    if (!m){ alert("Membre introuvable."); return; }
-
-    const expectedPin = m.pin || (1000 + m.id).toString();
-    if (pinInput !== expectedPin){
-      alert(`Code PIN incorrect. (Pour N°${m.id}, le PIN par défaut est ${expectedPin})`);
-      return;
-    }
-
-    // Attribution automatique des privilèges d'administration selon l'ID
-    if (m.id === 2) {
-      SESSION = { user: m.name, role: "admin", memberId: m.id, label: "Coordonnateur (Admin)" };
-    } else if (m.id === 17) {
-      SESSION = { user: m.name, role: "admin", memberId: m.id, label: "Secrétaire Gén / Trésorier (Admin)" };
-    } else {
-      SESSION = { user: m.name, role: "membre", memberId: m.id, label: "Membre (Consultation)" };
-    }
+    SESSION = { user: m.name, role: "membre", memberId: m.id, label: "Membre (Consultation)" };
   }
 
   try { localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION)); } catch(e){}
+
+  // Purge immédiate des zones de saisie après validation
+  document.getElementById('login-username-input').value = "";
+  document.getElementById('login-pass-input').value = "";
+
+  closeLoginModal();
   window.location.reload();
 }
