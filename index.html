@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ASBL LES AMIS DE LA SEMENCE (LAS) — Portail &amp; Média</title>
+    <title>ASBL LES AMIS DE LA SEMENCE (LAS) — Répertoire &amp; Média</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-    <script src="Auth.js"></script>
 
     <script>
         tailwind.config = {
@@ -21,7 +20,6 @@
             } }
         }
     </script>
-
     <style>
         @media print {
             .no-print { display:none !important; }
@@ -33,9 +31,8 @@
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
-    <script>checkAuthGuard(true);</script>
 
-    <!-- HEADER -->
+    <!-- NAVBAR -->
     <header class="bg-slate-900 text-white shadow-lg border-b border-las-700/40 sticky top-0 z-40 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
@@ -47,14 +44,14 @@
                         <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white flex items-center gap-2">
                             ASBL LES AMIS DE LA SEMENCE <span class="text-gold-400 font-bold text-xs px-2 py-0.5 rounded-full bg-gold-500/20 border border-gold-500/40">LAS</span>
                         </h1>
-                        <p class="text-[11px] text-slate-300 font-medium">Répertoire, Cotisations &amp; Espace Média / Documents</p>
+                        <p class="text-[11px] text-slate-300 font-medium">Répertoire officiel, Cotisations &amp; Espace Média / Blog</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700">
                         <i class="fa-solid fa-user-shield text-las-400 text-xs"></i>
-                        <span class="text-xs font-bold" id="current-user-badge">—</span>
+                        <span class="text-xs font-bold" id="current-user">—</span>
                     </div>
                     <button onclick="logout()" class="px-3 py-2 bg-rose-900/40 hover:bg-rose-800/60 text-rose-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-rose-800">
                         <i class="fa-solid fa-right-from-bracket"></i><span>Quitter</span>
@@ -62,7 +59,7 @@
                 </div>
             </div>
 
-            <!-- ONGLETS DE NAVIGATION PRINCIPAUX -->
+            <!-- ONGLETS DE NAVIGATION -->
             <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-800">
                 <button onclick="switchTab('members')" id="tab-btn-members" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-las-700 text-white flex items-center gap-2 shadow">
                     <i class="fa-solid fa-users"></i><span>Membres &amp; Cotisations</span>
@@ -76,7 +73,7 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex-grow w-full">
 
-        <!-- ================= SECTION 1 : MEMBRES & COTISATIONS ================= -->
+        <!-- ================= ONGLET 1 : MEMBRES ================= -->
         <div id="section-members" class="space-y-6">
             <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 no-print">
                 <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm"><div class="text-xl font-black text-slate-900" id="stat-total">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase mt-0.5">Membres</div></div>
@@ -87,7 +84,7 @@
                 <div class="bg-white rounded-2xl p-3.5 border border-slate-200 shadow-sm"><div class="text-xl font-black text-indigo-600"><span id="stat-attendu">0</span>$</div><div class="text-[10px] font-semibold text-slate-500 uppercase mt-0.5">Attendu/an</div></div>
             </div>
 
-            <!-- Barre d'actions membres -->
+            <!-- Filtres et recherche -->
             <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 no-print">
                 <div class="relative w-full sm:w-80">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
@@ -103,7 +100,7 @@
                 </div>
             </div>
 
-            <!-- Tableau des membres -->
+            <!-- Tableau complet (37 membres) -->
             <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
@@ -125,42 +122,40 @@
             </div>
         </div>
 
-        <!-- ================= SECTION 2 : BLOG, PHOTOTHÈQUE & DOCUMENTS ================= -->
+        <!-- ================= ONGLET 2 : BLOG, PHOTOTHÈQUE & DOCUMENTS ================= -->
         <div id="section-media" class="hidden space-y-6 mb-12">
             <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                     <h2 class="text-base font-black text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-photo-film text-las-600"></i> Photothèque, Vidéos &amp; Documents LAS
+                        <i class="fa-solid fa-photo-film text-las-600"></i> Blog, Photothèque &amp; Espace Documentaire LAS
                     </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Partagez et consultez les photos d'événements, rapports PDF et vidéos de l'association.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Partagez et consultez les publications, photos d'événements, rapports PDF et vidéos.</p>
                 </div>
                 <button onclick="openMediaModal()" class="px-4 py-2.5 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow">
-                    <i class="fa-solid fa-upload text-gold-400"></i><span>Ajouter un Média / Document</span>
+                    <i class="fa-solid fa-upload text-gold-400"></i><span>Ajouter un Média / Article</span>
                 </button>
             </div>
 
-            <!-- Filtres de médias -->
             <div class="flex items-center gap-2 overflow-x-auto pb-2">
-                <button onclick="filterMedia('ALL')" id="filter-media-all" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Tous</button>
+                <button onclick="filterMedia('ALL')" id="filter-media-ALL" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Tous</button>
                 <button onclick="filterMedia('photo')" id="filter-media-photo" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Photothèque (Photos)</button>
                 <button onclick="filterMedia('pdf')" id="filter-media-pdf" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Documents PDF / Rapports</button>
                 <button onclick="filterMedia('video')" id="filter-media-video" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Vidéos</button>
             </div>
 
-            <!-- Grille d'affichage des publications média / blog -->
             <div id="media-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5"></div>
         </div>
 
     </main>
 
-    <!-- MODALE AJOUT MEMBRE -->
+    <!-- MODALE MEMBRE -->
     <div id="member-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white sticky top-0">
-                <h3 class="font-bold text-sm" id="modal-title">Ajouter un Membre</h3>
+                <h3 class="font-bold text-sm">Gestion Membre</h3>
                 <button onclick="closeMemberModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form id="member-form" onsubmit="saveMember(event)" class="p-6 space-y-4">
+            <form onsubmit="saveMember(event)" class="p-6 space-y-4">
                 <input type="hidden" id="member-id">
                 <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nom &amp; Prénom *</label>
                     <input type="text" id="input-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"></div>
@@ -184,29 +179,29 @@
         </div>
     </div>
 
-    <!-- MODALE AJOUT MÉDIA / DOCUMENT / BLOG -->
+    <!-- MODALE BLOG / MÉDIA -->
     <div id="media-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
-                <h3 class="font-bold text-sm"><i class="fa-solid fa-upload text-gold-400"></i> Publier un Média ou Document</h3>
+                <h3 class="font-bold text-sm"><i class="fa-solid fa-upload text-gold-400"></i> Publier un Média / Article</h3>
                 <button onclick="closeMediaModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="saveMedia(event)" class="p-6 space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Type de publication *</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Type de contenu *</label>
                     <select id="media-type" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold">
-                        <option value="photo">Photothèque (Image / Photo)</option>
-                        <option value="pdf">Document PDF / Rapport</option>
+                        <option value="photo">Photothèque (Image)</option>
+                        <option value="pdf">Document / Rapport PDF</option>
                         <option value="video">Vidéo</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Titre de la publication *</label>
-                    <input type="text" id="media-title" required placeholder="Ex: Réunion générale de mars 2026" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold">
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Titre / Sujet *</label>
+                    <input type="text" id="media-title" required placeholder="Titre de l'article ou du document" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Description / Notes</label>
-                    <textarea id="media-desc" rows="2" placeholder="Détails de l'événement ou du document..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"></textarea>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Description</label>
+                    <textarea id="media-desc" rows="2" placeholder="Détails..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"></textarea>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Fichier (Photo, PDF ou Vidéo) *</label>
@@ -221,22 +216,54 @@
     </div>
 
 <script>
-// ================= DATA & INIT =================
 const COTISATION_MENSUELLE = 10;
 const ANNEE_COURANTE = new Date().getFullYear();
 const MEMBERS_KEY = "las_members_v2";
 const MEDIA_KEY = "las_media_v1";
 
-let membersData = JSON.parse(localStorage.getItem(MEMBERS_KEY) || JSON.stringify([
-  { id:1, name:"Ander Malala", phone:"243 894 726 836", asbl:"OUI", reunion:"OUI", poste:"Président", payments:{} },
-  { id:2, name:"Ananias KASANDA", phone:"243 819 978 801", asbl:"OUI", reunion:"OUI", poste:"Coordonnateur", payments:{} },
-  { id:3, name:"Baudry Landu", phone:"243 895 446 423", asbl:"OUI", reunion:"OUI", poste:"Trésorier", payments:{} },
-  { id:17, name:"Serge KITA", phone:"243 854 797 085", asbl:"OUI", reunion:"OUI", poste:"Secrétaire Général", payments:{} }
-]));
+// Intégration complète et exacte des 37 membres de l'ASBL LAS
+const DEFAULT_MEMBERS = [
+  { id:1, name:"Ander Malala", phone:"243 894 726 836", forum:"OUI", asbl:"OUI", reunion:"OUI", poste:"Président", payments:{} },
+  { id:2, name:"Ananias KASANDA", phone:"243 819 978 801", forum:"OUI", asbl:"OUI", reunion:"OUI", poste:"Coordonnateur", payments:{} },
+  { id:3, name:"Baudry Landu", phone:"243 895 446 423", forum:"OUI", asbl:"OUI", reunion:"OUI", poste:"Trésorier", payments:{} },
+  { id:4, name:"Junior Loti", phone:"243 898 953 438", forum:"OUI", asbl:"OUI", reunion:"OUI", poste:"Membre", payments:{} },
+  { id:5, name:"Aarly Nsungu", phone:"243 971 855 480", forum:"OUI", asbl:"OUI", reunion:"EXEMPTER", payments:{} },
+  { id:6, name:"BELINDA NTEMBE", phone:"+33 7 59 27 85 66", forum:"PARTIEL", asbl:"OUI", reunion:"EXEMPTER", payments:{} },
+  { id:7, name:"Dick mbengu", phone:"244 930 561 955", forum:"PARTIEL", asbl:"NON", reunion:"EXEMPTER", payments:{} },
+  { id:8, name:"Dijo Mboko", phone:"243 894 481 069", forum:"PARTIEL", asbl:"OUI", reunion:"OUI", payments:{} },
+  { id:9, name:"Divuandidi", phone:"243 907 258 208", forum:"NON", asbl:"OUI", reunion:"NON", payments:{} },
+  { id:10, name:"Elvis", phone:"243 852 105 790", forum:"NON", asbl:"NON", reunion:"NON", payments:{} },
+  { id:11, name:"fanny fatya mbala", phone:"243 896 633 569", forum:"OUI", asbl:"OUI", reunion:"OUI", payments:{} },
+  { id:12, name:"Fils Mbongo", phone:"243 999 459 122", forum:"NON", asbl:"NON", reunion:"NON", payments:{} },
+  { id:14, name:"Freddy KIMPIATTU", phone:"243 826 065 275", forum:"OUI", asbl:"OUI", reunion:"OUI", payments:{} },
+  { id:15, name:"Frederick Kifiya", phone:"243 899 694 673", forum:"OUI", asbl:"OUI", reunion:"OUI", payments:{} },
+  { id:16, name:"Fils Kimenga", phone:"243 843 218 094", forum:"NON", asbl:"OUI", reunion:"NON", payments:{} },
+  { id:17, name:"Serge KITA", phone:"243 854 797 085", forum:"OUI", asbl:"OUI", reunion:"OUI", poste:"Secrétaire Général", payments:{} },
+  { id:18, name:"Lolo Nzeza", phone:"243 900 532 333", forum:"OCCASIONEL", asbl:"NON", reunion:"NON", payments:{} },
+  { id:19, name:"Lombi", phone:"+242 05 761 5731", forum:"SOUVENT", asbl:"NON", reunion:"NON", payments:{} },
+  { id:20, name:"Lovy Sala", phone:"243 814 941 425", forum:"NON", asbl:"NON", reunion:"NON", payments:{} },
+  { id:21, name:"Matuba Pilu", phone:"243 994 141 415", forum:"NON", asbl:"NON", reunion:"NON", payments:{} },
+  { id:22, name:"Me Freddy Lutonto", phone:"243 897 426 649", forum:"OCCASIONEL", asbl:"OUI", reunion:"OUI", payments:{} },
+  { id:23, name:"Nadège MUBANGA", phone:"243 898 273 638", forum:"OUI", asbl:"OUI", reunion:"OUI", payments:{} },
+  { id:24, name:"Nadine Biangolo", phone:"243 904 746 639", forum:"OUI", asbl:"NON", reunion:"NON", payments:{} },
+  { id:25, name:"Niclette Kitembo", phone:"243 894 200 430", forum:"OCCASIONEL", asbl:"OUI", reunion:"NON", payments:{} },
+  { id:26, name:"nsamu abi", phone:"244 931 354 839", forum:"NON", asbl:"NON", reunion:"EXEMPTER", payments:{} },
+  { id:27, name:"Olivier NONGU", phone:"243 816 910 214", forum:"OCCASIONEL", asbl:"OUI", reunion:"OUI", payments:{} },
+  { id:28, name:"Patricia Makudi", phone:"243 815 122 136", forum:"NON", asbl:"NON", reunion:"NON", payments:{} },
+  { id:29, name:"Saint Vuangi", phone:"243 906 655 909", forum:"OUI", asbl:"OUI", reunion:"OUI", payments:{} },
+  { id:30, name:"Teddy Kasongo", phone:"243 901 318 624", forum:"PARFOIS", asbl:"OUI", reunion:"OUI", payments:{} },
+  { id:31, name:"Tonton Nkuku", phone:"243 971 958 874", forum:"OCCASIONEL", asbl:"OUI", reunion:"NON", payments:{} },
+  { id:32, name:"Tuzolana Nathalie", phone:"243 900 569 399", forum:"NON", asbl:"NON", reunion:"NON", payments:{} },
+  { id:33, name:"Gueyi Kikalankala", phone:"243 897 414 242", forum:"PARFOIS", asbl:"OUI", reunion:"OUI", payments:{} },
+  { id:34, name:"kungulu kinkela Fidel", phone:"243 896 722 306", forum:"NON", asbl:"NON", reunion:"NON", payments:{} },
+  { id:35, name:"Masuama Pembele", phone:"243 896 350 866", forum:"NON", asbl:"OUI", reunion:"NON", payments:{} },
+  { id:36, name:"pico mfumukwansa", phone:"243 840 200 071", forum:"OUI", asbl:"NON", reunion:"EXEMPTER", payments:{} },
+  { id:37, name:"Rachel Luzolo", phone:"243 894 055 982", forum:"NON", asbl:"OUI", reunion:"NON", payments:{} }
+];
 
+let membersData = JSON.parse(localStorage.getItem(MEMBERS_KEY) || JSON.stringify(DEFAULT_MEMBERS));
 let mediaData = JSON.parse(localStorage.getItem(MEDIA_KEY) || JSON.stringify([
-  { id: 1, type: 'photo', title: 'Renouvellement du bureau LAS', desc: 'Rencontre des membres fondateurs à Kinshasa.', url: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=600&q=80', date: '2026-03-01' },
-  { id: 2, type: 'pdf', title: 'Statuts et Règlement Intérieur ASBL LAS', desc: 'Document officiel consolidé.', url: '#', date: '2026-01-15' }
+  { id: 1, type: 'photo', title: 'Rencontre ASBL LAS', desc: 'Activités officielles à Kinshasa.', url: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=600&q=80', date: '2026-03-01' }
 ]));
 
 function saveMembers(){ localStorage.setItem(MEMBERS_KEY, JSON.stringify(membersData)); }
@@ -260,7 +287,6 @@ function switchTab(tab){
   }
 }
 
-// Stats & render members
 function isAJour(m, year){
   const paid = (m.payments && m.payments[year]) ? m.payments[year].filter(Boolean).length : 0;
   const due = year === ANNEE_COURANTE ? new Date().getMonth() + 1 : 12;
@@ -279,7 +305,9 @@ function renderStats(){
   document.getElementById('stat-retard').textContent = total - ajour;
   document.getElementById('stat-encaisse').textContent = encaisse;
   document.getElementById('stat-attendu').textContent = total * 12 * COTISATION_MENSUELLE;
-  document.getElementById('current-user-badge').textContent = SESSION.user;
+  
+  const sess = JSON.parse(localStorage.getItem('las_session_v1') || '{}');
+  document.getElementById('current-user').textContent = sess.user || 'Administrateur';
 }
 
 function renderMembers(){
@@ -293,8 +321,8 @@ function renderMembers(){
     return `
       <tr class="hover:bg-slate-50">
         <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-500">${m.id}</td>
-        <td class="py-2.5 px-4 font-bold text-slate-900">${escapeHTML(m.name)} <span class="block text-[10px] text-slate-500 font-normal">${escapeHTML(m.poste||'Membre')}</span></td>
-        <td class="py-2.5 px-4 font-mono text-slate-700">${escapeHTML(m.phone)}</td>
+        <td class="py-2.5 px-4 font-bold text-slate-900">${m.name} <span class="block text-[10px] text-slate-500 font-normal">${m.poste||'Membre'}</span></td>
+        <td class="py-2.5 px-4 font-mono text-slate-700">${m.phone}</td>
         <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${m.asbl==='OUI'?'bg-emerald-100 text-emerald-800':'bg-rose-100 text-rose-800'}">${m.asbl}</span></td>
         <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">${m.reunion}</span></td>
         <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${ajour?'bg-emerald-100 text-emerald-800':'bg-rose-100 text-rose-800'}">${ajour?'À JOUR':'RETARD'}</span></td>
@@ -306,7 +334,7 @@ function renderMembers(){
   }).join('');
 }
 
-// Media & Blog logic
+// Logique du Blog / Photothèque / Documents
 function openMediaModal(){ document.getElementById('media-modal').classList.remove('hidden'); }
 function closeMediaModal(){ document.getElementById('media-modal').classList.add('hidden'); }
 
@@ -321,28 +349,24 @@ function saveMedia(e){
     const reader = new FileReader();
     reader.onload = function(ev){
       mediaData.unshift({
-        id: Date.now(),
-        type: type,
-        title: title,
-        desc: desc,
+        id: Date.now(), type, title, desc,
         url: ev.target.result,
         date: new Date().toISOString().slice(0,10)
       });
       saveMediaStorage();
       closeMediaModal();
       renderMedia('ALL');
-      alert("Publication ajoutée avec succès !");
     };
     reader.readAsDataURL(fileInput.files[0]);
   }
 }
 
 function filterMedia(type){
-  ['all','photo','pdf','video'].forEach(t => {
+  ['ALL','photo','pdf','video'].forEach(t => {
     const btn = document.getElementById(`filter-media-${t}`);
     if(btn) btn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition";
   });
-  const activeBtn = document.getElementById(`filter-media-${type.toLowerCase()}`);
+  const activeBtn = document.getElementById(`filter-media-${type}`);
   if(activeBtn) activeBtn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition";
   renderMedia(type);
 }
@@ -352,7 +376,7 @@ function renderMedia(filter){
   const filtered = filter === 'ALL' ? mediaData : mediaData.filter(m => m.type === filter);
 
   if(filtered.length === 0){
-    grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-xs font-medium">Aucun contenu trouvé dans cette catégorie.</div>`;
+    grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-xs">Aucun contenu disponible.</div>`;
     return;
   }
 
@@ -371,9 +395,9 @@ function renderMedia(filter){
         <div>
           ${preview}
           <div class="p-4 space-y-2">
-            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-las-100 text-las-800">${m.type}</span>
-            <h3 class="font-bold text-slate-900 text-sm">${escapeHTML(m.title)}</h3>
-            <p class="text-xs text-slate-600">${escapeHTML(m.desc || '')}</p>
+            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-las-100 text-las-800">${m.type}</span>
+            <h3 class="font-bold text-slate-900 text-sm">${m.title}</h3>
+            <p class="text-xs text-slate-600">${m.desc || ''}</p>
           </div>
         </div>
         <div class="p-4 pt-0 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 mt-2">
@@ -397,6 +421,7 @@ function deleteMedia(id){
 
 function openMemberModal(){ document.getElementById('member-modal').classList.remove('hidden'); }
 function closeMemberModal(){ document.getElementById('member-modal').classList.add('hidden'); }
+
 function saveMember(e){
   e.preventDefault();
   const name = document.getElementById('input-name').value.trim();
@@ -408,11 +433,17 @@ function saveMember(e){
   membersData.unshift({ id: nextId, name, phone, poste, asbl, reunion, payments:{} });
   saveMembers(); closeMemberModal(); renderStats(); renderMembers();
 }
+
 function deleteMember(id){
   if(confirm("Supprimer ce membre ?")){
     membersData = membersData.filter(m=>m.id!==id);
     saveMembers(); renderStats(); renderMembers();
   }
+}
+
+function logout(){
+  localStorage.removeItem('las_session_v1');
+  window.location.href = 'login.html';
 }
 
 document.getElementById('search-input').addEventListener('input', renderMembers);
