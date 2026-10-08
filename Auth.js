@@ -1,10 +1,8 @@
 // ============================================================
-//  ASBL LAS — GESTION CENTRALISÉE DE L'AUTHENTIFICATION ET DES RÔLES (Auth.js)
+//  ASBL LAS — GESTION CENTRALISÉE DE L'AUTHENTIFICATION (Auth.js)
 // ============================================================
 
 const SESSION_KEY = "las_session_v1";
-
-// Identifiants exclusifs des Administrateurs / Dirigeants
 const ADMIN_USERNAMES = ['ananias', 'serge', 'root', 'mastor'];
 
 function getSession(){
@@ -17,7 +15,6 @@ function getSession(){
 
 let SESSION = getSession();
 
-// Vérification de validité de session globale
 function checkAuthGuard(requireLogin = true) {
   SESSION = getSession();
   const isLoginPage = window.location.pathname.includes('login.html');
@@ -33,7 +30,6 @@ function checkAuthGuard(requireLogin = true) {
   return true;
 }
 
-// Gestion des rôles et permissions
 function getUserRole() {
   return SESSION ? (SESSION.role || 'membre') : 'invite';
 }
@@ -65,7 +61,6 @@ function logout() {
   }
 }
 
-// Sécurité d'échappement HTML pour contrer les injections XSS
 function escapeHTML(str) {
   if (!str) return '';
   return str.toString()
