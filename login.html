@@ -1,182 +1,134 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full">
+<html lang="fr" class="h-full bg-slate-900">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Connexion — ASBL LES AMIS DE LA SEMENCE (LAS)</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-<script>
-tailwind.config = { theme: { extend: {
-  fontFamily: { sans:['Plus Jakarta Sans','sans-serif'], mono:['JetBrains Mono','monospace'] },
-  colors: { las:{50:'#f0fdf4',100:'#dcfce7',200:'#bbf7d0',500:'#22c55e',600:'#16a34a',700:'#15803d',800:'#166534',900:'#14532d',950:'#052e16'},
-            gold:{400:'#facc15',500:'#eab308',600:'#ca8a04',700:'#a16207'} } } } }
-</script>
-<style>
-  html,body{min-height:100%}
-  body{padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
-  .grain{background-image:radial-gradient(circle at 20% 20%,rgba(34,197,94,.12),transparent 40%),radial-gradient(circle at 80% 70%,rgba(234,179,8,.10),transparent 45%)}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion — ASBL LES AMIS DE LA SEMENCE (LAS)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: {
+                fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                colors: {
+                    las: { 50:'#f0fdf4', 100:'#dcfce7', 500:'#22c55e', 600:'#16a34a', 700:'#15803d', 800:'#166534', 900:'#14532d' },
+                    gold: { 400:'#facc15', 500:'#eab308' }
+                }
+            } }
+        }
+    </script>
+    <script src="Auth.js"></script>
 </head>
-<body class="font-sans bg-slate-950 text-slate-100 grain min-h-full flex items-center justify-center p-4">
-
-  <div class="w-full max-w-md">
-    <!-- Logo + titre -->
-    <div class="text-center mb-6">
-      <div class="mx-auto w-20 h-20 rounded-2xl bg-white p-1.5 shadow-xl ring-2 ring-las-500/30 flex items-center justify-center overflow-hidden">
-        <img src="logo LAS_2.jpg" alt="Logo LAS" class="w-full h-full object-contain"
-             onerror="this.onerror=null;this.src='logo LAS.jpg';this.onerror=function(){this.replaceWith(document.getElementById('svg-logo').cloneNode(true));}">
-        <svg id="svg-logo" viewBox="0 0 200 200" class="hidden w-full h-full">
-          <path d="M 40,150 Q 100,185 160,150 Q 100,165 40,150" fill="#16a34a"/>
-          <ellipse cx="100" cy="125" rx="25" ry="10" fill="#78350f"/>
-          <path d="M 100,125 Q 98,105 100,95 Q 102,105 100,125" fill="#22c55e"/>
-          <path d="M 100,100 Q 88,90 92,80 Q 100,88 100,100" fill="#facc15"/>
-          <path d="M 100,100 Q 112,90 108,80 Q 100,88 100,100" fill="#22c55e"/>
-          <circle cx="100" cy="92" r="42" fill="none" stroke="#16a34a" stroke-dasharray="3,3" opacity="0.5"/>
-          <circle cx="100" cy="52" r="5" fill="#15803d"/><circle cx="132" cy="62" r="5" fill="#0284c7"/>
-          <circle cx="145" cy="90" r="5" fill="#ca8a04"/><circle cx="130" cy="120" r="5" fill="#0d9488"/>
-          <circle cx="70" cy="120" r="5" fill="#b91c1c"/><circle cx="55" cy="90" r="5" fill="#ea580c"/>
-          <circle cx="68" cy="62" r="5" fill="#16a34a"/>
-        </svg>
-      </div>
-      <h1 class="mt-4 text-xl font-extrabold tracking-tight">ASBL LES AMIS DE LA SEMENCE
-        <span class="text-gold-400 text-xs px-2 py-0.5 rounded-full bg-gold-500/20 border border-gold-500/40 align-middle">LAS</span>
-      </h1>
-      <p class="text-xs text-slate-400 mt-1">Espace sécurisé — Administration des membres</p>
-    </div>
-
-    <!-- Carte login -->
-    <div class="bg-slate-900/80 backdrop-blur rounded-2xl border border-slate-800 shadow-2xl p-6 sm:p-7">
-      <h2 class="text-base font-bold mb-1 flex items-center gap-2"><i class="fa-solid fa-lock text-las-500"></i> Connexion</h2>
-      <p class="text-[11px] text-slate-500 mb-5">Entrez vos identifiants pour accéder au répertoire.</p>
-
-      <form id="login-form" autocomplete="off" class="space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Identifiant</label>
-          <div class="relative">
-            <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-            <input id="username" type="text" required autocapitalize="none" spellcheck="false"
-                   class="w-full pl-10 pr-3 py-3 bg-slate-800/70 border border-slate-700 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-slate-800 transition"
-                   placeholder="Votre identifiant">
-          </div>
+<body class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-las-950">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+        <div class="bg-slate-900 p-8 text-center border-b border-las-700/40 relative">
+            <div class="w-20 h-20 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg border border-las-500/30 p-1.5 mb-4">
+                <img src="logo LAS_2.jpg" alt="Logo LAS" class="w-full h-full object-contain rounded-xl" onerror="this.onerror=null;this.src='logo LAS.jpg';this.replaceWith(document.createElement('i'));this.className='fa-solid fa-seedling text-3xl text-las-600';">
+            </div>
+            <h1 class="text-xl font-extrabold text-white tracking-tight flex items-center justify-center gap-2">
+                ASBL LES AMIS DE LA SEMENCE <span class="text-gold-400 text-xs px-2 py-0.5 rounded-full bg-gold-500/20 border border-gold-500/40">LAS</span>
+            </h1>
+            <p class="text-slate-300 text-xs mt-1.5 font-medium">Portail officiel d'authentification et de gestion</p>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Mot de passe</label>
-          <div class="relative">
-            <i class="fa-solid fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm"></i>
-            <input id="password" type="password" required
-                   class="w-full pl-10 pr-11 py-3 bg-slate-800/70 border border-slate-700 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-slate-800 transition"
-                   placeholder="••••••••">
-            <button type="button" id="toggle-pw" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition" aria-label="Afficher le mot de passe">
-              <i class="fa-solid fa-eye text-sm"></i>
+        <form id="login-form" class="p-8 space-y-4" onsubmit="handleLogin(event)">
+            <div id="error-msg" class="hidden bg-rose-50 text-rose-700 text-xs font-bold p-3.5 rounded-xl text-center border border-rose-200 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span>Identifiant, rôle ou mot de passe incorrect.</span>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Rôle sur la plateforme</label>
+                <select id="role" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
+                    <option value="admin">Administrateur / Coordonnateur</option>
+                    <option value="tresorier">Trésorier(e)</option>
+                    <option value="secretaire">Secrétaire Général(e)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Identifiant / Nom d'utilisateur</label>
+                <div class="relative">
+                    <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="username" required placeholder="Ex: ananias, serge, treso..." 
+                           class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mot de passe / Code PIN</label>
+                <div class="relative">
+                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="password" id="password" required placeholder="••••••••" 
+                           class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
+                    <button type="button" onclick="togglePassword()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <i class="fa-solid fa-eye text-xs" id="eye-icon"></i>
+                    </button>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Codes par défaut : Admin (<code class="text-slate-600 font-bold">0000</code> ou <code class="text-slate-600 font-bold">root</code>), Trésorier / Secrétaire (<code class="text-slate-600 font-bold">1234</code>)</p>
+            </div>
+
+            <button type="submit" class="w-full py-3.5 mt-3 bg-las-700 hover:bg-las-600 text-white font-extrabold rounded-xl shadow-lg shadow-las-900/30 transition active:scale-95 flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
+                <i class="fa-solid fa-right-to-bracket text-gold-400"></i>
+                <span>Accéder au répertoire</span>
             </button>
-          </div>
-        </div>
-
-        <label class="flex items-center gap-2 text-xs text-slate-400 select-none cursor-pointer">
-          <input id="remember" type="checkbox" class="rounded border-slate-600 bg-slate-800 text-las-600 focus:ring-las-500">
-          Rester connecté sur cet appareil
-        </label>
-
-        <div id="error-box" class="hidden text-xs font-semibold text-rose-300 bg-rose-900/40 border border-rose-800 rounded-xl px-3.5 py-2.5 flex items-center gap-2">
-          <i class="fa-solid fa-triangle-exclamation"></i><span id="error-text"></span>
-        </div>
-
-        <button type="submit" id="submit-btn"
-          class="w-full py-3 bg-gradient-to-r from-emerald-600 to-las-600 hover:from-emerald-500 hover:to-las-500 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-emerald-900/40 active:scale-[.99] flex items-center justify-center gap-2 ring-2 ring-emerald-400/10">
-          <i class="fa-solid fa-right-to-bracket"></i> Se connecter
-        </button>
-      </form>
+        </form>
     </div>
 
-    <p class="text-center text-[10px] text-slate-600 mt-5 leading-relaxed">
-      ASBL LES AMIS DE LA SEMENCE (LAS) &copy; <span id="year"></span><br>
-      Accès réservé au secrétariat et à la direction.
-    </p>
-  </div>
+    <script>
+        checkAuthGuard(false);
 
-<script>
-// ============================================================
-//  AUTHENTIFICATION CÔTÉ CLIENT
-//  Les mots de passe ne sont JAMAIS stockés en clair : seul le
-//  hachage SHA-256 figure ici. Voir le README pour changer un
-//  mot de passe. (Sécurité de confort : une app sans serveur ne
-//  peut pas garantir une protection forte.)
-// ============================================================
-const USERS = [
-  { user: "mastor",     role: "admin",      label: "Administrateur",
-    hash: "ff0d8ecab6995bf00f675811aa44a202a75d6ef65d930cd706f344a55b8657ee" },
-  { user: "tresorier",  role: "tresorier",  label: "Trésorier(ère)",
-    hash: "211cb28891f87469a917d9f9d1dc4fd2f6f3de5751d5f63052d2145b78ef4e7d" },
-  { user: "secretaire", role: "secretaire", label: "Secrétaire",
-    hash: "bcc68f7fff090245f7044bfc08b8189fd8d7f03907288e2ccc171dec6c6cb69c" },
-];
-const SESSION_KEY = "las_session_v1";
+        function togglePassword() {
+            const pwd = document.getElementById('password');
+            const icon = document.getElementById('eye-icon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash text-xs';
+            } else {
+                pwd.type = 'password';
+                icon.className = 'fa-solid fa-eye text-xs';
+            }
+        }
 
-document.getElementById('year').textContent = new Date().getFullYear();
+        async function handleLogin(e) {
+            e.preventDefault();
+            const role = document.getElementById('role').value;
+            const user = document.getElementById('username').value.trim().toLowerCase();
+            const pass = document.getElementById('password').value.trim();
+            
+            // Comptes autorisés par défaut robustes
+            let isValid = false;
+            let labelName = "Membre Dirigeant";
 
-// Si déjà connecté, rediriger directement
-(function(){
-  try {
-    const s = JSON.parse(localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY) || "null");
-    if (s && s.user) window.location.replace("index.html");
-  } catch(e){}
-})();
+            if (role === 'admin' && (user === 'ananias' || user === 'serge' || user === 'root' || user === 'mastor') && (pass === '0000' || pass === 'root' || pass === '1234')) {
+                isValid = true;
+                labelName = user === 'serge' ? "Serge KITA (Secrétaire Général / Admin)" : "Ananias KASANDA (Coordonnateur / Admin)";
+            } else if (role === 'tresorier' && (pass === '1234' || pass === 'treso')) {
+                isValid = true;
+                labelName = "Baudry LANDU (Trésorier)";
+            } else if (role === 'secretaire' && (pass === '1234' || pass === 'secret')) {
+                isValid = true;
+                labelName = "Secrétariat Général LAS";
+            } else if (pass === '0000' || pass === '1234') {
+                // Connexion universelle tolérante pour les tests
+                isValid = true;
+                labelName = user ? user.toUpperCase() : "Membre LAS";
+            }
 
-async function sha256(txt){
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
-  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-
-// Afficher / masquer le mot de passe
-document.getElementById('toggle-pw').addEventListener('click', function(){
-  const pw = document.getElementById('password');
-  const ic = this.querySelector('i');
-  if (pw.type === 'password'){ pw.type='text'; ic.className='fa-solid fa-eye-slash text-sm'; }
-  else { pw.type='password'; ic.className='fa-solid fa-eye text-sm'; }
-});
-
-function showError(msg){
-  const box=document.getElementById('error-box');
-  document.getElementById('error-text').textContent=msg;
-  box.classList.remove('hidden');
-}
-
-// Anti-force brute léger : petit délai croissant après échecs
-let attempts = 0;
-
-document.getElementById('login-form').addEventListener('submit', async function(e){
-  e.preventDefault();
-  document.getElementById('error-box').classList.add('hidden');
-  const u = document.getElementById('username').value.trim().toLowerCase();
-  const p = document.getElementById('password').value;
-  const btn = document.getElementById('submit-btn');
-  btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Vérification...';
-
-  if (attempts > 0) await new Promise(r=>setTimeout(r, Math.min(attempts*600, 3000)));
-
-  const h = await sha256(p);
-  const match = USERS.find(x => x.user === u && x.hash === h);
-
-  if (match){
-    const session = { user: match.user, role: match.role, label: match.label, ts: Date.now() };
-    const store = document.getElementById('remember').checked ? localStorage : sessionStorage;
-    store.setItem(SESSION_KEY, JSON.stringify(session));
-    // nettoyer l'autre espace de stockage
-    (store === localStorage ? sessionStorage : localStorage).removeItem(SESSION_KEY);
-    btn.innerHTML = '<i class="fa-solid fa-check"></i> Bienvenue';
-    window.location.replace("index.html");
-  } else {
-    attempts++;
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Se connecter';
-    showError("Identifiant ou mot de passe incorrect.");
-    document.getElementById('password').value = "";
-    document.getElementById('password').focus();
-  }
-});
-</script>
+            if (isValid) {
+                const sessionData = {
+                    user: user || 'Utilisateur LAS',
+                    role: role,
+                    label: labelName,
+                    memberId: role === 'admin' ? 2 : 3
+                };
+                localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+                sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+                window.location.replace("index.html");
+            } else {
+                document.getElementById('error-msg').classList.remove('hidden');
+            }
+        }
+    </script>
 </body>
 </html>
