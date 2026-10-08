@@ -35,11 +35,11 @@
 
         <form id="login-form" class="p-8 space-y-5" onsubmit="handleLogin(event)">
             <div id="error-msg" class="hidden bg-rose-50 text-rose-600 text-xs font-bold p-3.5 rounded-xl text-center border border-rose-200">
-                Identifiants ou rôle incorrects.
+                Identifiants ou mot de passe incorrects.
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Rôle</label>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Rôle d'accès</label>
                 <select id="role" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
                     <option value="admin">Administrateur / Coordonnateur</option>
                     <option value="tresorier">Trésorier(e)</option>
@@ -49,7 +49,7 @@
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Identifiant</label>
-                <input type="text" id="username" required placeholder="Saisissez votre identifiant" 
+                <input type="text" id="username" required placeholder="Saisissez votre nom ou identifiant" 
                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
             </div>
 
@@ -84,13 +84,13 @@
             }
         }
 
-        async function handleLogin(e) {
+        function handleLogin(e) {
             e.preventDefault();
             const role = document.getElementById('role').value;
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
-            
-            if (pass.length > 0) {
+
+            if (verifyPassword(user, pass)) {
                 const sessionData = { 
                     user: user || "Ananias KASANDA", 
                     role: role, 
