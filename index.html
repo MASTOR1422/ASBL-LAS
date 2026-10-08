@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ASBL LES AMIS DE LA SEMENCE (LAS) — Portail Officiel</title>
+    <title>ASBL LES AMIS DE LA SEMENCE (LAS) — Répertoire &amp; Cotisations</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
-
-    <!-- Communication avec auth.js -->
-    <script src="auth.js"></script>
+    <script src="Auth.js"></script>
 
     <script>
         tailwind.config = {
@@ -53,112 +51,64 @@
         ::-webkit-scrollbar { height:6px; width:6px; }
         ::-webkit-scrollbar-track { background:#f1f5f9; }
         ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
-        .fl{display:block;font-size:.75rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem}
-        .fi{width:100%;padding:.55rem .85rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:.75rem;font-size:.75rem;font-weight:600;color:#1e293b}
-        .fi:focus{outline:none;box-shadow:0 0 0 2px #22c55e;background:#fff}
-        .sec{font-size:.65rem;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #dcfce7;padding-bottom:.25rem;margin-top:.5rem}
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+    <script>checkAuthGuard(true);</script>
 
-    <!-- BARRE DE NAVIGATION PRINCIPALE -->
+    <!-- ===================== BARRE DE NAVIGATION ===================== -->
     <header class="bg-slate-900 text-white shadow-lg border-b border-las-700/40 sticky top-0 z-40 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-3.5 w-full lg:w-auto justify-between lg:justify-start">
-                    <div class="flex items-center gap-3">
-                        <div class="relative shrink-0">
-                            <img src="LAS_2.png" alt="Logo ASBL LAS"
-                                 class="h-12 sm:h-14 w-auto max-w-[130px] object-contain bg-white rounded-xl p-1 shadow-md border border-las-500/30 ring-2 ring-las-500/20"
-                                 onerror="this.onerror=null;var f=document.getElementById('svg-logo-fallback').cloneNode(true);f.removeAttribute('id');f.classList.remove('hidden');f.classList.add('flex');this.replaceWith(f);">
-                            <div id="svg-logo-fallback" class="hidden w-14 h-14 rounded-xl bg-white p-0.5 shadow-md border border-las-500/30 items-center justify-center">
-                                <svg viewBox="0 0 200 200" class="w-full h-full">
-                                    <path d="M 40,150 Q 100,185 160,150 Q 100,165 40,150" fill="#16a34a"/>
-                                    <ellipse cx="100" cy="125" rx="25" ry="10" fill="#78350f"/>
-                                    <path d="M 100,125 Q 98,105 100,95 Q 102,105 100,125" fill="#22c55e"/>
-                                    <path d="M 100,100 Q 88,90 92,80 Q 100,88 100,100" fill="#facc15"/>
-                                    <path d="M 100,100 Q 112,90 108,80 Q 100,88 100,100" fill="#22c55e"/>
-                                    <circle cx="100" cy="92" r="42" fill="none" stroke="#16a34a" stroke-dasharray="3,3" opacity="0.4"/>
-                                    <circle cx="100" cy="52" r="5" fill="#15803d"/><circle cx="132" cy="62" r="5" fill="#0284c7"/>
-                                    <circle cx="145" cy="90" r="5" fill="#ca8a04"/><circle cx="130" cy="120" r="5" fill="#0d9488"/>
-                                    <circle cx="70" cy="120" r="5" fill="#b91c1c"/><circle cx="55" cy="90" r="5" fill="#ea580c"/>
-                                    <circle cx="68" cy="62" r="5" fill="#16a34a"/>
-                                </svg>
-                            </div>
+                <div class="flex items-center gap-3.5 w-full lg:w-auto">
+                    <div class="relative shrink-0">
+                        <img src="logo LAS_2.jpg" alt="Logo ASBL LAS"
+                             class="w-14 h-14 object-contain bg-white rounded-xl p-1 shadow-md border border-las-500/30 ring-2 ring-las-500/20"
+                             onerror="this.onerror=null;this.src='logo LAS.jpg';this.onerror=function(){this.replaceWith(document.getElementById('svg-logo-fallback').cloneNode(true));};">
+                        <div id="svg-logo-fallback" class="hidden w-14 h-14 rounded-xl bg-white p-0.5 shadow-md border border-las-500/30 items-center justify-center">
+                            <i class="fa-solid fa-seedling text-2xl text-las-600"></i>
                         </div>
-                        <div>
-                            <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                                ASBL LES AMIS DE LA SEMENCE <span class="text-gold-400 font-bold text-xs px-2.5 py-0.5 rounded-full bg-gold-500/20 border border-gold-500/40">LAS</span>
-                            </h1>
-                            <p class="text-xs text-slate-300 font-medium">Répertoire des Membres, Cotisations &amp; Documentation Médias</p>
-                        </div>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                            ASBL LES AMIS DE LA SEMENCE <span class="text-gold-400 font-bold text-xs px-2.5 py-0.5 rounded-full bg-gold-500/20 border border-gold-500/40">LAS</span>
+                        </h1>
+                        <p class="text-xs text-slate-300 font-medium">Répertoire officiel des membres &amp; Suivi des cotisations</p>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
-                    <!-- Badge profil utilisateur -->
-                    <button onclick="openLoginModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer text-left" title="Changer d'utilisateur">
-                        <i class="fa-solid fa-user-shield text-las-400"></i>
-                        <div>
-                            <span class="text-xs font-bold block leading-none" id="current-user">—</span>
-                            <span class="text-[9px] text-slate-400 font-mono">ID: <span id="current-id-tag">--</span></span>
-                        </div>
-                        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-las-700/40 text-las-200 font-bold uppercase ml-1" id="current-role">—</span>
-                        <i class="fa-solid fa-arrows-rotate text-[10px] text-gold-400 ml-1"></i>
+                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700">
+                        <i class="fa-solid fa-user-shield text-las-400 text-xs"></i>
+                        <span class="text-xs font-bold" id="current-user-badge">—</span>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-las-700/40 text-las-200 font-bold uppercase" id="current-role-badge">—</span>
+                    </div>
+
+                    <button onclick="openMemberModal()" id="btn-add-member" class="px-3.5 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-md shadow-las-900/20 active:scale-95">
+                        <i class="fa-solid fa-user-plus text-gold-400"></i><span>Nouveau Membre</span>
                     </button>
-
-                    <!-- Actions Administrateurs (Masqués pour les membres simples) -->
-                    <div id="header-member-actions" class="flex items-center gap-2">
-                        <button onclick="openMemberModal()" id="btn-add" class="px-3.5 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-md shadow-las-900/20 active:scale-95">
-                            <i class="fa-solid fa-user-plus text-gold-400"></i><span>Nouveau Membre</span>
-                        </button>
-                        <button onclick="exportCSV()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95">
-                            <i class="fa-solid fa-file-csv text-emerald-400"></i><span class="hidden md:inline">CSV</span>
-                        </button>
-                        <button onclick="exportJSON()" id="btn-json" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95" title="Sauvegarde JSON"><i class="fa-solid fa-cloud-arrow-down text-sky-400"></i><span class="hidden md:inline">JSON</span></button>
-                        <button onclick="document.getElementById('import-json').click()" id="btn-import" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95" title="Restaurer JSON"><i class="fa-solid fa-cloud-arrow-up text-amber-400"></i></button>
-                        <input type="file" id="import-json" accept=".json,application/json" class="hidden" onchange="importJSON(event)">
-                        <button onclick="window.print()" class="px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-las-600 hover:from-emerald-500 hover:to-las-500 text-white font-extrabold rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-900/30 active:scale-95 ring-2 ring-emerald-400/20">
-                            <i class="fa-solid fa-print"></i><span>Imprimer</span>
-                        </button>
-                    </div>
-
-                    <!-- Actions Blog Administrateur -->
-                    <div id="header-blog-actions" class="hidden flex items-center gap-2">
-                        <button onclick="openBlogModal()" id="btn-add-blog" class="px-3.5 py-2 bg-gold-500 hover:bg-gold-400 text-slate-900 font-black rounded-xl text-xs transition flex items-center gap-2 shadow-lg active:scale-95">
-                            <i class="fa-solid fa-cloud-arrow-up"></i><span>Publier Un Document / Média</span>
-                        </button>
-                    </div>
-
-                    <!-- Bouton Quitter -->
+                    <button onclick="exportCSV()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95">
+                        <i class="fa-solid fa-file-csv text-emerald-400"></i><span class="hidden md:inline">Exporter</span> CSV
+                    </button>
+                    <button onclick="window.print()" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-las-600 hover:from-emerald-500 hover:to-las-500 text-white font-extrabold rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-900/30 active:scale-95 ring-2 ring-emerald-400/20">
+                        <i class="fa-solid fa-print"></i><span>Imprimer / PDF</span>
+                    </button>
                     <button onclick="logout()" class="px-3 py-2 bg-rose-900/40 hover:bg-rose-800/60 text-rose-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-rose-800 active:scale-95" title="Se déconnecter">
                         <i class="fa-solid fa-right-from-bracket"></i><span class="hidden sm:inline">Quitter</span>
                     </button>
                 </div>
             </div>
         </div>
-
-        <div class="bg-slate-950/90 border-t border-slate-800/80 no-print">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center sm:justify-start gap-3 py-2 overflow-x-auto">
-                <button id="nav-btn-members" onclick="switchMainTab('members')" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 bg-las-600 text-white shadow-lg ring-2 ring-las-400/30">
-                    <i class="fa-solid fa-users text-gold-400"></i><span id="tab-members-title">1. RÉPERTOIRE DES MEMBRES &amp; COTISATIONS</span>
-                </button>
-                <button id="nav-btn-blog" onclick="switchMainTab('blog')" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
-                    <i class="fa-solid fa-folder-open text-gold-400"></i><span>2. BLOG &amp; MÉDIATHÈQUE (PV, PHOTOS, VIDÉOS)</span>
-                </button>
-            </div>
-        </div>
     </header>
 
-    <!-- EN-TÊTE D'IMPRESSION -->
+    <!-- ===================== EN-TÊTE D'IMPRESSION ===================== -->
     <div class="print-only mb-4 border-b-2 border-slate-900 pb-3">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <img src="LAS_2.png" alt="Logo ASBL LAS" class="h-16 w-auto max-w-[150px] object-contain rounded-lg border border-slate-300 p-0.5"
-                     onerror="this.onerror=null;var f=document.getElementById('svg-logo-fallback').cloneNode(true);f.removeAttribute('id');f.classList.remove('hidden');f.classList.add('flex');this.replaceWith(f);">
+                <img src="logo LAS_2.jpg" alt="Logo LAS" class="w-16 h-16 object-contain rounded-lg border border-slate-300 p-0.5">
                 <div>
                     <h1 class="text-lg font-black text-slate-900 uppercase tracking-tight">ASBL LES AMIS DE LA SEMENCE (LAS)</h1>
-                    <p class="text-xs font-bold text-las-800">RÉPERTOIRE OFFICIEL ET ÉTAT DES COTISATIONS ET PRÉSENCES</p>
+                    <p class="text-xs font-bold text-las-800">RÉPERTOIRE OFFICIEL ET ÉTAT DES COTISATIONS &amp; PRÉSENCES</p>
                     <p class="text-[8pt] text-slate-600 italic">Document officiel réservé à la direction et au secrétariat général</p>
                 </div>
             </div>
@@ -167,246 +117,106 @@
                 <p class="text-[8pt] text-slate-500 mt-1">Généré le <span id="print-timestamp"></span></p>
             </div>
         </div>
-        <div class="grid grid-cols-5 gap-2 mt-3 text-center text-[8.5pt]">
-            <div class="bg-slate-100 p-1.5 rounded border border-slate-300"><span class="block text-slate-600 font-semibold text-[7.5pt]">Total Membres</span><span class="text-xs font-black text-slate-900" id="print-stat-total">0</span></div>
-            <div class="bg-emerald-50 p-1.5 rounded border border-emerald-300"><span class="block text-emerald-800 font-semibold text-[7.5pt]">Actifs ASBL</span><span class="text-xs font-black text-emerald-950" id="print-stat-actifs">0</span></div>
-            <div class="bg-blue-50 p-1.5 rounded border border-blue-300"><span class="block text-blue-800 font-semibold text-[7.5pt]">Cotisations à jour</span><span class="text-xs font-black text-blue-950" id="print-stat-ajour">0</span></div>
-            <div class="bg-rose-50 p-1.5 rounded border border-rose-300"><span class="block text-rose-800 font-semibold text-[7.5pt]">Cotisation en retard</span><span class="text-xs font-black text-rose-950" id="print-stat-retard">0</span></div>
-            <div class="bg-amber-50 p-1.5 rounded border border-amber-300"><span class="block text-amber-800 font-semibold text-[7.5pt]">Total encaissé (USD)</span><span class="text-xs font-black text-amber-950" id="print-stat-encaisse">0</span></div>
-        </div>
     </div>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex-grow w-full">
 
-        <!-- SECTION 1 : RÉPERTOIRE DES MEMBRES & COTISATIONS -->
-        <section id="sec-members" class="space-y-6">
+        <!-- ===================== CARTES STATISTIQUES ===================== -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 no-print">
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-users"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-total">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Membres</div></div></div>
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-user-check"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-actifs">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Actifs ASBL</div></div></div>
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-circle-check"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-ajour">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">À jour</div></div></div>
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-retard">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">En retard</div></div></div>
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-sack-dollar"></i></div><div><div class="text-xl font-black text-slate-900 leading-none"><span id="stat-encaisse">0</span><span class="text-xs font-bold text-slate-400">$</span></div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Encaissé</div></div></div>
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-hand-holding-dollar"></i></div><div><div class="text-xl font-black text-slate-900 leading-none"><span id="stat-attendu">0</span><span class="text-xs font-bold text-slate-400">$</span></div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Attendu/an</div></div></div>
+        </div>
 
-            <!-- CARTES STATISTIQUES MEMBRES -->
-            <div id="members-stats-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 no-print">
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-users"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-total">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Membres</div></div></div>
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-user-check"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-actifs">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Actifs ASBL</div></div></div>
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-circle-check"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-ajour">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">À jour</div></div></div>
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-retard">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">En retard</div></div></div>
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-sack-dollar"></i></div><div><div class="text-xl font-black text-slate-900 leading-none"><span id="stat-encaisse">0</span><span class="text-xs font-bold text-slate-400">$</span></div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Encaissé</div></div></div>
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-hand-holding-dollar"></i></div><div><div class="text-xl font-black text-slate-900 leading-none"><span id="stat-attendu">0</span><span class="text-xs font-bold text-slate-400">$</span></div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Attendu/an</div></div></div>
-            </div>
+        <!-- ===================== RAPPEL ANNIVERSAIRES ===================== -->
+        <div id="birthday-banner" class="hidden no-print mb-6"></div>
 
-            <!-- BANNIÈRE ANNIVERSAIRES -->
-            <div id="birthday-banner" class="hidden no-print"></div>
-
-            <!-- INFOS CONSULTATION DU MEMBRE -->
-            <div id="member-personal-notice" class="hidden bg-emerald-900 text-white p-4 rounded-2xl shadow-md border border-emerald-700/60 flex items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-800 flex items-center justify-center text-gold-400 font-bold text-lg"><i class="fa-solid fa-eye"></i></div>
-                    <div>
-                        <h3 class="font-extrabold text-sm text-gold-400">Mode Consultation Membre</h3>
-                        <p class="text-xs text-emerald-100" id="member-notice-text">Vous pouvez consulter le répertoire complet, la médiathèque et l'état des cotisations de tous les membres.</p>
+        <!-- ===================== BARRE DE FILTRES ===================== -->
+        <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm mb-6 no-print space-y-3">
+            <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+                <div class="relative w-full lg:w-80">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input type="text" id="search-input" placeholder="Rechercher nom, téléphone, N°..." class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-white transition">
+                    <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
+                    <select id="filter-asbl" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
+                        <option value="ALL">Statut ASBL</option><option value="OUI">Actif ASBL</option><option value="NON">Inactif ASBL</option>
+                    </select>
+                    <select id="filter-cotis" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
+                        <option value="ALL">Cotisation</option><option value="AJOUR">À jour</option><option value="RETARD">En retard</option>
+                    </select>
+                    <select id="filter-reunion" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
+                        <option value="ALL">Présence réunion</option><option value="OUI">Présent</option><option value="NON">Absent</option><option value="EXEMPTER">Exempté</option>
+                    </select>
+                    <select id="filter-forum" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
+                        <option value="ALL">Forum</option><option value="OUI">Actif</option><option value="NON">Inactif</option><option value="PARTIEL">Partiel</option><option value="OCCASIONEL">Occasionnel</option><option value="SOUVENT">Souvent</option><option value="PARFOIS">Parfois</option>
+                    </select>
+                    <select id="sort-by" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
+                        <option value="id">Tri : N°</option><option value="name">Tri : Nom A→Z</option><option value="solde">Tri : Solde dû</option><option value="paid">Tri : Mois payés</option>
+                    </select>
+                    <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                        <button id="btn-view-table" onclick="setView('table')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm"><i class="fa-solid fa-table-list text-las-700"></i><span class="hidden sm:inline">Tableau</span></button>
+                        <button id="btn-view-cards" onclick="setView('cards')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5"><i class="fa-solid fa-address-card"></i><span class="hidden sm:inline">Cartes</span></button>
                     </div>
                 </div>
             </div>
-
-            <!-- BARRE DE FILTRES MEMBRES -->
-            <div id="members-filter-bar" class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm no-print space-y-3">
-                <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
-                    <div class="relative w-full lg:w-80">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" id="search-input" placeholder="Rechercher nom, téléphone, N°..." class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-white transition">
-                        <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
-                        <select id="filter-asbl" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
-                            <option value="ALL">Statut ASBL</option><option value="OUI">Actif ASBL</option><option value="NON">Inactif ASBL</option>
-                        </select>
-                        <select id="filter-cotis" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
-                            <option value="ALL">Cotisation</option><option value="AJOUR">À jour</option><option value="RETARD">En retard</option>
-                        </select>
-                        <select id="filter-reunion" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
-                            <option value="ALL">Présence réunion</option><option value="OUI">Présent</option><option value="NON">Absent</option><option value="EXEMPTER">Exempté</option>
-                        </select>
-                        <select id="filter-forum" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
-                            <option value="ALL">Forum</option><option value="OUI">Actif</option><option value="NON">Inactif</option><option value="PARTIEL">Partiel</option><option value="OCCASIONEL">Occasionnel</option><option value="SOUVENT">Souvent</option><option value="PARFOIS">Parfois</option>
-                        </select>
-                        <select id="sort-by" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
-                            <option value="id">Tri : N°</option><option value="name">Tri : Nom A→Z</option><option value="solde">Tri : Solde dû</option><option value="paid">Tri : Mois payés</option>
-                        </select>
-                        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
-                            <button id="btn-view-table" onclick="setView('table')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm"><i class="fa-solid fa-table-list text-las-700"></i><span class="hidden sm:inline">Tableau</span></button>
-                            <button id="btn-view-cards" onclick="setView('cards')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5"><i class="fa-solid fa-address-card"></i><span class="hidden sm:inline">Cartes</span></button>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
-                    <span>Membres affichés : <strong id="filter-count" class="text-slate-800">0</strong></span>
-                    <button onclick="resetFilters()" class="text-las-700 hover:text-las-900 font-semibold text-[11px] underline">Réinitialiser les filtres</button>
-                </div>
+            <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+                <span>Résultats : <strong id="filter-count" class="text-slate-800">0</strong> membres</span>
+                <button onclick="resetFilters()" class="text-las-700 hover:text-las-900 font-semibold text-[11px] underline">Réinitialiser les filtres</button>
             </div>
+        </div>
 
-            <!-- TABLEAU MEMBRES -->
-            <div id="view-table" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden mb-8 print-container">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-900 text-slate-100 text-[11px] font-extrabold uppercase tracking-wider border-b-2 border-slate-900">
-                                <th class="py-3 px-3 text-center w-12">N°</th>
-                                <th class="py-3 px-4">Membre</th>
-                                <th class="py-3 px-4">Téléphone / WhatsApp</th>
-                                <th class="py-3 px-3 text-center">Actif ASBL</th>
-                                <th class="py-3 px-3 text-center">Réunion</th>
-                                <th class="py-3 px-3 text-center">Cotisation</th>
-                                <th class="py-3 px-3 text-center">Solde dû</th>
-                                <th class="py-3 px-3 text-center no-print w-24">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body" class="divide-y divide-slate-200 text-xs font-medium bg-white"></tbody>
-                    </table>
-                </div>
+        <!-- ===================== VUE TABLEAU ===================== -->
+        <div id="view-table" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden mb-8 print-container">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900 text-slate-100 text-[11px] font-extrabold uppercase tracking-wider border-b-2 border-slate-900">
+                            <th class="py-3 px-3 text-center w-12">N°</th>
+                            <th class="py-3 px-4">Membre</th>
+                            <th class="py-3 px-4">Téléphone / WhatsApp</th>
+                            <th class="py-3 px-3 text-center">Actif ASBL</th>
+                            <th class="py-3 px-3 text-center">Réunion</th>
+                            <th class="py-3 px-3 text-center">Cotisation</th>
+                            <th class="py-3 px-3 text-center">Solde dû</th>
+                            <th class="py-3 px-3 text-center no-print w-24">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y divide-slate-200 text-xs font-medium bg-white"></tbody>
+                </table>
             </div>
+        </div>
 
-            <!-- CARTES MEMBRES -->
-            <div id="view-cards" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8 no-print"></div>
-
-        </section>
-
-
-        <!-- SECTION 2 : BLOG, PHOTOTHÈQUE & MÉDIATHÈQUE -->
-        <section id="sec-blog" class="hidden space-y-6">
-
-            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-las-900 rounded-3xl p-6 text-white shadow-xl border border-slate-700/60 no-print">
-                <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div>
-                        <span class="text-gold-400 text-xs font-extrabold uppercase tracking-widest bg-gold-500/20 px-3 py-1 rounded-full border border-gold-500/30">Médiathèque Officielle</span>
-                        <h2 class="text-xl sm:text-2xl font-black mt-2">Blog, Photothèque &amp; Documents Assemblés</h2>
-                        <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-                            Consultez les Procès-Verbaux (PV au format PDF), les photos HD et vidéos officielles de l'ASBL LAS.
-                        </p>
-                    </div>
-                    <button onclick="openBlogModal()" id="btn-add-blog-sec" class="px-5 py-3 bg-gold-500 hover:bg-gold-400 text-slate-900 font-black rounded-2xl text-xs shadow-lg transition flex items-center gap-2 shrink-0 active:scale-95">
-                        <i class="fa-solid fa-cloud-arrow-up text-base"></i><span>Publier un Document / Média</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- STATISTIQUES BLOG -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 no-print">
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-file-pdf"></i></div>
-                    <div><div class="text-2xl font-black text-slate-900 leading-none" id="blog-stat-pv">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">PV &amp; Documents PDF</div></div>
-                </div>
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-images"></i></div>
-                    <div><div class="text-2xl font-black text-slate-900 leading-none" id="blog-stat-photos">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Photothèque</div></div>
-                </div>
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-video"></i></div>
-                    <div><div class="text-2xl font-black text-slate-900 leading-none" id="blog-stat-videos">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Vidéos</div></div>
-                </div>
-                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-folder-closed"></i></div>
-                    <div><div class="text-2xl font-black text-slate-900 leading-none" id="blog-stat-total">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Total Publications</div></div>
-                </div>
-            </div>
-
-            <!-- BARRE DE RECHERCHE BLOG -->
-            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm no-print space-y-3">
-                <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
-                    <div class="relative w-full lg:w-96">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                        <input type="text" id="blog-search-input" placeholder="Rechercher titre, PV, date, auteur..." class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-gold-500 focus:bg-white transition">
-                        <button id="blog-clear-search" onclick="clearBlogSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
-                        <select id="blog-filter-type" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500">
-                            <option value="ALL">Tous les types</option>
-                            <option value="pv">Procès-Verbaux (PV PDF)</option>
-                            <option value="compte_rendu">Comptes Rendus (PDF)</option>
-                            <option value="phototheque">Photothèque / Images</option>
-                            <option value="video">Vidéos</option>
-                            <option value="document">Autres Documents PDF</option>
-                        </select>
-
-                        <select id="blog-filter-category" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500">
-                            <option value="ALL">Toutes catégories</option>
-                            <option value="Assemblée Générale">Assemblée Générale</option>
-                            <option value="Réunion Mensuelle">Réunion Mensuelle</option>
-                            <option value="Événement / Fête">Événement / Fête</option>
-                            <option value="Statuts & Textes">Statuts &amp; Textes</option>
-                            <option value="Communiqué Officiel">Communiqué Officiel</option>
-                        </select>
-
-                        <select id="blog-sort-by" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500">
-                            <option value="recent">Plus récent d'abord</option>
-                            <option value="oldest">Plus ancien d'abord</option>
-                            <option value="title">Titre (A-Z)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
-                    <span>Publications affichées : <strong id="blog-filter-count" class="text-slate-800">0</strong> éléments</span>
-                    <button onclick="resetBlogFilters()" class="text-gold-700 hover:text-gold-900 font-semibold text-[11px] underline">Réinitialiser les filtres du blog</button>
-                </div>
-            </div>
-
-            <!-- GRILLE DU BLOG -->
-            <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-
-        </section>
+        <!-- ===================== VUE CARTES ===================== -->
+        <div id="view-cards" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8 no-print"></div>
 
     </main>
 
-    <!-- PIED D'IMPRESSION -->
+    <!-- ===================== PIED D'IMPRESSION ===================== -->
     <footer class="print-only mt-8 pt-4 border-t-2 border-slate-900">
         <div class="grid grid-cols-3 gap-4 text-center text-xs">
             <div><p class="font-bold text-slate-900">Le Secrétariat Général</p><div class="h-14"></div><p class="text-[8pt] text-slate-500">Nom &amp; Signature</p></div>
             <div><p class="font-bold text-slate-900">La Trésorerie</p><div class="h-14"></div><p class="text-[8pt] text-slate-500">Cachet &amp; Validation</p></div>
-            <div><p class="font-bold text-slate-900">Le Président de l'ASBL</p><div class="h-14"></div><p class="text-[8pt] text-slate-500">Visa &amp; Signature</p></div>
+            <div><p class="font-bold text-slate-900">Le Coordonnateur de l'ASBL</p><div class="h-14"></div><p class="text-[8pt] text-slate-500">Visa &amp; Signature</p></div>
         </div>
-        <p class="text-center text-[7.5pt] text-slate-400 mt-6">ASBL LES AMIS DE LA SEMENCE (LAS) — Registre officiel d'administration — Imprimé depuis la plateforme</p>
+        <p class="text-center text-[7.5pt] text-slate-400 mt-6">ASBL LES AMIS DE LA SEMENCE (LAS) — Registre officiel d'administration</p>
     </footer>
 
-    <!-- PIED WEB -->
+    <!-- ===================== PIED WEB ===================== -->
     <footer class="no-print bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <p class="font-medium text-slate-600"><strong>ASBL LES AMIS DE LA SEMENCE (LAS)</strong> &copy; <span id="current-year">2026</span> — Tous droits réservés.</p>
-            <p class="text-slate-400 text-[11px]">Système de gestion des membres, cotisations, PV &amp; médiathèque documentaire</p>
+            <p class="text-slate-400 text-[11px]">Système de gestion interne des membres &amp; cotisations</p>
         </div>
     </footer>
 
-    <!-- MODALE DE CONNEXION SÉCURISÉE -->
-    <div id="login-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
-            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50">
-                <h3 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-user-lock text-gold-400"></i><span>Authentification Membre</span></h3>
-                <button onclick="closeLoginModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Sélectionnez votre Nom / Membre ID :</label>
-                    <select id="login-member-select" onchange="onMemberSelectChange()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></select>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Identifiant (Prénom en minuscules) :</label>
-                    <input type="text" id="login-username-input" autocomplete="off" placeholder="Ex: ananias, serge, ander..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Mot de passe :</label>
-                    <input type="password" id="login-pass-input" autocomplete="off" placeholder="Ex: prenom2026" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
-                    <span class="text-[10px] text-slate-400 mt-1 block">Règle par défaut : Votre prénom en minuscules suivi de <b>2026</b> (ex: <i>ander2026</i>).</span>
-                </div>
-
-                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
-                    <button type="button" onclick="closeLoginModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-200 transition">Annuler</button>
-                    <button type="button" onclick="applyUserLogin()" class="px-5 py-2 bg-las-700 hover:bg-las-600 text-white text-xs font-bold rounded-xl transition shadow-md">Se Connecter</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODALE AJOUT / ÉDITION MEMBRE -->
+    <!-- ===================== MODALE AJOUT / ÉDITION ===================== -->
     <div id="member-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50 sticky top-0">
                 <h3 class="font-bold text-base flex items-center gap-2" id="modal-title"><i class="fa-solid fa-user-plus text-gold-400"></i><span>Ajouter un Membre</span></h3>
                 <button onclick="closeMemberModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -440,7 +250,7 @@
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email</label>
                         <input type="email" id="input-email" placeholder="exemple@mail.com" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Profession</label>
-                        <input type="text" id="input-profession" placeholder="Ex: Enseignant" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
+                        <input type="text" id="input-profession" placeholder="Ex: Ingénieur" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Poste dans l'ASBL</label>
@@ -460,19 +270,6 @@
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Note / Fonction</label>
                         <input type="text" id="input-note" placeholder="Ex: Membre fondateur" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
-                <div class="sec">Informations personnelles complémentaires</div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    <div><label class="fl">Sexe</label><select id="input-sexe" class="fi"><option value="">—</option><option>Masculin</option><option>Féminin</option></select></div>
-                    <div><label class="fl">État civil</label><select id="input-etatcivil" class="fi"><option value="">—</option><option>Célibataire</option><option>Marié(e)</option><option>Divorcé(e)</option><option>Veuf(ve)</option></select></div>
-                    <div><label class="fl">Nationalité</label><input type="text" id="input-nationalite" placeholder="Ex: Congolaise" class="fi"></div>
-                    <div><label class="fl">WhatsApp</label><input type="text" id="input-whatsapp" placeholder="243 ..." class="fi font-mono"></div>
-                    <div class="sm:col-span-2"><label class="fl">N° pièce d'identité</label><input type="text" id="input-idDoc" placeholder="Carte d'électeur / passeport" class="fi"></div>
-                </div>
-                <div class="sec">Personne à contacter en cas d'urgence</div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="fl">Nom</label><input type="text" id="input-urgenceNom" class="fi"></div>
-                    <div><label class="fl">Téléphone</label><input type="text" id="input-urgenceTel" class="fi font-mono"></div>
-                </div>
                 <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
                     <button type="button" onclick="closeMemberModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Annuler</button>
                     <button type="submit" class="px-5 py-2 bg-las-700 hover:bg-las-600 text-white text-xs font-bold rounded-xl transition shadow-md shadow-las-800/30">Enregistrer</button>
@@ -481,7 +278,7 @@
         </div>
     </div>
 
-    <!-- MODALE FICHE MEMBRE -->
+    <!-- ===================== MODALE FICHE MEMBRE ===================== -->
     <div id="detail-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 no-print overflow-y-auto">
         <div class="bg-slate-50 rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden my-4">
             <div class="bg-slate-900 px-5 sm:px-6 py-4 flex items-center justify-between text-white">
@@ -495,225 +292,38 @@
         </div>
     </div>
 
-    <!-- MODALE PUBLICATION BLOG -->
-    <div id="blog-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
-            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-gold-500/30 sticky top-0">
-                <h3 class="font-bold text-base flex items-center gap-2" id="blog-modal-title"><i class="fa-solid fa-cloud-arrow-up text-gold-400"></i><span>Publier un Document (PDF) / Média</span></h3>
-                <button onclick="closeBlogModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <form id="blog-form" onsubmit="saveBlogEntry(event)" class="p-6 space-y-4">
-                <input type="hidden" id="blog-id">
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Titre de la publication ou du Document *</label>
-                    <input type="text" id="blog-input-title" required placeholder="Ex: Procès-Verbal de l'Assemblée Générale Ordinaire" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:bg-white transition">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Type de contenu *</label>
-                        <select id="blog-input-type" required onchange="updateBlogFileAccept()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-gold-500">
-                            <option value="pv">Procès-Verbal (Strictement PDF)</option>
-                            <option value="compte_rendu">Compte Rendu (Strictement PDF)</option>
-                            <option value="phototheque">Photothèque (Toutes Images)</option>
-                            <option value="video">Vidéo / Clip (Toutes Vidéos)</option>
-                            <option value="document">Autre Document Officiel (PDF)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Catégorie *</label>
-                        <select id="blog-input-category" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-gold-500">
-                            <option value="Assemblée Générale">Assemblée Générale</option>
-                            <option value="Réunion Mensuelle">Réunion Mensuelle</option>
-                            <option value="Événement / Fête">Événement / Fête</option>
-                            <option value="Statuts & Textes">Statuts &amp; Textes</option>
-                            <option value="Communiqué Officiel">Communiqué Officiel</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Date du document / événement *</label>
-                        <input type="date" id="blog-input-date" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-gold-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Auteur / Publié par</label>
-                        <input type="text" id="blog-input-author" placeholder="Ex: Secrétariat Général" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-gold-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Description / Résumé du contenu</label>
-                    <textarea id="blog-input-desc" rows="3" placeholder="Saisissez un bref résumé des résolutions, de la réunion ou de la photo..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:bg-white transition"></textarea>
-                </div>
-
-                <div class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="blog-file-input-label">Joindre un fichier (PDF uniquement pour les documents)</label>
-                    <input type="file" id="blog-input-file" accept=".pdf,application/pdf" onchange="handleBlogFileUpload(event)" class="block w-full text-[11px] text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gold-500 file:text-slate-900 hover:file:bg-gold-400 cursor-pointer">
-                    <span class="text-[10px] text-slate-500 mt-1 block">Formats : PDF uniquement pour PV/Documents · Images (JPG, PNG, WEBP) · Vidéos (MP4, WEBM).</span>
-                    
-                    <div id="blog-file-preview-info" class="hidden mt-3 text-xs font-mono text-las-800 font-bold flex items-center justify-between bg-las-100 p-2.5 rounded-xl border border-las-300">
-                        <span id="blog-file-name-display"><i class="fa-solid fa-paperclip mr-1"></i> Fichier chargé</span>
-                        <button type="button" onclick="removeBlogFile()" class="text-rose-600 hover:underline text-xs"><i class="fa-solid fa-trash"></i> Retirer</button>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
-                    <button type="button" onclick="closeBlogModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Annuler</button>
-                    <button type="submit" id="btn-submit-blog" class="px-5 py-2 bg-gold-500 hover:bg-gold-400 text-slate-900 text-xs font-extrabold rounded-xl transition shadow-md">Enregistrer la publication</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODALE APERÇU / LECTEUR DYNAMIQUE DES MÉDIAS & PDF -->
-    <div id="blog-view-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 no-print overflow-y-auto">
-        <div class="bg-white rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden my-4 max-h-[92vh] flex flex-col">
-            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white shrink-0">
-                <h3 class="font-bold text-base flex items-center gap-2" id="blog-view-title"><i class="fa-solid fa-file-contract text-gold-400"></i> Consultation du Document</h3>
-                <button onclick="closeBlogViewModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <div id="blog-view-content" class="p-6 space-y-4 overflow-y-auto flex-grow"></div>
-        </div>
-    </div>
-
 <script>
 // ============================================================
-//  LOGIQUE PRINCIPALE DE L'APPLICATION
+//  PARAMÈTRES ET DONNÉES
 // ============================================================
-
-function escapeHTML(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function dataURLtoBlob(dataurl) {
-  if (!dataurl || !dataurl.includes(',')) return null;
-  try {
-    const arr = dataurl.split(',');
-    const mimeMatch = arr[0].match(/:(.*?);/);
-    const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new Blob([u8arr], { type: mime });
-  } catch(e) {
-    return null;
-  }
-}
-
 const COTISATION_MENSUELLE = 10;
 const MOIS = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 const ANNEE_COURANTE = new Date().getFullYear();
 const DB_KEY = "las_members_v2";
-const BLOG_DB_KEY = "las_blog_v2";
 
-// ============================================================
-//  BASE DE DONNÉES INDEXEDDB POUR MÉDIAS LOURDS
-// ============================================================
-const IDB_NAME = "LAS_MediaStore_v3";
-let idbConn = null;
-
-function initIDB(){
-  return new Promise((resolve) => {
-    if(!window.indexedDB){ resolve(null); return; }
-    const req = indexedDB.open(IDB_NAME, 1);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if(!db.objectStoreNames.contains("files")){
-        db.createObjectStore("files", { keyPath: "id" });
-      }
-    };
-    req.onsuccess = (e) => { idbConn = e.target.result; resolve(idbConn); };
-    req.onerror = () => resolve(null);
-  });
-}
-
-function saveFileToIDB(id, fileObj){
-  return new Promise((resolve) => {
-    if(!idbConn){ resolve(false); return; }
-    const tx = idbConn.transaction("files", "readwrite");
-    const store = tx.objectStore("files");
-    store.put({ id: id, fileData: fileObj.fileData, fileName: fileObj.fileName, fileType: fileObj.fileType });
-    tx.oncomplete = () => resolve(true);
-    tx.onerror = () => resolve(false);
-  });
-}
-
-function getFileFromIDB(id){
-  return new Promise((resolve) => {
-    if(!idbConn){ resolve(null); return; }
-    const tx = idbConn.transaction("files", "readonly");
-    const store = tx.objectStore("files");
-    const req = store.get(id);
-    req.onsuccess = () => resolve(req.result || null);
-    req.onerror = () => resolve(null);
-  });
-}
-
-// ============================================================
-//  DONNÉES OFFICIELLES ET CODES PIN DES 37 MEMBRES
-// ============================================================
 const DEFAULT_MEMBERS = [
-  { id:1, name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
-  { id:2, name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Coordonnateur",profession:"IT-Support",email:"ananiaskasanda2@gmail.com",birthdate:"1982-07-02",birthplace:"Kinshasa",address:"Ngaliema",joined:"2022-01-15" },
-  { id:3, name:"Baudry Landu",phone:"243 895 446 423",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Trésorier",profession:"Comptable",birthplace:"Kinshasa",joined:"2022-03-10" },
-  { id:4, name:"Junior Loti",phone:"243 898 953 438",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Membre",profession:"Commerçant" },
-  { id:5, name:"Aarly Nsungu",phone:"243 971 855 480",forum:"OUI",asbl:"OUI",reunion:"EXEMPTER" },
-  { id:6, name:"BELINDA NTEMBE",phone:"+33 7 59 27 85 66",forum:"PARTIEL",asbl:"OUI",reunion:"EXEMPTER" },
-  { id:7, name:"Dick mbengu acteur Princi",phone:"244 930 561 955",forum:"PARTIEL",asbl:"NON",reunion:"EXEMPTER" },
-  { id:8, name:"Dijo Mboko",phone:"243 894 481 069",forum:"PARTIEL",asbl:"OUI",reunion:"OUI" },
-  { id:9, name:"Divuandidi",phone:"243 907 258 208",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:10, name:"Elvis",phone:"243 852 105 790",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:11, name:"fanny fatya mbala",phone:"243 896 633 569",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:12, name:"Fils Mbongo",phone:"243 999 459 122",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:14, name:"Freddy KIMPIATTU",phone:"243 826 065 275",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:15, name:"Frederick Kifiya",phone:"243 899 694 673",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:16, name:"Fils Kimenga",phone:"243 843 218 094",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:17, name:"Kita serge",phone:"243 854 797 085",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire Général / Trésorier" },
-  { id:18, name:"Lolo Nzeza",phone:"243 900 532 333",forum:"OCCASIONEL",asbl:"NON",reunion:"NON" },
-  { id:19, name:"Lombi",phone:"+242 05 761 5731",forum:"SOUVENT",asbl:"NON",reunion:"NON" },
-  { id:20, name:"Lovy Sala",phone:"243 814 941 425",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:21, name:"Matuba Pilu",phone:"243 994 141 415",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:22, name:"Me Freddy Lutonto",phone:"243 897 426 649",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
-  { id:23, name:"Nadège MUBANGA",phone:"243 898 273 638",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:24, name:"Nadine Biangolo",phone:"243 904 746 639",forum:"OUI",asbl:"NON",reunion:"NON" },
-  { id:25, name:"Niclette Kitembo",phone:"243 894 200 430",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
-  { id:26, name:"nsamu abi",phone:"244 931 354 839",forum:"NON",asbl:"NON",reunion:"EXEMPTER" },
-  { id:27, name:"Olivier NONGU",phone:"243 816 910 214",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
-  { id:28, name:"Patricia Makudi",phone:"243 815 122 136",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:29, name:"Saint Vuangi",phone:"243 906 655 909",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:30, name:"Teddy Kasongo",phone:"243 901 318 624",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
-  { id:31, name:"Tonton Nkuku",phone:"243 971 958 874",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
-  { id:32, name:"Tuzolana Nathalie",phone:"243 900 569 399",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:33, name:"Gueyi Kikalankala",phone:"243 897 414 242",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
-  { id:34, name:"kungulu kinkela Fidel",phone:"243 896 722 306",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:35, name:"Masuama Pembele",phone:"243 896 350 866",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:36, name:"pico mfumukwansa",phone:"243 840 200 071",forum:"OUI",asbl:"NON",reunion:"EXEMPTER" },
-  { id:37, name:"Rachel Luzolo",phone:"243 894 055 982",forum:"NON",asbl:"OUI",reunion:"NON" }
+  { id:1,name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
+  { id:2,name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Coordonnateur",profession:"IT DevSecOps",email:"ananiaskasanda2@gmail.com",birthdate:"1982-07-02",birthplace:"Kinshasa",address:"Ngaliema",joined:"2022-01-15" },
+  { id:3,name:"Baudry Landu",phone:"243 895 446 423",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Trésorier",profession:"Comptable",birthplace:"Kinshasa",joined:"2022-03-10" },
+  { id:4,name:"Junior Loti",phone:"243 898 953 438",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Membre",profession:"Commerçant" },
+  { id:5,name:"Aarly Nsungu",phone:"243 971 855 480",forum:"OUI",asbl:"OUI",reunion:"EXEMPTER" },
+  { id:6,name:"BELINDA NTEMBE",phone:"+33 7 59 27 85 66",forum:"PARTIEL",asbl:"OUI",reunion:"EXEMPTER" },
+  { id:7,name:"Dick mbengu",phone:"244 930 561 955",forum:"PARTIEL",asbl:"NON",reunion:"EXEMPTER" },
+  { id:8,name:"Dijo Mboko",phone:"243 894 481 069",forum:"PARTIEL",asbl:"OUI",reunion:"OUI" },
+  { id:9,name:"Divuandidi",phone:"243 907 258 208",forum:"NON",asbl:"OUI",reunion:"NON" },
+  { id:14,name:"Freddy KIMPIATTU",phone:"243 826 065 275",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:17,name:"Serge KITA",phone:"243 854 797 085",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire Général",profession:"Administrateur" },
+  { id:23,name:"Nadège MUBANGA",phone:"243 898 273 638",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:27,name:"Olivier NONGU",phone:"243 816 910 214",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
+  { id:37,name:"Rachel Luzolo",phone:"243 894 055 982",forum:"NON",asbl:"OUI",reunion:"NON" }
 ];
 
 function normalize(m){
-  const creds = typeof getCredentialsForMember === 'function' ? getCredentialsForMember(m) : { username: "", password: "" };
   return Object.assign({
-    username: creds.username,
-    pin: creds.password,
-    photo:"", sexe:"", etatcivil:"", nationalite:"", whatsapp:"", idDoc:"", urgenceNom:"", urgenceTel:"", updatedAt:"", updatedBy:"", email:"", address:"", note:"", joined:"",
+    photo:"", email:"", address:"", note:"", joined:"",
     birthdate:"", birthplace:"", profession:"", poste:"",
     payments:{}
-  }, m, {
-    payments: m.payments || {}
-  });
+  }, m, { payments: m.payments || {} });
 }
 
 let membersData = loadData();
@@ -723,119 +333,15 @@ function loadData(){
   try {
     const raw = localStorage.getItem(DB_KEY);
     if (raw){ return JSON.parse(raw).map(normalize); }
-  } catch(e){ console.warn("Erreur lecture données", e); }
+  } catch(e){}
   return DEFAULT_MEMBERS.map(normalize);
 }
-
 function saveData(){
-  try {
-    localStorage.setItem(DB_KEY, JSON.stringify(membersData));
-    localStorage.setItem(DB_KEY+"_ts", Date.now());
-  } catch(e){
-    alert("Stockage plein. Les données texte de base ont été enregistrées.");
-  }
+  try { localStorage.setItem(DB_KEY, JSON.stringify(membersData)); }
+  catch(e){ alert("Erreur : stockage saturé ou photo trop volumineuse."); }
 }
 
-// ============================================================
-//  DONNÉES DU BLOG & MÉDIATHÈQUE DÉFAUT
-// ============================================================
-const DEFAULT_BLOG = [
-  {
-    id: 101,
-    title: "Procès-Verbal de l'Assemblée Générale Ordinaire 2026",
-    type: "pv",
-    category: "Assemblée Générale",
-    date: "2026-02-15",
-    author: "Ananias KASANDA (Coordonnateur)",
-    desc: "Adoption du rapport financier annuel, approbation des bilans et validation du programme d'activités.",
-    fileData: "",
-    fileName: "PV_AG_2026_LAS.pdf",
-    fileType: "application/pdf"
-  },
-  {
-    id: 102,
-    title: "Compte Rendu de la Réunion Mensuelle d'Avril 2026",
-    type: "compte_rendu",
-    category: "Réunion Mensuelle",
-    date: "2026-04-05",
-    author: "Serge KITA (Secrétaire Général)",
-    desc: "Synthèse des échanges, état des cotisations mensuelles et planification de l'entraide sociale.",
-    fileData: "",
-    fileName: "CR_Reunion_Avril_2026.pdf",
-    fileType: "application/pdf"
-  },
-  {
-    id: 103,
-    title: "Photothèque — Retrouvailles des Ancien(ne)s de la Semence",
-    type: "phototheque",
-    category: "Événement / Fête",
-    date: "2026-01-10",
-    author: "Comité d'Organisation",
-    desc: "Album photo officiel immortalisant la grande rencontre annuelle des anciens élèves.",
-    fileData: "",
-    fileName: "Album_Fete_Semence.jpg",
-    fileType: "image/jpeg"
-  }
-];
-
-let blogData = loadBlogData();
-
-function loadBlogData(){
-  try {
-    const raw = localStorage.getItem(BLOG_DB_KEY);
-    if (raw){ return JSON.parse(raw); }
-  } catch(e){ console.warn("Erreur chargement blog", e); }
-  return DEFAULT_BLOG;
-}
-
-function saveBlogData(){
-  try {
-    const lightweight = blogData.map(item => {
-      const clone = Object.assign({}, item);
-      if (clone.fileData && clone.fileData.length > 200000) { clone.fileData = ""; }
-      return clone;
-    });
-    localStorage.setItem(BLOG_DB_KEY, JSON.stringify(lightweight));
-  } catch(e){ console.warn("Erreur sauvegarde blog", e); }
-}
-
-function switchMainTab(tab){
-  const secMembers = document.getElementById('sec-members');
-  const secBlog = document.getElementById('sec-blog');
-  const btnMembers = document.getElementById('nav-btn-members');
-  const btnBlog = document.getElementById('nav-btn-blog');
-  const hdrMemberActions = document.getElementById('header-member-actions');
-  const hdrBlogActions = document.getElementById('header-blog-actions');
-
-  if(tab === 'blog'){
-    secMembers.classList.add('hidden');
-    secBlog.classList.remove('hidden');
-
-    btnMembers.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800";
-    btnBlog.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 bg-gold-500 text-slate-900 shadow-lg ring-2 ring-gold-400/50";
-
-    if(canEdit()){
-      hdrMemberActions.classList.add('hidden');
-      hdrBlogActions.classList.remove('hidden');
-    }
-
-    renderBlog();
-  } else {
-    secMembers.classList.remove('hidden');
-    secBlog.classList.add('hidden');
-
-    btnMembers.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 bg-las-600 text-white shadow-lg ring-2 ring-las-400/30";
-    btnBlog.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800";
-
-    if(canEdit()){
-      hdrMemberActions.classList.remove('hidden');
-    }
-    hdrBlogActions.classList.add('hidden');
-
-    renderData();
-  }
-}
-
+// ---------- Cotisations ----------
 function yearPaid(m, year){
   const arr = (m.payments && m.payments[year]) || [];
   return arr.filter(Boolean).length;
@@ -852,6 +358,7 @@ function isAJour(m, year){
   return soldeDu(m, year) === 0;
 }
 
+// ---------- Anniversaires ----------
 function daysUntilBirthday(m){
   if(!m.birthdate) return null;
   const d = new Date(m.birthdate);
@@ -887,6 +394,9 @@ function fmtDate(str){
   return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
 }
 
+// ============================================================
+//  BADGES & AVATARS
+// ============================================================
 function badge(value, type){
   const v = (value||'').toUpperCase().trim();
   const base = 'badge-print inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border';
@@ -898,10 +408,10 @@ function badge(value, type){
   if (v==='OUI')  return `<span class="${base} bg-emerald-100 text-emerald-800 border-emerald-300"><i class="fa-solid fa-check text-[10px] no-print"></i> OUI</span>`;
   if (v==='NON')  return `<span class="${base} bg-rose-100 text-rose-800 border-rose-300"><i class="fa-solid fa-xmark text-[10px] no-print"></i> NON</span>`;
   if (v==='EXEMPTER'||v==='EXEMPTE') return `<span class="${base} bg-amber-100 text-amber-900 border-amber-300"><i class="fa-solid fa-shield-halved text-[10px] no-print"></i> EXEMPTÉ</span>`;
-  return `<span class="${base} bg-slate-100 text-slate-700 border-slate-300">${escapeHTML(v)||'—'}</span>`;
+  return `<span class="${base} bg-slate-100 text-slate-700 border-slate-300">${v||'—'}</span>`;
 }
 function initials(name){
-  return name.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+  return (name||'LAS').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
 }
 function avatar(m, size){
   const s = size||40;
@@ -911,6 +421,9 @@ function avatar(m, size){
   return `<div class="rounded-lg bg-las-100 text-las-800 flex items-center justify-center font-extrabold border border-las-200" style="width:${s}px;height:${s}px;font-size:${Math.round(s*0.36)}px">${initials(m.name)}</div>`;
 }
 
+// ============================================================
+//  STATISTIQUES & INTERFACE
+// ============================================================
 function calculateStats(){
   const total = membersData.length;
   const actifs = membersData.filter(m=>m.asbl==='OUI').length;
@@ -921,8 +434,6 @@ function calculateStats(){
 
   set('stat-total',total); set('stat-actifs',actifs); set('stat-ajour',ajour);
   set('stat-retard',retard); set('stat-encaisse',encaisse); set('stat-attendu',attendu);
-  set('print-stat-total',total); set('print-stat-actifs',actifs); set('print-stat-ajour',ajour);
-  set('print-stat-retard',retard); set('print-stat-encaisse',encaisse);
 
   const today = new Date();
   const d = today.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
@@ -933,7 +444,6 @@ function set(id,val){ const el=document.getElementById(id); if(el) el.textConten
 
 function renderBirthdays(){
   const banner = document.getElementById('birthday-banner');
-
   const soon = membersData
     .map(m => ({ m, d: daysUntilBirthday(m) }))
     .filter(x => x.d !== null && x.d >= 0 && x.d <= 2)
@@ -941,22 +451,21 @@ function renderBirthdays(){
 
   if(soon.length === 0){ banner.classList.add('hidden'); banner.innerHTML=''; return; }
 
-  const confetti = Array.from({length:14}).map((_,i)=>{
-    const colors=['#eab308','#15803d','#ef4444','#3b82f6','#f97316','#ffffff'];
-    const c=colors[i%colors.length], left=(i*7+4)%100, delay=(i*0.12).toFixed(2);
+  const confetti = Array.from({length:12}).map((_,i)=>{
+    const colors=['#eab308','#15803d','#ef4444','#3b82f6','#ffffff'];
+    const c=colors[i%colors.length], left=(i*8+5)%100, delay=(i*0.15).toFixed(2);
     return `<span class="confetti" style="left:${left}%;background:${c};animation-delay:${delay}s"></span>`;
   }).join('');
 
   const items = soon.map(({m,d})=>{
     const a = age(m);
     const when = d===0 ? "aujourd'hui" : d===1 ? "demain" : "dans 2 jours";
-    const tag = d===0 ? 'bg-white text-las-800' : 'bg-white/20 text-white';
     return `<button onclick="openDetail(${m.id})" class="group flex items-center gap-2.5 bg-white/15 hover:bg-white/25 rounded-xl pl-1.5 pr-3 py-1.5 transition text-left">
         <span class="bday-ring">${avatar(m,34)}</span>
         <span class="leading-tight">
           <span class="block text-white font-bold text-xs">${escapeHTML(m.name)}</span>
-          <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tag} mt-0.5">
-            🎉 ${when}${a!==null ? ` · ${a+ (d===0?0:1)} ans` : ''}
+          <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-white text-las-800 mt-0.5">
+            🎉 ${when}${a!==null ? ` · ${a+(d===0?0:1)} ans` : ''}
           </span>
         </span>
       </button>`;
@@ -969,8 +478,8 @@ function renderBirthdays(){
         <div class="flex items-center gap-3 shrink-0">
           <div class="w-11 h-11 rounded-xl bg-white/90 text-las-700 flex items-center justify-center text-2xl bday-pulse">🎂</div>
           <div>
-            <h3 class="text-white font-extrabold text-sm sm:text-base leading-tight">Anniversaire en vue</h3>
-            <p class="text-white/85 text-[11px] font-medium">Pensez à leur adresser un mot chaleureux !</p>
+            <h3 class="text-white font-extrabold text-sm sm:text-base leading-tight">Anniversaire(s) en cours</h3>
+            <p class="text-white/85 text-[11px] font-medium">Souhaitez un joyeux anniversaire à vos membres !</p>
           </div>
         </div>
         <div class="flex flex-wrap gap-2 sm:ml-auto">${items}</div>
@@ -979,6 +488,9 @@ function renderBirthdays(){
   banner.classList.remove('hidden');
 }
 
+// ============================================================
+//  RENDU DES DONNÉES (TABLEAU & CARTES)
+// ============================================================
 function getFiltered(){
   const q = document.getElementById('search-input').value.toLowerCase().trim();
   const fAsbl = document.getElementById('filter-asbl').value;
@@ -1011,14 +523,13 @@ function renderData(){
   const filtered = getFiltered();
   set('filter-count', filtered.length);
 
-  // TABLEAU
   const tbody = document.getElementById('table-body');
   if (filtered.length===0){
     tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-slate-400 font-medium"><i class="fa-solid fa-folder-open text-3xl mb-2 block text-slate-300"></i>Aucun membre ne correspond aux critères.</td></tr>`;
   } else {
     tbody.innerHTML = filtered.map(m=>{
-      const solde = soldeDu(m,ANNEE_COURANTE);
-      const cot = isAJour(m,ANNEE_COURANTE)?'AJOUR':'RETARD';
+      const solde = soldeDu(m, ANNEE_COURANTE);
+      const cot = isAJour(m, ANNEE_COURANTE) ? 'AJOUR' : 'RETARD';
       return `
       <tr class="hover:bg-slate-50 transition-colors cursor-pointer" onclick="openDetail(${m.id})">
         <td class="py-2.5 px-3 text-center font-extrabold text-slate-500 border-b border-slate-200 font-mono text-[11px]">${m.id}</td>
@@ -1037,23 +548,22 @@ function renderData(){
         <td class="py-2.5 px-3 text-center border-b border-slate-200 no-print" onclick="event.stopPropagation()">
           <div class="flex items-center justify-center gap-1">
             <button onclick="openDetail(${m.id})" title="Fiche" class="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-id-card text-xs"></i></button>
-            ${canEdit()?`<button onclick="editMember(${m.id})" title="Modifier" class="p-1.5 text-slate-500 hover:text-las-700 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-pen-to-square text-xs"></i></button>`:''}
-            ${canDelete()?`<button onclick="deleteMember(${m.id})" title="Supprimer" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"><i class="fa-solid fa-trash-can text-xs"></i></button>`:''}
+            <button onclick="editMember(${m.id})" title="Modifier" class="p-1.5 text-slate-500 hover:text-las-700 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
+            <button onclick="deleteMember(${m.id})" title="Supprimer" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"><i class="fa-solid fa-trash-can text-xs"></i></button>
           </div>
         </td>
       </tr>`;
     }).join('');
   }
 
-  // CARTES
   const cards = document.getElementById('view-cards');
   if (filtered.length===0){
     cards.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-medium">Aucun membre trouvé.</div>`;
   } else {
     cards.innerHTML = filtered.map(m=>{
-      const solde = soldeDu(m,ANNEE_COURANTE);
-      const paid = yearPaid(m,ANNEE_COURANTE);
-      const cot = isAJour(m,ANNEE_COURANTE)?'AJOUR':'RETARD';
+      const solde = soldeDu(m, ANNEE_COURANTE);
+      const paid = yearPaid(m, ANNEE_COURANTE);
+      const cot = isAJour(m, ANNEE_COURANTE) ? 'AJOUR' : 'RETARD';
       return `
       <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col justify-between space-y-3 hover:shadow-md transition cursor-pointer" onclick="openDetail(${m.id})">
         <div class="flex items-start gap-3 border-b border-slate-100 pb-2.5">
@@ -1066,10 +576,10 @@ function renderData(){
           </div>
         </div>
         <div class="space-y-1.5 text-xs">
-          <div class="flex items-center justify-between"><span class="text-slate-500"><i class="fa-solid fa-phone text-slate-400 mr-1.5"></i>Tél:</span><span class="font-mono text-slate-800 font-semibold text-[11px]">${escapeHTML(m.phone)}</span></div>
-          <div class="flex items-center justify-between"><span class="text-slate-500"><i class="fa-solid fa-users text-slate-400 mr-1.5"></i>ASBL:</span>${badge(m.asbl,'asbl')}</div>
-          <div class="flex items-center justify-between"><span class="text-slate-500"><i class="fa-solid fa-calendar-check text-slate-400 mr-1.5"></i>Réunion:</span>${badge(m.reunion,'reunion')}</div>
-          <div class="flex items-center justify-between"><span class="text-slate-500"><i class="fa-solid fa-coins text-slate-400 mr-1.5"></i>${ANNEE_COURANTE}:</span><span class="font-bold ${solde>0?'text-rose-600':'text-emerald-600'}">${paid}/12 mois</span></div>
+          <div class="flex items-center justify-between"><span class="text-slate-500">Tél:</span><span class="font-mono text-slate-800 font-semibold text-[11px]">${escapeHTML(m.phone)}</span></div>
+          <div class="flex items-center justify-between"><span class="text-slate-500">ASBL:</span>${badge(m.asbl,'asbl')}</div>
+          <div class="flex items-center justify-between"><span class="text-slate-500">Réunion:</span>${badge(m.reunion,'reunion')}</div>
+          <div class="flex items-center justify-between"><span class="text-slate-500">${ANNEE_COURANTE}:</span><span class="font-bold ${solde>0?'text-rose-600':'text-emerald-600'}">${paid}/12 mois</span></div>
         </div>
         <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
           <span class="text-[11px] font-bold ${solde>0?'text-rose-600':'text-emerald-600'}">Solde : ${solde} $</span>
@@ -1080,360 +590,9 @@ function renderData(){
   }
 }
 
-// BLOG & MÉDIATHÈQUE
-let currentBlogFile = null;
-
-function updateBlogFileAccept(){
-  const type = document.getElementById('blog-input-type').value;
-  const input = document.getElementById('blog-input-file');
-  const label = document.getElementById('blog-file-input-label');
-
-  if(type === 'pv' || type === 'compte_rendu' || type === 'document'){
-    input.accept = ".pdf,application/pdf";
-    label.innerText = "Joindre un document (Format PDF obligatoire)";
-  } else if(type === 'phototheque'){
-    input.accept = "image/*";
-    label.innerText = "Joindre une image / photo (JPG, PNG, WEBP...)";
-  } else if(type === 'video'){
-    input.accept = "video/*";
-    label.innerText = "Joindre une vidéo (MP4, WEBM, OGG...)";
-  } else {
-    input.accept = ".pdf,image/*,video/*";
-    label.innerText = "Joindre un fichier";
-  }
-}
-
-function renderBlog(){
-  const search = document.getElementById('blog-search-input').value.toLowerCase().trim();
-  const fType = document.getElementById('blog-filter-type').value;
-  const fCat = document.getElementById('blog-filter-category').value;
-  const sort = document.getElementById('blog-sort-by').value;
-
-  document.getElementById('blog-clear-search').classList.toggle('hidden', search.length === 0);
-
-  let filtered = blogData.filter(item => {
-    const matchSearch = item.title.toLowerCase().includes(search) || (item.desc || '').toLowerCase().includes(search) || (item.author || '').toLowerCase().includes(search);
-    const matchType = fType === 'ALL' || item.type === fType;
-    const matchCat = fCat === 'ALL' || item.category === fCat;
-    return matchSearch && matchType && matchCat;
-  });
-
-  filtered.sort((a, b) => {
-    if(sort === 'oldest') return new Date(a.date) - new Date(b.date);
-    if(sort === 'title') return a.title.localeCompare(b.title, 'fr');
-    return new Date(b.date) - new Date(a.date);
-  });
-
-  const countPV = blogData.filter(x => x.type === 'pv' || x.type === 'compte_rendu' || x.type === 'document').length;
-  const countPhotos = blogData.filter(x => x.type === 'phototheque').length;
-  const countVideos = blogData.filter(x => x.type === 'video').length;
-
-  set('blog-stat-pv', countPV);
-  set('blog-stat-photos', countPhotos);
-  set('blog-stat-videos', countVideos);
-  set('blog-stat-total', blogData.length);
-  set('blog-filter-count', filtered.length);
-
-  const grid = document.getElementById('blog-grid');
-  if(filtered.length === 0){
-    grid.innerHTML = `<div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200"><i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-2 block"></i><p class="text-slate-500 font-semibold text-sm">Aucun document ou média trouvé.</p></div>`;
-    return;
-  }
-
-  grid.innerHTML = filtered.map(item => {
-    let typeBadge = '<span class="bg-indigo-100 text-indigo-800 border-indigo-200 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase">Document PDF</span>';
-    let mediaPreview = '';
-
-    if(item.type === 'pv') {
-      typeBadge = '<span class="bg-amber-100 text-amber-900 border-amber-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase"><i class="fa-solid fa-file-pdf mr-1 text-rose-600"></i>PV (PDF)</span>';
-      mediaPreview = `<div class="h-36 w-full bg-slate-100 border-b border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200/80 transition" onclick="viewBlogItem(${item.id})">
-        <i class="fa-solid fa-file-pdf text-4xl text-rose-600 mb-1"></i>
-        <span class="text-[11px] font-bold text-slate-700">Aperçu du PDF disponible</span>
-      </div>`;
-    } else if(item.type === 'compte_rendu' || item.type === 'document') {
-      typeBadge = '<span class="bg-blue-100 text-blue-800 border-blue-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase"><i class="fa-solid fa-file-pdf mr-1 text-rose-600"></i>Compte Rendu (PDF)</span>';
-      mediaPreview = `<div class="h-36 w-full bg-slate-100 border-b border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200/80 transition" onclick="viewBlogItem(${item.id})">
-        <i class="fa-solid fa-file-pdf text-4xl text-rose-600 mb-1"></i>
-        <span class="text-[11px] font-bold text-slate-700">Aperçu du PDF disponible</span>
-      </div>`;
-    } else if(item.type === 'phototheque') {
-      typeBadge = '<span class="bg-emerald-100 text-emerald-800 border-emerald-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase"><i class="fa-solid fa-camera-retro mr-1"></i>Photothèque</span>';
-      if(item.fileData && item.fileType.startsWith('image/')) {
-        mediaPreview = `<div class="h-48 w-full bg-slate-900 overflow-hidden relative group cursor-pointer" onclick="viewBlogItem(${item.id})">
-          <img src="${item.fileData}" alt="${escapeHTML(item.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-        </div>`;
-      } else {
-        mediaPreview = `<div class="h-36 w-full bg-slate-100 border-b border-slate-200 flex flex-col items-center justify-center cursor-pointer" onclick="viewBlogItem(${item.id})">
-          <i class="fa-solid fa-image text-3xl text-emerald-600 mb-1"></i>
-          <span class="text-[11px] font-bold text-slate-600">Image jointe</span>
-        </div>`;
-      }
-    } else if(item.type === 'video') {
-      typeBadge = '<span class="bg-rose-100 text-rose-800 border-rose-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase"><i class="fa-solid fa-circle-play mr-1"></i>Vidéo</span>';
-      if(item.fileData && item.fileType.startsWith('video/')) {
-        mediaPreview = `<div class="h-48 w-full bg-slate-950 flex items-center justify-center">
-          <video src="${item.fileData}" controls class="max-h-full max-w-full"></video>
-        </div>`;
-      } else {
-        mediaPreview = `<div class="h-36 w-full bg-slate-900 text-white flex flex-col items-center justify-center cursor-pointer" onclick="viewBlogItem(${item.id})">
-          <i class="fa-solid fa-circle-play text-4xl text-rose-500 mb-1"></i>
-          <span class="text-[11px] font-bold">Lire la vidéo</span>
-        </div>`;
-      }
-    }
-
-    return `
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition">
-      ${mediaPreview}
-      <div class="p-5 space-y-3 flex-grow flex flex-col justify-between">
-        <div class="space-y-2">
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            ${typeBadge}
-            <span class="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-tag mr-1"></i>${escapeHTML(item.category)}</span>
-          </div>
-          <h3 class="font-extrabold text-slate-900 text-sm leading-snug hover:text-gold-600 transition cursor-pointer" onclick="viewBlogItem(${item.id})">${escapeHTML(item.title)}</h3>
-          <p class="text-xs text-slate-600 line-clamp-3">${escapeHTML(item.desc) || 'Aucune description rédigée.'}</p>
-        </div>
-
-        <div class="pt-3 border-t border-slate-100 space-y-2 text-[11px] text-slate-500 font-medium">
-          <div class="flex items-center justify-between">
-            <span><i class="fa-solid fa-calendar text-slate-400 mr-1"></i> ${fmtDate(item.date)}</span>
-            <span><i class="fa-solid fa-user-pen text-slate-400 mr-1"></i> ${escapeHTML(item.author) || 'ASBL LAS'}</span>
-          </div>
-          ${item.fileName ? `
-            <div class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-200">
-              <span class="truncate max-w-[170px] font-mono font-bold text-slate-700 text-[10px]"><i class="fa-solid fa-paperclip text-gold-600 mr-1"></i>${escapeHTML(item.fileName)}</span>
-              <button onclick="downloadBlogFile(${item.id})" class="text-las-700 hover:text-las-900 font-bold text-[10px] underline flex items-center gap-1"><i class="fa-solid fa-download"></i> Télécharger</button>
-            </div>
-          ` : ''}
-        </div>
-      </div>
-
-      <div class="bg-slate-50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
-        <button onclick="viewBlogItem(${item.id})" class="text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center gap-1.5"><i class="fa-solid fa-eye text-gold-600"></i> Aperçu / Consulter</button>
-        ${canEdit() ? `<button onclick="deleteBlogItem(${item.id})" class="text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1"><i class="fa-solid fa-trash"></i> Supprimer</button>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openBlogModal(){
-  if(!canEdit()){ alert("Seuls les Administrateurs autorisés (Ananias KASANDA & Serge KITA) peuvent publier des fichiers."); return; }
-  document.getElementById('blog-form').reset();
-  currentBlogFile = null;
-  document.getElementById('blog-file-preview-info').classList.add('hidden');
-  document.getElementById('blog-input-date').value = new Date().toISOString().slice(0,10);
-  updateBlogFileAccept();
-  document.getElementById('blog-modal').classList.remove('hidden');
-}
-
-function closeBlogModal(){
-  document.getElementById('blog-modal').classList.add('hidden');
-}
-
-function handleBlogFileUpload(e){
-  const file = e.target.files[0];
-  if(!file) return;
-
-  const type = document.getElementById('blog-input-type').value;
-
-  if((type === 'pv' || type === 'compte_rendu' || type === 'document') && !file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf'){
-    alert("Format refusé : Les procès-verbaux et documents officiels doivent STRICTEMENT être au format PDF.");
-    e.target.value = '';
-    return;
-  }
-
-  const btnSubmit = document.getElementById('btn-submit-blog');
-  btnSubmit.disabled = true;
-  btnSubmit.innerText = "Chargement du fichier...";
-
-  const reader = new FileReader();
-  reader.onload = ev => {
-    currentBlogFile = {
-      fileData: ev.target.result,
-      fileName: file.name,
-      fileType: file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : "application/octet-stream")
-    };
-    document.getElementById('blog-file-name-display').innerHTML = `<i class="fa-solid fa-paperclip mr-1"></i> ${escapeHTML(file.name)} (${Math.round(file.size/1024)} Ko)`;
-    document.getElementById('blog-file-preview-info').classList.remove('hidden');
-    btnSubmit.disabled = false;
-    btnSubmit.innerText = "Enregistrer la publication";
-  };
-  reader.readAsDataURL(file);
-}
-
-function removeBlogFile(){
-  currentBlogFile = null;
-  document.getElementById('blog-input-file').value = '';
-  document.getElementById('blog-file-preview-info').classList.add('hidden');
-}
-
-async function saveBlogEntry(e){
-  e.preventDefault();
-  if(!canEdit()) return;
-
-  const id = Date.now();
-  const title = document.getElementById('blog-input-title').value.trim();
-  const type = document.getElementById('blog-input-type').value;
-  const category = document.getElementById('blog-input-category').value;
-  const date = document.getElementById('blog-input-date').value;
-  const author = document.getElementById('blog-input-author').value.trim() || SESSION.user;
-  const desc = document.getElementById('blog-input-desc').value.trim();
-
-  const newEntry = {
-    id: id,
-    title,
-    type,
-    category,
-    date,
-    author,
-    desc,
-    fileData: (currentBlogFile && currentBlogFile.fileData.length < 200000) ? currentBlogFile.fileData : "",
-    fileName: currentBlogFile ? currentBlogFile.fileName : (type==='pv'||type==='compte_rendu' ? title+'.pdf' : ''),
-    fileType: currentBlogFile ? currentBlogFile.fileType : (type==='pv'||type==='compte_rendu' ? 'application/pdf' : '')
-  };
-
-  if(currentBlogFile){
-    await saveFileToIDB(id, currentBlogFile);
-  }
-
-  blogData.unshift(newEntry);
-  saveBlogData();
-  renderBlog();
-  closeBlogModal();
-}
-
-function deleteBlogItem(id){
-  if(!canEdit()) return;
-  if(confirm("Voulez-vous supprimer ce document/média définitivement ?")){
-    blogData = blogData.filter(x => x.id !== id);
-    saveBlogData();
-    renderBlog();
-  }
-}
-
-async function viewBlogItem(id){
-  const item = blogData.find(x => x.id === id);
-  if(!item) return;
-
-  const idbRecord = await getFileFromIDB(id);
-  const fileData = (idbRecord && idbRecord.fileData) ? idbRecord.fileData : item.fileData;
-  const fileType = (idbRecord && idbRecord.fileType) ? idbRecord.fileType : item.fileType;
-
-  document.getElementById('blog-view-title').innerHTML = `<i class="fa-solid fa-file-contract text-gold-400"></i> ${escapeHTML(item.title)}`;
-
-  let mediaDisplay = '';
-
-  if(fileData) {
-    if(fileType.startsWith('image/') || item.type === 'phototheque') {
-      mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 max-h-[500px] bg-slate-900 flex items-center justify-center">
-        <img src="${fileData}" class="max-h-[500px] w-auto object-contain">
-      </div>`;
-    } else if(fileType.startsWith('video/') || item.type === 'video') {
-      mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900">
-        <video src="${fileData}" controls class="w-full max-h-[500px]"></video>
-      </div>`;
-    } else if(fileType === 'application/pdf' || item.fileName.endsWith('.pdf') || item.type === 'pv' || item.type === 'compte_rendu') {
-      mediaDisplay = `<div class="space-y-2">
-        <div class="flex items-center justify-between text-xs font-bold text-slate-700 bg-slate-100 p-2 rounded-lg border border-slate-200">
-          <span><i class="fa-solid fa-file-pdf text-rose-600 mr-1.5"></i> Aperçu dynamique du document PDF</span>
-          <a href="${fileData}" target="_blank" class="text-las-700 hover:underline flex items-center gap-1"><i class="fa-solid fa-up-right-from-square"></i> Plein écran</a>
-        </div>
-        <iframe src="${fileData}#toolbar=0" class="w-full h-[500px] rounded-xl border border-slate-300 bg-slate-100"></iframe>
-      </div>`;
-    }
-  } else if(item.type === 'pv' || item.type === 'compte_rendu' || item.type === 'document') {
-    mediaDisplay = `<div class="p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-3">
-      <i class="fa-solid fa-file-pdf text-5xl text-rose-600"></i>
-      <h4 class="font-extrabold text-slate-800 text-sm">Document PDF Officiel de l'ASBL LAS</h4>
-      <p class="text-xs text-slate-500 max-w-md mx-auto">Ce document est disponible au téléchargement binaire direct via le bouton ci-dessous.</p>
-    </div>`;
-  }
-
-  document.getElementById('blog-view-content').innerHTML = `
-    <div class="space-y-4">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="bg-gold-100 text-gold-900 border border-gold-300 px-3 py-1 rounded-full text-xs font-black uppercase">${escapeHTML(item.type.replace('_',' '))}</span>
-        <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">${escapeHTML(item.category)}</span>
-        <span class="text-xs text-slate-500 font-medium ml-auto"><i class="fa-solid fa-calendar mr-1"></i> ${fmtDate(item.date)}</span>
-      </div>
-
-      <h2 class="text-lg font-black text-slate-900">${escapeHTML(item.title)}</h2>
-
-      ${mediaDisplay}
-
-      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed space-y-2">
-        <h4 class="font-extrabold text-slate-900 uppercase tracking-wider text-[10px]">Description &amp; Résumé :</h4>
-        <p class="whitespace-pre-line">${escapeHTML(item.desc) || 'Aucun détail supplémentaire rédigé.'}</p>
-      </div>
-
-      <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
-        <span>Auteur / Origine : <strong>${escapeHTML(item.author) || 'ASBL LAS'}</strong></span>
-        ${item.fileName ? `<button onclick="downloadBlogFile(${item.id})" class="px-5 py-2.5 bg-las-700 hover:bg-las-600 text-white font-extrabold rounded-xl transition flex items-center gap-2 shadow-md"><i class="fa-solid fa-download"></i> Télécharger (${escapeHTML(item.fileName)})</button>` : ''}
-      </div>
-    </div>`;
-
-  document.getElementById('blog-view-modal').classList.remove('hidden');
-}
-
-function closeBlogViewModal(){
-  document.getElementById('blog-view-modal').classList.add('hidden');
-}
-
-async function downloadBlogFile(id){
-  const item = blogData.find(x => x.id === id);
-  if(!item) return;
-
-  let fileData = item.fileData;
-  let fileName = item.fileName || (item.title + ".pdf");
-
-  const idbRecord = await getFileFromIDB(id);
-  if(idbRecord && idbRecord.fileData){
-    fileData = idbRecord.fileData;
-    fileName = idbRecord.fileName || fileName;
-  }
-
-  let downloadUrl = "";
-  if(fileData && fileData.startsWith('data:')){
-    const blob = dataURLtoBlob(fileData);
-    if(blob){
-      downloadUrl = URL.createObjectURL(blob);
-    } else {
-      downloadUrl = fileData;
-    }
-  } else {
-    const content = `ASBL LES AMIS DE LA SEMENCE (LAS)\n----------------------------------------\n` +
-                    `DOCUMENT OFFICIEL : ${item.title}\n` +
-                    `CATÉGORIE : ${item.category}\n` +
-                    `DATE : ${item.date}\n` +
-                    `AUTEUR : ${item.author}\n\n` +
-                    `RÉSUMÉ ET DÉTAILS :\n${item.desc}\n\n` +
-                    `Document officiel généré depuis la plateforme ASBL LAS.`;
-    const blob = new Blob([content], { type: 'application/pdf;charset=utf-8' });
-    downloadUrl = URL.createObjectURL(blob);
-  }
-
-  const a = document.createElement('a');
-  a.href = downloadUrl;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-function clearBlogSearch(){
-  document.getElementById('blog-search-input').value = '';
-  renderBlog();
-}
-
-function resetBlogFilters(){
-  document.getElementById('blog-search-input').value = '';
-  document.getElementById('blog-filter-type').value = 'ALL';
-  document.getElementById('blog-filter-category').value = 'ALL';
-  document.getElementById('blog-sort-by').value = 'recent';
-  renderBlog();
-}
-
+// ============================================================
+//  FICHE MEMBRE ET COTISATIONS MENSUELLES
+// ============================================================
 let detailId = null;
 function openDetail(id){
   const m = membersData.find(x=>x.id===id); if(!m) return;
@@ -1441,14 +600,10 @@ function openDetail(id){
   renderDetail(m, ANNEE_COURANTE);
   document.getElementById('detail-modal').classList.remove('hidden');
 }
-
-function closeDetail(){
-  document.getElementById('detail-modal').classList.add('hidden');
-  detailId=null;
-}
+function closeDetail(){ document.getElementById('detail-modal').classList.add('hidden'); detailId=null; }
 
 function renderDetail(m, year){
-  const paidArr = (m.payments[year]||Array(12).fill(false));
+  const paidArr = (m.payments[year] || Array(12).fill(false));
   const paid = paidArr.filter(Boolean).length;
   const due = monthsDue(m, year);
   const solde = soldeDu(m, year);
@@ -1460,21 +615,16 @@ function renderDetail(m, year){
     const cls = on ? 'bg-emerald-500 text-white border-emerald-600'
                    : isFuture ? 'bg-slate-50 text-slate-300 border-slate-200'
                    : 'bg-rose-50 text-rose-500 border-rose-200';
-    const click = canPay() ? `onclick="togglePay(${m.id},${year},${i})"` : '';
-    const cursor = canPay() ? 'cursor-pointer hover:ring-2 hover:ring-las-400' : 'cursor-default opacity-95';
-    return `<button type="button" ${click} class="${cls} ${cursor} rounded-lg border py-2 text-[11px] font-bold transition flex flex-col items-center gap-0.5">
+    return `<button type="button" onclick="togglePay(${m.id},${year},${i})" class="${cls} cursor-pointer hover:ring-2 hover:ring-las-400 rounded-lg border py-2 text-[11px] font-bold transition flex flex-col items-center gap-0.5">
               <span>${mo}</span><i class="fa-solid ${on?'fa-check':(isFuture?'fa-minus':'fa-xmark')} text-[10px]"></i>
             </button>`;
   }).join('');
 
-  const yearsSelect = (()=> {
-    const ys=[ANNEE_COURANTE+1,ANNEE_COURANTE,ANNEE_COURANTE-1,ANNEE_COURANTE-2];
-    return ys.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y}</option>`).join('');
-  })();
+  const yearsSelect = [ANNEE_COURANTE+1,ANNEE_COURANTE,ANNEE_COURANTE-1,ANNEE_COURANTE-2]
+    .map(y=>`<option value="${y}" ${y===year?'selected':''}>${y}</option>`).join('');
 
   const bday = birthdaySoon(m);
   const aYears = age(m);
-  const creds = typeof getCredentialsForMember === 'function' ? getCredentialsForMember(m) : { username: "", password: "" };
 
   document.getElementById('detail-content').innerHTML = `
     ${bday ? `
@@ -1482,9 +632,10 @@ function renderDetail(m, year){
       <div class="w-10 h-10 rounded-lg bg-white/90 text-las-700 flex items-center justify-center text-xl bday-pulse shrink-0">🎂</div>
       <div class="relative">
         <p class="text-white font-extrabold text-sm leading-tight">Joyeux anniversaire ${birthdayLabel(m).toLowerCase()} !</p>
-        <p class="text-white/85 text-[11px]">${escapeHTML(m.name)}${aYears!==null?` fête ses ${aYears + (daysUntilBirthday(m)===0?0:1)} ans`:''}.</p>
+        <p class="text-white/85 text-[11px]">${escapeHTML(m.name)}${aYears!==null?` fête ses ${aYears+(daysUntilBirthday(m)===0?0:1)} ans`:''}.</p>
       </div>
     </div>` : ''}
+
     <div class="bg-white rounded-xl border ${bday?'border-gold-300 ring-1 ring-gold-200':'border-slate-200'} p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
       <div class="shrink-0 ${bday?'bday-ring':''}">${avatar(m,96)}</div>
       <div class="flex-1 text-center sm:text-left w-full">
@@ -1496,34 +647,18 @@ function renderDetail(m, year){
         ${m.note?`<p class="text-xs text-las-700 font-semibold mt-0.5">${escapeHTML(m.note)}</p>`:''}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-3 text-xs text-left">
           <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-slate-400 w-4"></i><span class="font-mono font-semibold text-slate-800">${escapeHTML(m.phone)}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400 w-4"></i><span class="text-slate-700 break-all">${escapeHTML(m.email)||'—'}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-briefcase text-slate-400 w-4"></i><span class="text-slate-700">${escapeHTML(m.profession)||'—'}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-slate-400 w-4"></i><span class="text-slate-700">${escapeHTML(m.address)||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400 w-4"></i><span class="text-slate-700 break-all">${escapeHTML(m.email||'—')}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-briefcase text-slate-400 w-4"></i><span class="text-slate-700">${escapeHTML(m.profession||'—')}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-slate-400 w-4"></i><span class="text-slate-700">${escapeHTML(m.address||'—')}</span></div>
           <div class="flex items-center gap-2"><i class="fa-solid fa-cake-candles text-slate-400 w-4"></i><span class="text-slate-700">${fmtDate(m.birthdate)}${aYears!==null?` (${aYears} ans)`:''}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-location-crosshairs text-slate-400 w-4"></i><span class="text-slate-700">Né(e) à ${escapeHTML(m.birthplace)||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-location-crosshairs text-slate-400 w-4"></i><span class="text-slate-700">Né(e) à ${escapeHTML(m.birthplace||'—')}</span></div>
           <div class="flex items-center gap-2"><i class="fa-solid fa-calendar-plus text-slate-400 w-4"></i><span class="text-slate-700">Intégration : ${fmtDate(m.joined)}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-user-gear text-slate-400 w-4"></i><span class="text-slate-700 font-mono">Identifiant : <b>${creds.username}</b></span></div>
         </div>
         <div class="flex items-center justify-center sm:justify-start gap-2 mt-3 flex-wrap">
           ${badge(m.asbl,'asbl')} <span class="text-[10px] text-slate-400">ASBL</span>
           ${badge(m.reunion,'reunion')} <span class="text-[10px] text-slate-400">Réunion</span>
           ${badge(m.forum,'forum')} <span class="text-[10px] text-slate-400">Forum</span>
         </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-xl border border-slate-200 p-4">
-      <div class="flex items-center justify-between mb-2">
-        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-address-book text-las-600"></i> Informations complémentaires</h4>
-        ${canEdit()?`<button onclick="editMember(${m.id})" class="text-[11px] font-bold text-las-700 hover:underline"><i class="fa-solid fa-pen"></i> Modifier</button>`:''}
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
-        <div><span class="text-slate-500">Sexe :</span> <b class="text-slate-800">${escapeHTML(m.sexe)||'—'}</b></div>
-        <div><span class="text-slate-500">État civil :</span> <b class="text-slate-800">${escapeHTML(m.etatcivil)||'—'}</b></div>
-        <div><span class="text-slate-500">Nationalité :</span> <b class="text-slate-800">${escapeHTML(m.nationalite)||'—'}</b></div>
-        <div><span class="text-slate-500">WhatsApp :</span> <b class="font-mono text-slate-800">${escapeHTML(m.whatsapp||m.phone)||'—'}</b></div>
-        ${canEdit()?`<div><span class="text-slate-500">N° pièce d'identité :</span> <b class="text-slate-800">${escapeHTML(m.idDoc)||'—'}</b></div>`:''}
-        <div class="sm:col-span-2"><span class="text-slate-500">Contact d'urgence :</span> <b class="text-slate-800">${escapeHTML(m.urgenceNom)||'—'}${m.urgenceTel?` · <span class="font-mono">${escapeHTML(m.urgenceTel)}</span>`:''}</b></div>
       </div>
     </div>
 
@@ -1544,68 +679,64 @@ function renderDetail(m, year){
         <select onchange="changeYear(${m.id}, this.value)" class="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:ring-2 focus:ring-las-500">${yearsSelect}</select>
       </div>
       <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">${grid}</div>
-      ${canPay()
-        ? `<div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-             <p class="text-[10px] text-slate-400">Cliquez un mois pour enregistrer un paiement.</p>
-             <div class="flex gap-2">
-               <button onclick="markAll(${m.id},${year},true)" class="text-[11px] font-bold text-emerald-700 hover:underline">Tout payer</button>
-               <button onclick="markAll(${m.id},${year},false)" class="text-[11px] font-bold text-rose-600 hover:underline">Tout effacer</button>
-             </div>
-           </div>`
-        : `<p class="text-[10px] text-slate-400 mt-3 pt-3 border-t border-slate-100 italic">Mode lecture seule — Seuls les Administrateurs autorisés (Ananias KASANDA & Serge KITA) peuvent enregistrer les paiements.</p>`}
+      <div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+        <p class="text-[10px] text-slate-400">Cliquez sur un mois pour basculer l'état payé / impayé.</p>
+        <div class="flex gap-2">
+          <button onclick="markAll(${m.id},${year},true)" class="text-[11px] font-bold text-emerald-700 hover:underline">Tout payer</button>
+          <button onclick="markAll(${m.id},${year},false)" class="text-[11px] font-bold text-rose-600 hover:underline">Tout effacer</button>
+        </div>
+      </div>
     </div>
 
     <div class="flex items-center justify-end gap-2">
-      ${canEdit()?`<button onclick="editMember(${m.id})" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square"></i> Modifier la fiche</button>`:''}
-      <button onclick="printMemberCard()" class="px-4 py-2 bg-las-700 hover:bg-las-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-print"></i> Imprimer la Fiche</button>
+      <button onclick="editMember(${m.id})" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square"></i> Modifier la fiche</button>
+      <button onclick="printMemberCard()" class="px-4 py-2 bg-las-700 hover:bg-las-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-print"></i> Imprimer</button>
     </div>
   `;
 }
 
 function changeYear(id, year){ const m=membersData.find(x=>x.id===id); if(m) renderDetail(m, parseInt(year)); }
 function togglePay(id, year, monthIdx){
-  if(!canPay()) return;
   const m = membersData.find(x=>x.id===id); if(!m) return;
   if(!m.payments[year]) m.payments[year]=Array(12).fill(false);
   m.payments[year][monthIdx] = !m.payments[year][monthIdx];
   saveData(); renderDetail(m, year); calculateStats(); renderData();
 }
 function markAll(id, year, val){
-  if(!canPay()) return;
   const m = membersData.find(x=>x.id===id); if(!m) return;
   m.payments[year] = Array(12).fill(val);
   saveData(); renderDetail(m, year); calculateStats(); renderData();
 }
 
-const EXTRA_FIELDS=['sexe','etatcivil','nationalite','whatsapp','idDoc','urgenceNom','urgenceTel'];
+// ============================================================
+//  MODALES ET ACTIONS MEMBRES (AJOUT, ÉDITION, SUPPRESSION)
+// ============================================================
 let tempPhoto = "";
 function openMemberModal(member=null){
-  if(!canEdit()){ alert("Seuls les Administrateurs autorisés peuvent modifier les membres."); return; }
-  const modal=document.getElementById('member-modal');
-  const title=document.getElementById('modal-title');
+  const modal = document.getElementById('member-modal');
+  const title = document.getElementById('modal-title');
   document.getElementById('member-form').reset();
   tempPhoto = member ? (member.photo||"") : "";
   updatePhotoPreview();
   if(member){
     title.innerHTML = `<i class="fa-solid fa-user-pen text-gold-400"></i><span>Modifier — N° ${member.id}</span>`;
-    document.getElementById('member-id').value=member.id;
-    document.getElementById('input-name').value=member.name;
-    document.getElementById('input-phone').value=member.phone;
-    document.getElementById('input-email').value=member.email||"";
-    document.getElementById('input-address').value=member.address||"";
-    document.getElementById('input-joined').value=member.joined||"";
-    document.getElementById('input-note').value=member.note||"";
-    document.getElementById('input-birthdate').value=member.birthdate||"";
-    document.getElementById('input-birthplace').value=member.birthplace||"";
-    document.getElementById('input-profession').value=member.profession||"";
-    document.getElementById('input-poste').value=member.poste||"";
-    document.getElementById('input-asbl').value=member.asbl;
-    document.getElementById('input-forum').value=member.forum;
-    document.getElementById('input-reunion').value=member.reunion;
-    EXTRA_FIELDS.forEach(f=>document.getElementById('input-'+f).value=member[f]||'');
+    document.getElementById('member-id').value = member.id;
+    document.getElementById('input-name').value = member.name;
+    document.getElementById('input-phone').value = member.phone;
+    document.getElementById('input-email').value = member.email||"";
+    document.getElementById('input-address').value = member.address||"";
+    document.getElementById('input-joined').value = member.joined||"";
+    document.getElementById('input-note').value = member.note||"";
+    document.getElementById('input-birthdate').value = member.birthdate||"";
+    document.getElementById('input-birthplace').value = member.birthplace||"";
+    document.getElementById('input-profession').value = member.profession||"";
+    document.getElementById('input-poste').value = member.poste||"";
+    document.getElementById('input-asbl').value = member.asbl;
+    document.getElementById('input-forum').value = member.forum;
+    document.getElementById('input-reunion').value = member.reunion;
   } else {
     title.innerHTML = `<i class="fa-solid fa-user-plus text-gold-400"></i><span>Ajouter un Membre</span>`;
-    document.getElementById('member-id').value='';
+    document.getElementById('member-id').value = '';
   }
   modal.classList.remove('hidden');
 }
@@ -1643,45 +774,44 @@ function editMember(id){
   const m=membersData.find(x=>x.id===id); if(m) openMemberModal(m);
 }
 function deleteMember(id){
-  if(!canDelete()){ alert("Seuls les Administrateurs autorisés peuvent supprimer un membre."); return; }
   const m=membersData.find(x=>x.id===id); if(!m) return;
-  if(confirm(`Supprimer définitivement le membre "${m.name}" ?`)){
-    membersData=membersData.filter(x=>x.id!==id);
+  if(confirm(`Supprimer définitivement le membre "${m.name}" du répertoire LAS ?`)){
+    membersData = membersData.filter(x=>x.id!==id);
     saveData(); calculateStats(); renderBirthdays(); renderData();
   }
 }
 function saveMember(e){
   e.preventDefault();
-  if(!canEdit()) return;
-  const idVal=document.getElementById('member-id').value;
-  const data={
-    name:document.getElementById('input-name').value.trim(),
-    phone:document.getElementById('input-phone').value.trim(),
-    email:document.getElementById('input-email').value.trim(),
-    address:document.getElementById('input-address').value.trim(),
-    joined:document.getElementById('input-joined').value,
-    note:document.getElementById('input-note').value.trim(),
-    birthdate:document.getElementById('input-birthdate').value,
-    birthplace:document.getElementById('input-birthplace').value.trim(),
-    profession:document.getElementById('input-profession').value.trim(),
-    poste:document.getElementById('input-poste').value.trim(),
-    asbl:document.getElementById('input-asbl').value,
-    forum:document.getElementById('input-forum').value,
-    reunion:document.getElementById('input-reunion').value,
-    photo:tempPhoto,
-    updatedAt:new Date().toISOString(), updatedBy:(SESSION&&SESSION.user)||''
+  const idVal = document.getElementById('member-id').value;
+  const data = {
+    name: document.getElementById('input-name').value.trim(),
+    phone: document.getElementById('input-phone').value.trim(),
+    email: document.getElementById('input-email').value.trim(),
+    address: document.getElementById('input-address').value.trim(),
+    joined: document.getElementById('input-joined').value,
+    note: document.getElementById('input-note').value.trim(),
+    birthdate: document.getElementById('input-birthdate').value,
+    birthplace: document.getElementById('input-birthplace').value.trim(),
+    profession: document.getElementById('input-profession').value.trim(),
+    poste: document.getElementById('input-poste').value.trim(),
+    asbl: document.getElementById('input-asbl').value,
+    forum: document.getElementById('input-forum').value,
+    reunion: document.getElementById('input-reunion').value,
+    photo: tempPhoto
   };
-  EXTRA_FIELDS.forEach(f=>data[f]=document.getElementById('input-'+f).value.trim());
   if(idVal){
-    const i=membersData.findIndex(m=>m.id===parseInt(idVal));
-    if(i!==-1) membersData[i]=normalize(Object.assign({}, membersData[i], data, {id:parseInt(idVal)}));
+    const i = membersData.findIndex(m=>m.id===parseInt(idVal));
+    if(i!==-1) membersData[i] = normalize(Object.assign({}, membersData[i], data, {id:parseInt(idVal)}));
   } else {
-    const nextId=membersData.length?Math.max(...membersData.map(m=>m.id))+1:1;
+    const nextId = membersData.length ? Math.max(...membersData.map(m=>m.id))+1 : 1;
     membersData.unshift(normalize(Object.assign({id:nextId}, data)));
   }
   saveData(); calculateStats(); renderBirthdays(); renderData(); closeMemberModal();
 }
 
+// ============================================================
+//  IMPRESSION DE FICHE INDIVIDUELLE & OUTILS
+// ============================================================
 function printMemberCard(){
   const m=membersData.find(x=>x.id===detailId); if(!m) return;
   const year=ANNEE_COURANTE;
@@ -1689,8 +819,8 @@ function printMemberCard(){
   const paid=paidArr.filter(Boolean).length, solde=soldeDu(m,year);
   const rows=MOIS.map((mo,i)=>`<td style="border:1px solid #cbd5e1;padding:4px 6px;text-align:center;font-size:10px">${mo}<br><b style="color:${paidArr[i]?'#16a34a':'#e11d48'}">${paidArr[i]?'Payé':'—'}</b></td>`).join('');
   const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Fiche — ${escapeHTML(m.name)}</title>
-    <style>body{font-family:Arial,Helvetica,sans-serif;color:#0f172a;padding:24px;max-width:720px;margin:auto}
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Fiche — ${m.name}</title>
+    <style>body{font-family:Arial,sans-serif;color:#0f172a;padding:24px;max-width:720px;margin:auto}
     h1{font-size:18px;margin:0}.muted{color:#64748b;font-size:12px}
     table{border-collapse:collapse;width:100%;margin-top:8px}.hdr{display:flex;gap:16px;align-items:center;border-bottom:2px solid #0f172a;padding-bottom:12px}
     .ph{width:90px;height:90px;border-radius:10px;object-fit:cover;border:1px solid #cbd5e1}
@@ -1702,31 +832,32 @@ function printMemberCard(){
       ${m.note?`<div class="muted">${escapeHTML(m.note)}</div>`:''}</div>
     </div>
     <div style="margin-top:12px">
-      <div class="row"><span class="lbl">Poste dans l'ASBL :</span> ${escapeHTML(m.poste)||'Membre'}</div>
-      <div class="row"><span class="lbl">Téléphone :</span> ${escapeHTML(m.phone)} &nbsp;|&nbsp; <span class="lbl">Email :</span> ${escapeHTML(m.email)||'—'}</div>
-      <div class="row"><span class="lbl">Profession :</span> ${escapeHTML(m.profession)||'—'}</div>
-      <div class="row"><span class="lbl">Date de naissance :</span> ${fmtDate(m.birthdate)} ${age(m)!==null?`(${age(m)} ans)`:''} &nbsp;|&nbsp; <span class="lbl">Lieu :</span> ${escapeHTML(m.birthplace)||'—'}</div>
-      <div class="row"><span class="lbl">Adresse / Commune :</span> ${escapeHTML(m.address)||'—'}</div>
-      <div class="row"><span class="lbl">Date d'intégration :</span> ${fmtDate(m.joined)}</div>
+      <div class="row"><span class="lbl">Poste :</span> ${escapeHTML(m.poste||'Membre')}</div>
+      <div class="row"><span class="lbl">Téléphone :</span> ${escapeHTML(m.phone)} &nbsp;|&nbsp; <span class="lbl">Email :</span> ${escapeHTML(m.email||'—')}</div>
+      <div class="row"><span class="lbl">Profession :</span> ${escapeHTML(m.profession||'—')}</div>
+      <div class="row"><span class="lbl">Naissance :</span> ${fmtDate(m.birthdate)} ${age(m)!==null?`(${age(m)} ans)`:''} &nbsp;|&nbsp; <span class="lbl">Lieu :</span> ${escapeHTML(m.birthplace||'—')}</div>
+      <div class="row"><span class="lbl">Adresse :</span> ${escapeHTML(m.address||'—')}</div>
+      <div class="row"><span class="lbl">Intégration :</span> ${fmtDate(m.joined)}</div>
       <div class="row"><span class="lbl">Actif ASBL :</span> ${m.asbl} &nbsp;|&nbsp; <span class="lbl">Réunion :</span> ${m.reunion} &nbsp;|&nbsp; <span class="lbl">Forum :</span> ${m.forum}</div>
     </div>
     <h3 style="margin-top:16px;font-size:14px">Cotisations ${year} — ${COTISATION_MENSUELLE} $/mois</h3>
     <table><tr>${rows}</tr></table>
     <div class="row" style="margin-top:10px"><b>Total payé :</b> ${paid*COTISATION_MENSUELLE} $ (${paid}/12) &nbsp;&nbsp; <b>Solde dû :</b> <span style="color:${solde>0?'#e11d48':'#16a34a'}">${solde} $</span></div>
-    <p class="muted" style="margin-top:28px">Fiche générée le ${new Date().toLocaleDateString('fr-FR')} — Document interne LAS.</p>
+    <p class="muted" style="margin-top:28px">Fiche générée le ${new Date().toLocaleDateString('fr-FR')} — Document officiel LAS.</p>
     <script>window.onload=()=>window.print()<\/script></body></html>`);
   w.document.close();
 }
 
 function setView(view){
-  currentView=view;
-  const vt=document.getElementById('view-table'), vc=document.getElementById('view-cards');
-  const bt=document.getElementById('btn-view-table'), bc=document.getElementById('btn-view-cards');
-  const active="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm";
-  const idle="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5";
+  currentView = view;
+  const vt = document.getElementById('view-table'), vc = document.getElementById('view-cards');
+  const bt = document.getElementById('btn-view-table'), bc = document.getElementById('btn-view-cards');
+  const active = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm";
+  const idle = "px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5";
   if(view==='table'){ vt.classList.remove('hidden'); vc.classList.add('hidden'); bt.className=active; bc.className=idle; }
   else { vt.classList.add('hidden'); vc.classList.remove('hidden'); bc.className=active; bt.className=idle; }
 }
+
 function clearSearch(){ document.getElementById('search-input').value=''; renderData(); }
 function resetFilters(){
   document.getElementById('search-input').value='';
@@ -1737,7 +868,7 @@ function resetFilters(){
 
 function exportCSV(){
   const headers=["N°","Nom & Prénom","Poste","Téléphone","Email","Profession","Date naissance","Lieu naissance","Adresse","Date intégration","Actif ASBL","Forum","Réunion",`Mois payés ${ANNEE_COURANTE}`,`Payé ${ANNEE_COURANTE} (USD)`,"Solde dû (USD)"];
-  const rows=getFiltered().map(m=>{
+  const rows=membersData.map(m=>{
     const paid=yearPaid(m,ANNEE_COURANTE);
     return [m.id,`"${m.name.replace(/"/g,'""')}"`,`"${m.poste||''}"`,`"${m.phone}"`,`"${m.email||''}"`,`"${m.profession||''}"`,`"${m.birthdate||''}"`,`"${m.birthplace||''}"`,`"${m.address||''}"`,`"${m.joined||''}"`,m.asbl,m.forum,m.reunion,paid,paid*COTISATION_MENSUELLE,soldeDu(m,ANNEE_COURANTE)];
   });
@@ -1748,80 +879,24 @@ function exportCSV(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
-function exportJSON(){
-  const ts=+localStorage.getItem(DB_KEY+"_ts")||Date.now();
-  const blob=new Blob([JSON.stringify({updatedAt:ts,members:membersData},null,1)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='membres.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-}
-
-function importJSON(e){
-  if(!canEdit()) return;
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=()=>{ try{
-    const j=JSON.parse(r.result); const arr=Array.isArray(j)?j:j.members;
-    if(!Array.isArray(arr)) throw 0;
-    if(!confirm(`Remplacer les données actuelles par ${arr.length} membres ?`)) return;
-    membersData=arr.map(normalize); saveData(); calculateStats(); renderBirthdays(); renderData();
-  }catch(_){ alert("Fichier JSON invalide."); } e.target.value=''; };
-  r.readAsText(f);
-}
-
-async function syncFromRepo(){
-  try{
-    const r=await fetch('membres.json',{cache:'no-store'}); if(!r.ok) return;
-    const j=await r.json(); const remote=+j.updatedAt||0, local=+localStorage.getItem(DB_KEY+"_ts")||0;
-    if(Array.isArray(j.members) && remote>local){
-      membersData=j.members.map(normalize);
-      localStorage.setItem(DB_KEY,JSON.stringify(membersData)); localStorage.setItem(DB_KEY+"_ts",remote);
-      calculateStats(); renderBirthdays(); renderData();
-    }
-  }catch(e){}
-}
-
-function applyRoleUI(){
-  set('current-user', SESSION.user);
-  set('current-role', SESSION.label || (isAdmin() ? "Administrateur" : "Membre"));
-  set('current-id-tag', MEMBER_ID !== null ? MEMBER_ID : '--');
-
-  if(!canEdit()){
-    ['btn-add','btn-json','btn-import','btn-add-blog','btn-add-blog-sec'].forEach(id => {
-      const el = document.getElementById(id);
-      if(el) el.classList.add('hidden');
-    });
-
-    set('tab-members-title', '1. RÉPERTOIRE DES MEMBRES & COTISATIONS');
-    document.getElementById('member-personal-notice').classList.remove('hidden');
-  } else {
-    document.getElementById('member-personal-notice').classList.add('hidden');
+// ============================================================
+//  INITIALISATION DE L'APPLICATION
+// ============================================================
+function initApp(){
+  if (SESSION && SESSION.user) {
+    set('current-user-badge', SESSION.user);
+    set('current-role-badge', SESSION.label || SESSION.role);
   }
-}
+  ['search-input'].forEach(id=>document.getElementById(id).addEventListener('input', renderData));
+  ['filter-asbl','filter-cotis','filter-reunion','filter-forum','sort-by'].forEach(id=>document.getElementById(id).addEventListener('change', renderData));
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ closeMemberModal(); closeDetail(); } });
 
-['search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderData));
-['filter-asbl','filter-cotis','filter-reunion','filter-forum','sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderData));
-
-['blog-search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderBlog));
-['blog-filter-type','blog-filter-category','blog-sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderBlog));
-
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    closeMemberModal();
-    closeDetail();
-    closeBlogModal();
-    closeBlogViewModal();
-    closeLoginModal();
-  }
-});
-
-initIDB().then(() => {
-  applyRoleUI();
   calculateStats();
   renderBirthdays();
   renderData();
-  renderBlog();
-  syncFromRepo();
-});
+}
+
+initApp();
 </script>
 </body>
 </html>
