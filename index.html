@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
-    <!-- Liaison du module externe de gestion des identifiants et des rôles -->
+    <!-- Communication avec auth.js -->
     <script src="auth.js"></script>
 
     <script>
@@ -97,11 +97,11 @@
 
                 <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
                     <!-- Badge profil utilisateur -->
-                    <button onclick="openLoginModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer text-left" title="Changer d'utilisateur ou de rôle">
+                    <button onclick="openLoginModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer text-left" title="Changer d'utilisateur">
                         <i class="fa-solid fa-user-shield text-las-400"></i>
                         <div>
                             <span class="text-xs font-bold block leading-none" id="current-user">—</span>
-                            <span class="text-[9px] text-slate-400 font-mono">ID: <span id="current-id-tag">ALL</span></span>
+                            <span class="text-[9px] text-slate-400 font-mono">ID: <span id="current-id-tag">--</span></span>
                         </div>
                         <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-las-700/40 text-las-200 font-bold uppercase ml-1" id="current-role">—</span>
                         <i class="fa-solid fa-arrows-rotate text-[10px] text-gold-400 ml-1"></i>
@@ -130,6 +130,7 @@
                         </button>
                     </div>
 
+                    <!-- Bouton Quitter -->
                     <button onclick="logout()" class="px-3 py-2 bg-rose-900/40 hover:bg-rose-800/60 text-rose-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-rose-800 active:scale-95" title="Se déconnecter">
                         <i class="fa-solid fa-right-from-bracket"></i><span class="hidden sm:inline">Quitter</span>
                     </button>
@@ -371,33 +372,28 @@
         </div>
     </footer>
 
-    <!-- MODALE DE CONNEXION -->
+    <!-- MODALE DE CONNEXION SÉCURISÉE -->
     <div id="login-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 no-print">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50">
-                <h3 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-user-lock text-gold-400"></i><span>Accès Portail &amp; Identité</span></h3>
+                <h3 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-user-lock text-gold-400"></i><span>Authentification Membre</span></h3>
                 <button onclick="closeLoginModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4">
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Type d'accès :</label>
-                    <select id="login-role-select" onchange="toggleLoginMemberSelect()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
-                        <option value="membre">Membre Individuel / Administrateur</option>
-                        <option value="root">Root Principal (Super-Admin System)</option>
-                    </select>
-                </div>
-
-                <div id="login-member-group" class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Sélectionnez votre Nom / Membre ID :</label>
-                        <select id="login-member-select" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></select>
-                    </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Sélectionnez votre Nom / Membre ID :</label>
+                    <select id="login-member-select" onchange="onMemberSelectChange()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></select>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Code PIN Secret :</label>
-                    <input type="password" id="login-pin-input" placeholder="Par défaut ex: 1001, 1002..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
-                    <span class="text-[10px] text-slate-400 mt-1 block">Le code PIN par défaut d'un membre est : <b>1000 + son N° ID</b>.</span>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Identifiant (Prénom en minuscules) :</label>
+                    <input type="text" id="login-username-input" autocomplete="off" placeholder="Ex: ananias, serge, ander..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Mot de passe :</label>
+                    <input type="password" id="login-pass-input" autocomplete="off" placeholder="Ex: prenom2026" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
+                    <span class="text-[10px] text-slate-400 mt-1 block">Règle par défaut : Votre prénom en minuscules suivi de <b>2026</b> (ex: <i>ander2026</i>).</span>
                 </div>
 
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
@@ -585,7 +581,7 @@
 
 <script>
 // ============================================================
-//  LOGIQUE PRINCIPALE & BASE DE DONNÉES DE L'APPLICATION
+//  LOGIQUE PRINCIPALE DE L'APPLICATION
 // ============================================================
 
 function escapeHTML(str) {
@@ -612,7 +608,6 @@ function dataURLtoBlob(dataurl) {
     }
     return new Blob([u8arr], { type: mime });
   } catch(e) {
-    console.error("Erreur conversion binaire Blob", e);
     return null;
   }
 }
@@ -624,7 +619,7 @@ const DB_KEY = "las_members_v2";
 const BLOG_DB_KEY = "las_blog_v2";
 
 // ============================================================
-//  BASE DE DONNÉES INDEXEDDB POUR STOCKAGE MEDIA LOURD
+//  BASE DE DONNÉES INDEXEDDB POUR MÉDIAS LOURDS
 // ============================================================
 const IDB_NAME = "LAS_MediaStore_v3";
 let idbConn = null;
@@ -670,47 +665,49 @@ function getFileFromIDB(id){
 //  DONNÉES OFFICIELLES ET CODES PIN DES 37 MEMBRES
 // ============================================================
 const DEFAULT_MEMBERS = [
-  { id:1, pin:"1001", name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
-  { id:2, pin:"1002", name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire général",profession:"IT-Support",email:"ananiaskasanda2@gmail.com",birthdate:"1982-07-02",birthplace:"Kinshasa",address:"Ngaliema",joined:"2022-01-15" },
-  { id:3, pin:"1003", name:"Baudry Landu",phone:"243 895 446 423",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Trésorier",profession:"Comptable",birthplace:"Kinshasa",joined:"2022-03-10" },
-  { id:4, pin:"1004", name:"Junior Loti",phone:"243 898 953 438",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Membre",profession:"Commerçant" },
-  { id:5, pin:"1005", name:"Aarly Nsungu",phone:"243 971 855 480",forum:"OUI",asbl:"OUI",reunion:"EXEMPTER" },
-  { id:6, pin:"1006", name:"BELINDA NTEMBE",phone:"+33 7 59 27 85 66",forum:"PARTIEL",asbl:"OUI",reunion:"EXEMPTER" },
-  { id:7, pin:"1007", name:"Dick mbengu acteur Princi",phone:"244 930 561 955",forum:"PARTIEL",asbl:"NON",reunion:"EXEMPTER" },
-  { id:8, pin:"1008", name:"Dijo Mboko",phone:"243 894 481 069",forum:"PARTIEL",asbl:"OUI",reunion:"OUI" },
-  { id:9, pin:"1009", name:"Divuandidi",phone:"243 907 258 208",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:10, pin:"1010", name:"Elvis",phone:"243 852 105 790",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:11, pin:"1011", name:"fanny fatya mbala",phone:"243 896 633 569",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:12, pin:"1012", name:"Fils Mbongo",phone:"243 999 459 122",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:14, pin:"1014", name:"Freddy KIMPIATTU",phone:"243 826 065 275",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:15, pin:"1015", name:"Frederick Kifiya",phone:"243 899 694 673",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:16, pin:"1016", name:"Fils Kimenga",phone:"243 843 218 094",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:17, pin:"1017", name:"Kita serge",phone:"243 854 797 085",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire Général / Trésorier" },
-  { id:18, pin:"1018", name:"Lolo Nzeza",phone:"243 900 532 333",forum:"OCCASIONEL",asbl:"NON",reunion:"NON" },
-  { id:19, pin:"1019", name:"Lombi",phone:"+242 05 761 5731",forum:"SOUVENT",asbl:"NON",reunion:"NON" },
-  { id:20, pin:"1020", name:"Lovy Sala",phone:"243 814 941 425",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:21, pin:"1021", name:"Matuba Pilu",phone:"243 994 141 415",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:22, pin:"1022", name:"Me Freddy Lutonto",phone:"243 897 426 649",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
-  { id:23, pin:"1023", name:"Nadège MUBANGA",phone:"243 898 273 638",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:24, pin:"1024", name:"Nadine Biangolo",phone:"243 904 746 639",forum:"OUI",asbl:"NON",reunion:"NON" },
-  { id:25, pin:"1025", name:"Niclette Kitembo",phone:"243 894 200 430",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
-  { id:26, pin:"1026", name:"nsamu abi",phone:"244 931 354 839",forum:"NON",asbl:"NON",reunion:"EXEMPTER" },
-  { id:27, pin:"1027", name:"Olivier NONGU",phone:"243 816 910 214",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
-  { id:28, pin:"1028", name:"Patricia Makudi",phone:"243 815 122 136",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:29, pin:"1029", name:"Saint Vuangi",phone:"243 906 655 909",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:30, pin:"1030", name:"Teddy Kasongo",phone:"243 901 318 624",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
-  { id:31, pin:"1031", name:"Tonton Nkuku",phone:"243 971 958 874",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
-  { id:32, pin:"1032", name:"Tuzolana Nathalie",phone:"243 900 569 399",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:33, pin:"1033", name:"Gueyi Kikalankala",phone:"243 897 414 242",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
-  { id:34, pin:"1034", name:"kungulu kinkela Fidel",phone:"243 896 722 306",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:35, pin:"1035", name:"Masuama Pembele",phone:"243 896 350 866",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:36, pin:"1036", name:"pico mfumukwansa",phone:"243 840 200 071",forum:"OUI",asbl:"NON",reunion:"EXEMPTER" },
-  { id:37, pin:"1037", name:"Rachel Luzolo",phone:"243 894 055 982",forum:"NON",asbl:"OUI",reunion:"NON" }
+  { id:1, name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
+  { id:2, name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Coordonnateur",profession:"IT-Support",email:"ananiaskasanda2@gmail.com",birthdate:"1982-07-02",birthplace:"Kinshasa",address:"Ngaliema",joined:"2022-01-15" },
+  { id:3, name:"Baudry Landu",phone:"243 895 446 423",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Trésorier",profession:"Comptable",birthplace:"Kinshasa",joined:"2022-03-10" },
+  { id:4, name:"Junior Loti",phone:"243 898 953 438",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Membre",profession:"Commerçant" },
+  { id:5, name:"Aarly Nsungu",phone:"243 971 855 480",forum:"OUI",asbl:"OUI",reunion:"EXEMPTER" },
+  { id:6, name:"BELINDA NTEMBE",phone:"+33 7 59 27 85 66",forum:"PARTIEL",asbl:"OUI",reunion:"EXEMPTER" },
+  { id:7, name:"Dick mbengu acteur Princi",phone:"244 930 561 955",forum:"PARTIEL",asbl:"NON",reunion:"EXEMPTER" },
+  { id:8, name:"Dijo Mboko",phone:"243 894 481 069",forum:"PARTIEL",asbl:"OUI",reunion:"OUI" },
+  { id:9, name:"Divuandidi",phone:"243 907 258 208",forum:"NON",asbl:"OUI",reunion:"NON" },
+  { id:10, name:"Elvis",phone:"243 852 105 790",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:11, name:"fanny fatya mbala",phone:"243 896 633 569",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:12, name:"Fils Mbongo",phone:"243 999 459 122",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:14, name:"Freddy KIMPIATTU",phone:"243 826 065 275",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:15, name:"Frederick Kifiya",phone:"243 899 694 673",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:16, name:"Fils Kimenga",phone:"243 843 218 094",forum:"NON",asbl:"OUI",reunion:"NON" },
+  { id:17, name:"Kita serge",phone:"243 854 797 085",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire Général / Trésorier" },
+  { id:18, name:"Lolo Nzeza",phone:"243 900 532 333",forum:"OCCASIONEL",asbl:"NON",reunion:"NON" },
+  { id:19, name:"Lombi",phone:"+242 05 761 5731",forum:"SOUVENT",asbl:"NON",reunion:"NON" },
+  { id:20, name:"Lovy Sala",phone:"243 814 941 425",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:21, name:"Matuba Pilu",phone:"243 994 141 415",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:22, name:"Me Freddy Lutonto",phone:"243 897 426 649",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
+  { id:23, name:"Nadège MUBANGA",phone:"243 898 273 638",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:24, name:"Nadine Biangolo",phone:"243 904 746 639",forum:"OUI",asbl:"NON",reunion:"NON" },
+  { id:25, name:"Niclette Kitembo",phone:"243 894 200 430",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
+  { id:26, name:"nsamu abi",phone:"244 931 354 839",forum:"NON",asbl:"NON",reunion:"EXEMPTER" },
+  { id:27, name:"Olivier NONGU",phone:"243 816 910 214",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
+  { id:28, name:"Patricia Makudi",phone:"243 815 122 136",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:29, name:"Saint Vuangi",phone:"243 906 655 909",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:30, name:"Teddy Kasongo",phone:"243 901 318 624",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
+  { id:31, name:"Tonton Nkuku",phone:"243 971 958 874",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
+  { id:32, name:"Tuzolana Nathalie",phone:"243 900 569 399",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:33, name:"Gueyi Kikalankala",phone:"243 897 414 242",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
+  { id:34, name:"kungulu kinkela Fidel",phone:"243 896 722 306",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:35, name:"Masuama Pembele",phone:"243 896 350 866",forum:"NON",asbl:"OUI",reunion:"NON" },
+  { id:36, name:"pico mfumukwansa",phone:"243 840 200 071",forum:"OUI",asbl:"NON",reunion:"EXEMPTER" },
+  { id:37, name:"Rachel Luzolo",phone:"243 894 055 982",forum:"NON",asbl:"OUI",reunion:"NON" }
 ];
 
 function normalize(m){
+  const creds = typeof getCredentialsForMember === 'function' ? getCredentialsForMember(m) : { username: "", password: "" };
   return Object.assign({
-    pin: m.pin || (1000 + m.id).toString(),
+    username: creds.username,
+    pin: creds.password,
     photo:"", sexe:"", etatcivil:"", nationalite:"", whatsapp:"", idDoc:"", urgenceNom:"", urgenceTel:"", updatedAt:"", updatedBy:"", email:"", address:"", note:"", joined:"",
     birthdate:"", birthplace:"", profession:"", poste:"",
     payments:{}
@@ -982,7 +979,6 @@ function renderBirthdays(){
   banner.classList.remove('hidden');
 }
 
-// CONSULTATION GLOBALE POUR TOUS LES MEMBRES
 function getFiltered(){
   const q = document.getElementById('search-input').value.toLowerCase().trim();
   const fAsbl = document.getElementById('filter-asbl').value;
@@ -1222,7 +1218,7 @@ function renderBlog(){
 }
 
 function openBlogModal(){
-  if(!canEdit()){ alert("Seuls les Administrateurs autorisés peuvent publier des fichiers."); return; }
+  if(!canEdit()){ alert("Seuls les Administrateurs autorisés (Ananias KASANDA & Serge KITA) peuvent publier des fichiers."); return; }
   document.getElementById('blog-form').reset();
   currentBlogFile = null;
   document.getElementById('blog-file-preview-info').classList.add('hidden');
@@ -1321,4 +1317,511 @@ async function viewBlogItem(id){
   if(!item) return;
 
   const idbRecord = await getFileFromIDB(id);
-  const fileData = (idbRecord && idbRecord.fileData) ? idb
+  const fileData = (idbRecord && idbRecord.fileData) ? idbRecord.fileData : item.fileData;
+  const fileType = (idbRecord && idbRecord.fileType) ? idbRecord.fileType : item.fileType;
+
+  document.getElementById('blog-view-title').innerHTML = `<i class="fa-solid fa-file-contract text-gold-400"></i> ${escapeHTML(item.title)}`;
+
+  let mediaDisplay = '';
+
+  if(fileData) {
+    if(fileType.startsWith('image/') || item.type === 'phototheque') {
+      mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 max-h-[500px] bg-slate-900 flex items-center justify-center">
+        <img src="${fileData}" class="max-h-[500px] w-auto object-contain">
+      </div>`;
+    } else if(fileType.startsWith('video/') || item.type === 'video') {
+      mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900">
+        <video src="${fileData}" controls class="w-full max-h-[500px]"></video>
+      </div>`;
+    } else if(fileType === 'application/pdf' || item.fileName.endsWith('.pdf') || item.type === 'pv' || item.type === 'compte_rendu') {
+      mediaDisplay = `<div class="space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-700 bg-slate-100 p-2 rounded-lg border border-slate-200">
+          <span><i class="fa-solid fa-file-pdf text-rose-600 mr-1.5"></i> Aperçu dynamique du document PDF</span>
+          <a href="${fileData}" target="_blank" class="text-las-700 hover:underline flex items-center gap-1"><i class="fa-solid fa-up-right-from-square"></i> Plein écran</a>
+        </div>
+        <iframe src="${fileData}#toolbar=0" class="w-full h-[500px] rounded-xl border border-slate-300 bg-slate-100"></iframe>
+      </div>`;
+    }
+  } else if(item.type === 'pv' || item.type === 'compte_rendu' || item.type === 'document') {
+    mediaDisplay = `<div class="p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-3">
+      <i class="fa-solid fa-file-pdf text-5xl text-rose-600"></i>
+      <h4 class="font-extrabold text-slate-800 text-sm">Document PDF Officiel de l'ASBL LAS</h4>
+      <p class="text-xs text-slate-500 max-w-md mx-auto">Ce document est disponible au téléchargement binaire direct via le bouton ci-dessous.</p>
+    </div>`;
+  }
+
+  document.getElementById('blog-view-content').innerHTML = `
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="bg-gold-100 text-gold-900 border border-gold-300 px-3 py-1 rounded-full text-xs font-black uppercase">${escapeHTML(item.type.replace('_',' '))}</span>
+        <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">${escapeHTML(item.category)}</span>
+        <span class="text-xs text-slate-500 font-medium ml-auto"><i class="fa-solid fa-calendar mr-1"></i> ${fmtDate(item.date)}</span>
+      </div>
+
+      <h2 class="text-lg font-black text-slate-900">${escapeHTML(item.title)}</h2>
+
+      ${mediaDisplay}
+
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed space-y-2">
+        <h4 class="font-extrabold text-slate-900 uppercase tracking-wider text-[10px]">Description &amp; Résumé :</h4>
+        <p class="whitespace-pre-line">${escapeHTML(item.desc) || 'Aucun détail supplémentaire rédigé.'}</p>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+        <span>Auteur / Origine : <strong>${escapeHTML(item.author) || 'ASBL LAS'}</strong></span>
+        ${item.fileName ? `<button onclick="downloadBlogFile(${item.id})" class="px-5 py-2.5 bg-las-700 hover:bg-las-600 text-white font-extrabold rounded-xl transition flex items-center gap-2 shadow-md"><i class="fa-solid fa-download"></i> Télécharger (${escapeHTML(item.fileName)})</button>` : ''}
+      </div>
+    </div>`;
+
+  document.getElementById('blog-view-modal').classList.remove('hidden');
+}
+
+function closeBlogViewModal(){
+  document.getElementById('blog-view-modal').classList.add('hidden');
+}
+
+async function downloadBlogFile(id){
+  const item = blogData.find(x => x.id === id);
+  if(!item) return;
+
+  let fileData = item.fileData;
+  let fileName = item.fileName || (item.title + ".pdf");
+
+  const idbRecord = await getFileFromIDB(id);
+  if(idbRecord && idbRecord.fileData){
+    fileData = idbRecord.fileData;
+    fileName = idbRecord.fileName || fileName;
+  }
+
+  let downloadUrl = "";
+  if(fileData && fileData.startsWith('data:')){
+    const blob = dataURLtoBlob(fileData);
+    if(blob){
+      downloadUrl = URL.createObjectURL(blob);
+    } else {
+      downloadUrl = fileData;
+    }
+  } else {
+    const content = `ASBL LES AMIS DE LA SEMENCE (LAS)\n----------------------------------------\n` +
+                    `DOCUMENT OFFICIEL : ${item.title}\n` +
+                    `CATÉGORIE : ${item.category}\n` +
+                    `DATE : ${item.date}\n` +
+                    `AUTEUR : ${item.author}\n\n` +
+                    `RÉSUMÉ ET DÉTAILS :\n${item.desc}\n\n` +
+                    `Document officiel généré depuis la plateforme ASBL LAS.`;
+    const blob = new Blob([content], { type: 'application/pdf;charset=utf-8' });
+    downloadUrl = URL.createObjectURL(blob);
+  }
+
+  const a = document.createElement('a');
+  a.href = downloadUrl;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function clearBlogSearch(){
+  document.getElementById('blog-search-input').value = '';
+  renderBlog();
+}
+
+function resetBlogFilters(){
+  document.getElementById('blog-search-input').value = '';
+  document.getElementById('blog-filter-type').value = 'ALL';
+  document.getElementById('blog-filter-category').value = 'ALL';
+  document.getElementById('blog-sort-by').value = 'recent';
+  renderBlog();
+}
+
+let detailId = null;
+function openDetail(id){
+  const m = membersData.find(x=>x.id===id); if(!m) return;
+  detailId = id;
+  renderDetail(m, ANNEE_COURANTE);
+  document.getElementById('detail-modal').classList.remove('hidden');
+}
+
+function closeDetail(){
+  document.getElementById('detail-modal').classList.add('hidden');
+  detailId=null;
+}
+
+function renderDetail(m, year){
+  const paidArr = (m.payments[year]||Array(12).fill(false));
+  const paid = paidArr.filter(Boolean).length;
+  const due = monthsDue(m, year);
+  const solde = soldeDu(m, year);
+  const pct = Math.round(paid/12*100);
+
+  const grid = MOIS.map((mo,i)=>{
+    const on = !!paidArr[i];
+    const isFuture = (year===ANNEE_COURANTE && i >= due);
+    const cls = on ? 'bg-emerald-500 text-white border-emerald-600'
+                   : isFuture ? 'bg-slate-50 text-slate-300 border-slate-200'
+                   : 'bg-rose-50 text-rose-500 border-rose-200';
+    const click = canPay() ? `onclick="togglePay(${m.id},${year},${i})"` : '';
+    const cursor = canPay() ? 'cursor-pointer hover:ring-2 hover:ring-las-400' : 'cursor-default opacity-95';
+    return `<button type="button" ${click} class="${cls} ${cursor} rounded-lg border py-2 text-[11px] font-bold transition flex flex-col items-center gap-0.5">
+              <span>${mo}</span><i class="fa-solid ${on?'fa-check':(isFuture?'fa-minus':'fa-xmark')} text-[10px]"></i>
+            </button>`;
+  }).join('');
+
+  const yearsSelect = (()=> {
+    const ys=[ANNEE_COURANTE+1,ANNEE_COURANTE,ANNEE_COURANTE-1,ANNEE_COURANTE-2];
+    return ys.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y}</option>`).join('');
+  })();
+
+  const bday = birthdaySoon(m);
+  const aYears = age(m);
+  const creds = typeof getCredentialsForMember === 'function' ? getCredentialsForMember(m) : { username: "", password: "" };
+
+  document.getElementById('detail-content').innerHTML = `
+    ${bday ? `
+    <div class="bday-banner relative overflow-hidden rounded-xl p-3.5 shadow ring-1 ring-gold-400/40 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-white/90 text-las-700 flex items-center justify-center text-xl bday-pulse shrink-0">🎂</div>
+      <div class="relative">
+        <p class="text-white font-extrabold text-sm leading-tight">Joyeux anniversaire ${birthdayLabel(m).toLowerCase()} !</p>
+        <p class="text-white/85 text-[11px]">${escapeHTML(m.name)}${aYears!==null?` fête ses ${aYears + (daysUntilBirthday(m)===0?0:1)} ans`:''}.</p>
+      </div>
+    </div>` : ''}
+    <div class="bg-white rounded-xl border ${bday?'border-gold-300 ring-1 ring-gold-200':'border-slate-200'} p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+      <div class="shrink-0 ${bday?'bday-ring':''}">${avatar(m,96)}</div>
+      <div class="flex-1 text-center sm:text-left w-full">
+        <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+          <h2 class="text-lg font-black text-slate-900">${escapeHTML(m.name)}</h2>
+          <span class="text-[10px] font-extrabold font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">N° ${m.id}</span>
+          ${m.poste?`<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-las-100 text-las-800 border border-las-200">${escapeHTML(m.poste)}</span>`:''}
+        </div>
+        ${m.note?`<p class="text-xs text-las-700 font-semibold mt-0.5">${escapeHTML(m.note)}</p>`:''}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-3 text-xs text-left">
+          <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-slate-400 w-4"></i><span class="font-mono font-semibold text-slate-800">${escapeHTML(m.phone)}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400 w-4"></i><span class="text-slate-700 break-all">${escapeHTML(m.email)||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-briefcase text-slate-400 w-4"></i><span class="text-slate-700">${escapeHTML(m.profession)||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-slate-400 w-4"></i><span class="text-slate-700">${escapeHTML(m.address)||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-cake-candles text-slate-400 w-4"></i><span class="text-slate-700">${fmtDate(m.birthdate)}${aYears!==null?` (${aYears} ans)`:''}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-location-crosshairs text-slate-400 w-4"></i><span class="text-slate-700">Né(e) à ${escapeHTML(m.birthplace)||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-calendar-plus text-slate-400 w-4"></i><span class="text-slate-700">Intégration : ${fmtDate(m.joined)}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-user-gear text-slate-400 w-4"></i><span class="text-slate-700 font-mono">Identifiant : <b>${creds.username}</b></span></div>
+        </div>
+        <div class="flex items-center justify-center sm:justify-start gap-2 mt-3 flex-wrap">
+          ${badge(m.asbl,'asbl')} <span class="text-[10px] text-slate-400">ASBL</span>
+          ${badge(m.reunion,'reunion')} <span class="text-[10px] text-slate-400">Réunion</span>
+          ${badge(m.forum,'forum')} <span class="text-[10px] text-slate-400">Forum</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-4">
+      <div class="flex items-center justify-between mb-2">
+        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-address-book text-las-600"></i> Informations complémentaires</h4>
+        ${canEdit()?`<button onclick="editMember(${m.id})" class="text-[11px] font-bold text-las-700 hover:underline"><i class="fa-solid fa-pen"></i> Modifier</button>`:''}
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
+        <div><span class="text-slate-500">Sexe :</span> <b class="text-slate-800">${escapeHTML(m.sexe)||'—'}</b></div>
+        <div><span class="text-slate-500">État civil :</span> <b class="text-slate-800">${escapeHTML(m.etatcivil)||'—'}</b></div>
+        <div><span class="text-slate-500">Nationalité :</span> <b class="text-slate-800">${escapeHTML(m.nationalite)||'—'}</b></div>
+        <div><span class="text-slate-500">WhatsApp :</span> <b class="font-mono text-slate-800">${escapeHTML(m.whatsapp||m.phone)||'—'}</b></div>
+        ${canEdit()?`<div><span class="text-slate-500">N° pièce d'identité :</span> <b class="text-slate-800">${escapeHTML(m.idDoc)||'—'}</b></div>`:''}
+        <div class="sm:col-span-2"><span class="text-slate-500">Contact d'urgence :</span> <b class="text-slate-800">${escapeHTML(m.urgenceNom)||'—'}${m.urgenceTel?` · <span class="font-mono">${escapeHTML(m.urgenceTel)}</span>`:''}</b></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-3">
+      <div class="bg-white rounded-xl border border-slate-200 p-3 text-center"><div class="text-[10px] font-semibold text-slate-500 uppercase">Payé ${year}</div><div class="text-lg font-black text-emerald-600">${paid*COTISATION_MENSUELLE} $</div><div class="text-[10px] text-slate-400">${paid}/12 mois</div></div>
+      <div class="bg-white rounded-xl border border-slate-200 p-3 text-center"><div class="text-[10px] font-semibold text-slate-500 uppercase">Solde dû</div><div class="text-lg font-black ${solde>0?'text-rose-600':'text-emerald-600'}">${solde} $</div><div class="text-[10px] text-slate-400">${Math.max(0,due-paid)} mois</div></div>
+      <div class="bg-white rounded-xl border border-slate-200 p-3 text-center"><div class="text-[10px] font-semibold text-slate-500 uppercase">Attendu/an</div><div class="text-lg font-black text-slate-800">${12*COTISATION_MENSUELLE} $</div><div class="text-[10px] text-slate-400">${COTISATION_MENSUELLE} $/mois</div></div>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1"><span>Progression ${year}</span><span>${pct}%</span></div>
+      <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-emerald-500 to-las-600 rounded-full transition-all" style="width:${pct}%"></div></div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-4">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-coins text-gold-500"></i> Cotisations mensuelles</h4>
+        <select onchange="changeYear(${m.id}, this.value)" class="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:ring-2 focus:ring-las-500">${yearsSelect}</select>
+      </div>
+      <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">${grid}</div>
+      ${canPay()
+        ? `<div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+             <p class="text-[10px] text-slate-400">Cliquez un mois pour enregistrer un paiement.</p>
+             <div class="flex gap-2">
+               <button onclick="markAll(${m.id},${year},true)" class="text-[11px] font-bold text-emerald-700 hover:underline">Tout payer</button>
+               <button onclick="markAll(${m.id},${year},false)" class="text-[11px] font-bold text-rose-600 hover:underline">Tout effacer</button>
+             </div>
+           </div>`
+        : `<p class="text-[10px] text-slate-400 mt-3 pt-3 border-t border-slate-100 italic">Mode lecture seule — Seuls les Administrateurs autorisés (Ananias KASANDA & Serge KITA) peuvent enregistrer les paiements.</p>`}
+    </div>
+
+    <div class="flex items-center justify-end gap-2">
+      ${canEdit()?`<button onclick="editMember(${m.id})" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square"></i> Modifier la fiche</button>`:''}
+      <button onclick="printMemberCard()" class="px-4 py-2 bg-las-700 hover:bg-las-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-print"></i> Imprimer la Fiche</button>
+    </div>
+  `;
+}
+
+function changeYear(id, year){ const m=membersData.find(x=>x.id===id); if(m) renderDetail(m, parseInt(year)); }
+function togglePay(id, year, monthIdx){
+  if(!canPay()) return;
+  const m = membersData.find(x=>x.id===id); if(!m) return;
+  if(!m.payments[year]) m.payments[year]=Array(12).fill(false);
+  m.payments[year][monthIdx] = !m.payments[year][monthIdx];
+  saveData(); renderDetail(m, year); calculateStats(); renderData();
+}
+function markAll(id, year, val){
+  if(!canPay()) return;
+  const m = membersData.find(x=>x.id===id); if(!m) return;
+  m.payments[year] = Array(12).fill(val);
+  saveData(); renderDetail(m, year); calculateStats(); renderData();
+}
+
+const EXTRA_FIELDS=['sexe','etatcivil','nationalite','whatsapp','idDoc','urgenceNom','urgenceTel'];
+let tempPhoto = "";
+function openMemberModal(member=null){
+  if(!canEdit()){ alert("Seuls les Administrateurs autorisés peuvent modifier les membres."); return; }
+  const modal=document.getElementById('member-modal');
+  const title=document.getElementById('modal-title');
+  document.getElementById('member-form').reset();
+  tempPhoto = member ? (member.photo||"") : "";
+  updatePhotoPreview();
+  if(member){
+    title.innerHTML = `<i class="fa-solid fa-user-pen text-gold-400"></i><span>Modifier — N° ${member.id}</span>`;
+    document.getElementById('member-id').value=member.id;
+    document.getElementById('input-name').value=member.name;
+    document.getElementById('input-phone').value=member.phone;
+    document.getElementById('input-email').value=member.email||"";
+    document.getElementById('input-address').value=member.address||"";
+    document.getElementById('input-joined').value=member.joined||"";
+    document.getElementById('input-note').value=member.note||"";
+    document.getElementById('input-birthdate').value=member.birthdate||"";
+    document.getElementById('input-birthplace').value=member.birthplace||"";
+    document.getElementById('input-profession').value=member.profession||"";
+    document.getElementById('input-poste').value=member.poste||"";
+    document.getElementById('input-asbl').value=member.asbl;
+    document.getElementById('input-forum').value=member.forum;
+    document.getElementById('input-reunion').value=member.reunion;
+    EXTRA_FIELDS.forEach(f=>document.getElementById('input-'+f).value=member[f]||'');
+  } else {
+    title.innerHTML = `<i class="fa-solid fa-user-plus text-gold-400"></i><span>Ajouter un Membre</span>`;
+    document.getElementById('member-id').value='';
+  }
+  modal.classList.remove('hidden');
+}
+function closeMemberModal(){ document.getElementById('member-modal').classList.add('hidden'); tempPhoto=""; }
+
+function handlePhoto(e){
+  const file=e.target.files[0]; if(!file) return;
+  if(file.size > 3*1024*1024){ alert("Image trop lourde (max 3 Mo)."); e.target.value=''; return; }
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=400, scale=Math.min(1, max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=img.width*scale; c.height=img.height*scale;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      tempPhoto=c.toDataURL('image/jpeg',0.82);
+      updatePhotoPreview();
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function updatePhotoPreview(){
+  const prev=document.getElementById('photo-preview');
+  const ph=document.getElementById('photo-placeholder');
+  const rm=document.getElementById('btn-remove-photo');
+  if(tempPhoto){ prev.src=tempPhoto; prev.classList.remove('hidden'); ph.classList.add('hidden'); rm.classList.remove('hidden'); }
+  else { prev.classList.add('hidden'); ph.classList.remove('hidden'); rm.classList.add('hidden'); }
+}
+function removePhoto(){ tempPhoto=""; document.getElementById('input-photo').value=''; updatePhotoPreview(); }
+
+function editMember(id){
+  closeDetail();
+  const m=membersData.find(x=>x.id===id); if(m) openMemberModal(m);
+}
+function deleteMember(id){
+  if(!canDelete()){ alert("Seuls les Administrateurs autorisés peuvent supprimer un membre."); return; }
+  const m=membersData.find(x=>x.id===id); if(!m) return;
+  if(confirm(`Supprimer définitivement le membre "${m.name}" ?`)){
+    membersData=membersData.filter(x=>x.id!==id);
+    saveData(); calculateStats(); renderBirthdays(); renderData();
+  }
+}
+function saveMember(e){
+  e.preventDefault();
+  if(!canEdit()) return;
+  const idVal=document.getElementById('member-id').value;
+  const data={
+    name:document.getElementById('input-name').value.trim(),
+    phone:document.getElementById('input-phone').value.trim(),
+    email:document.getElementById('input-email').value.trim(),
+    address:document.getElementById('input-address').value.trim(),
+    joined:document.getElementById('input-joined').value,
+    note:document.getElementById('input-note').value.trim(),
+    birthdate:document.getElementById('input-birthdate').value,
+    birthplace:document.getElementById('input-birthplace').value.trim(),
+    profession:document.getElementById('input-profession').value.trim(),
+    poste:document.getElementById('input-poste').value.trim(),
+    asbl:document.getElementById('input-asbl').value,
+    forum:document.getElementById('input-forum').value,
+    reunion:document.getElementById('input-reunion').value,
+    photo:tempPhoto,
+    updatedAt:new Date().toISOString(), updatedBy:(SESSION&&SESSION.user)||''
+  };
+  EXTRA_FIELDS.forEach(f=>data[f]=document.getElementById('input-'+f).value.trim());
+  if(idVal){
+    const i=membersData.findIndex(m=>m.id===parseInt(idVal));
+    if(i!==-1) membersData[i]=normalize(Object.assign({}, membersData[i], data, {id:parseInt(idVal)}));
+  } else {
+    const nextId=membersData.length?Math.max(...membersData.map(m=>m.id))+1:1;
+    membersData.unshift(normalize(Object.assign({id:nextId}, data)));
+  }
+  saveData(); calculateStats(); renderBirthdays(); renderData(); closeMemberModal();
+}
+
+function printMemberCard(){
+  const m=membersData.find(x=>x.id===detailId); if(!m) return;
+  const year=ANNEE_COURANTE;
+  const paidArr=(m.payments[year]||Array(12).fill(false));
+  const paid=paidArr.filter(Boolean).length, solde=soldeDu(m,year);
+  const rows=MOIS.map((mo,i)=>`<td style="border:1px solid #cbd5e1;padding:4px 6px;text-align:center;font-size:10px">${mo}<br><b style="color:${paidArr[i]?'#16a34a':'#e11d48'}">${paidArr[i]?'Payé':'—'}</b></td>`).join('');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Fiche — ${escapeHTML(m.name)}</title>
+    <style>body{font-family:Arial,Helvetica,sans-serif;color:#0f172a;padding:24px;max-width:720px;margin:auto}
+    h1{font-size:18px;margin:0}.muted{color:#64748b;font-size:12px}
+    table{border-collapse:collapse;width:100%;margin-top:8px}.hdr{display:flex;gap:16px;align-items:center;border-bottom:2px solid #0f172a;padding-bottom:12px}
+    .ph{width:90px;height:90px;border-radius:10px;object-fit:cover;border:1px solid #cbd5e1}
+    .ini{width:90px;height:90px;border-radius:10px;background:#dcfce7;color:#166534;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;border:1px solid #bbf7d0}
+    .row{font-size:13px;margin:3px 0}.lbl{color:#64748b}</style></head><body>
+    <div class="hdr">
+      ${m.photo?`<img class="ph" src="${m.photo}">`:`<div class="ini">${initials(m.name)}</div>`}
+      <div><h1>${escapeHTML(m.name)}</h1><div class="muted">N° ${m.id} — ASBL LES AMIS DE LA SEMENCE (LAS)</div>
+      ${m.note?`<div class="muted">${escapeHTML(m.note)}</div>`:''}</div>
+    </div>
+    <div style="margin-top:12px">
+      <div class="row"><span class="lbl">Poste dans l'ASBL :</span> ${escapeHTML(m.poste)||'Membre'}</div>
+      <div class="row"><span class="lbl">Téléphone :</span> ${escapeHTML(m.phone)} &nbsp;|&nbsp; <span class="lbl">Email :</span> ${escapeHTML(m.email)||'—'}</div>
+      <div class="row"><span class="lbl">Profession :</span> ${escapeHTML(m.profession)||'—'}</div>
+      <div class="row"><span class="lbl">Date de naissance :</span> ${fmtDate(m.birthdate)} ${age(m)!==null?`(${age(m)} ans)`:''} &nbsp;|&nbsp; <span class="lbl">Lieu :</span> ${escapeHTML(m.birthplace)||'—'}</div>
+      <div class="row"><span class="lbl">Adresse / Commune :</span> ${escapeHTML(m.address)||'—'}</div>
+      <div class="row"><span class="lbl">Date d'intégration :</span> ${fmtDate(m.joined)}</div>
+      <div class="row"><span class="lbl">Actif ASBL :</span> ${m.asbl} &nbsp;|&nbsp; <span class="lbl">Réunion :</span> ${m.reunion} &nbsp;|&nbsp; <span class="lbl">Forum :</span> ${m.forum}</div>
+    </div>
+    <h3 style="margin-top:16px;font-size:14px">Cotisations ${year} — ${COTISATION_MENSUELLE} $/mois</h3>
+    <table><tr>${rows}</tr></table>
+    <div class="row" style="margin-top:10px"><b>Total payé :</b> ${paid*COTISATION_MENSUELLE} $ (${paid}/12) &nbsp;&nbsp; <b>Solde dû :</b> <span style="color:${solde>0?'#e11d48':'#16a34a'}">${solde} $</span></div>
+    <p class="muted" style="margin-top:28px">Fiche générée le ${new Date().toLocaleDateString('fr-FR')} — Document interne LAS.</p>
+    <script>window.onload=()=>window.print()<\/script></body></html>`);
+  w.document.close();
+}
+
+function setView(view){
+  currentView=view;
+  const vt=document.getElementById('view-table'), vc=document.getElementById('view-cards');
+  const bt=document.getElementById('btn-view-table'), bc=document.getElementById('btn-view-cards');
+  const active="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm";
+  const idle="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5";
+  if(view==='table'){ vt.classList.remove('hidden'); vc.classList.add('hidden'); bt.className=active; bc.className=idle; }
+  else { vt.classList.add('hidden'); vc.classList.remove('hidden'); bc.className=active; bt.className=idle; }
+}
+function clearSearch(){ document.getElementById('search-input').value=''; renderData(); }
+function resetFilters(){
+  document.getElementById('search-input').value='';
+  ['filter-asbl','filter-cotis','filter-reunion','filter-forum'].forEach(id=>document.getElementById(id).value='ALL');
+  document.getElementById('sort-by').value='id';
+  renderData();
+}
+
+function exportCSV(){
+  const headers=["N°","Nom & Prénom","Poste","Téléphone","Email","Profession","Date naissance","Lieu naissance","Adresse","Date intégration","Actif ASBL","Forum","Réunion",`Mois payés ${ANNEE_COURANTE}`,`Payé ${ANNEE_COURANTE} (USD)`,"Solde dû (USD)"];
+  const rows=getFiltered().map(m=>{
+    const paid=yearPaid(m,ANNEE_COURANTE);
+    return [m.id,`"${m.name.replace(/"/g,'""')}"`,`"${m.poste||''}"`,`"${m.phone}"`,`"${m.email||''}"`,`"${m.profession||''}"`,`"${m.birthdate||''}"`,`"${m.birthplace||''}"`,`"${m.address||''}"`,`"${m.joined||''}"`,m.asbl,m.forum,m.reunion,paid,paid*COTISATION_MENSUELLE,soldeDu(m,ANNEE_COURANTE)];
+  });
+  const csv="\uFEFF"+[headers.join(";"),...rows.map(r=>r.join(";"))].join("\n");
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=url; a.download=`ASBL_LAS_Membres_${new Date().toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function exportJSON(){
+  const ts=+localStorage.getItem(DB_KEY+"_ts")||Date.now();
+  const blob=new Blob([JSON.stringify({updatedAt:ts,members:membersData},null,1)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='membres.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+function importJSON(e){
+  if(!canEdit()) return;
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+    const j=JSON.parse(r.result); const arr=Array.isArray(j)?j:j.members;
+    if(!Array.isArray(arr)) throw 0;
+    if(!confirm(`Remplacer les données actuelles par ${arr.length} membres ?`)) return;
+    membersData=arr.map(normalize); saveData(); calculateStats(); renderBirthdays(); renderData();
+  }catch(_){ alert("Fichier JSON invalide."); } e.target.value=''; };
+  r.readAsText(f);
+}
+
+async function syncFromRepo(){
+  try{
+    const r=await fetch('membres.json',{cache:'no-store'}); if(!r.ok) return;
+    const j=await r.json(); const remote=+j.updatedAt||0, local=+localStorage.getItem(DB_KEY+"_ts")||0;
+    if(Array.isArray(j.members) && remote>local){
+      membersData=j.members.map(normalize);
+      localStorage.setItem(DB_KEY,JSON.stringify(membersData)); localStorage.setItem(DB_KEY+"_ts",remote);
+      calculateStats(); renderBirthdays(); renderData();
+    }
+  }catch(e){}
+}
+
+function applyRoleUI(){
+  set('current-user', SESSION.user);
+  set('current-role', SESSION.label || (isAdmin() ? "Administrateur" : "Membre"));
+  set('current-id-tag', MEMBER_ID !== null ? MEMBER_ID : '--');
+
+  if(!canEdit()){
+    ['btn-add','btn-json','btn-import','btn-add-blog','btn-add-blog-sec'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.classList.add('hidden');
+    });
+
+    set('tab-members-title', '1. RÉPERTOIRE DES MEMBRES & COTISATIONS');
+    document.getElementById('member-personal-notice').classList.remove('hidden');
+  } else {
+    document.getElementById('member-personal-notice').classList.add('hidden');
+  }
+}
+
+['search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderData));
+['filter-asbl','filter-cotis','filter-reunion','filter-forum','sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderData));
+
+['blog-search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderBlog));
+['blog-filter-type','blog-filter-category','blog-sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderBlog));
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeMemberModal();
+    closeDetail();
+    closeBlogModal();
+    closeBlogViewModal();
+    closeLoginModal();
+  }
+});
+
+initIDB().then(() => {
+  applyRoleUI();
+  calculateStats();
+  renderBirthdays();
+  renderData();
+  renderBlog();
+  syncFromRepo();
+});
+</script>
+</body>
+</html>
