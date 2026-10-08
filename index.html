@@ -83,6 +83,11 @@
                         <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-las-700/40 text-las-200 font-bold uppercase" id="current-role">—</span>
                     </div>
 
+                    <!-- Bouton pour changer de mot de passe -->
+                    <button onclick="openPasswordModal()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95" title="Changer mot de passe">
+                        <i class="fa-solid fa-key text-gold-400"></i><span class="hidden sm:inline">Mot de passe</span>
+                    </button>
+
                     <button onclick="openMemberModal()" id="btn-add" class="px-3.5 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-md shadow-las-900/20 active:scale-95">
                         <i class="fa-solid fa-user-plus text-gold-400"></i><span>Nouveau Membre</span>
                     </button>
@@ -260,6 +265,35 @@
         </div>
     </footer>
 
+    <!-- ===================== MODALE DE CHANGEMENT DE MOT DE PASSE ===================== -->
+    <div id="password-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-100 overflow-hidden">
+            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white">
+                <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-key text-gold-400"></i> Changer le mot de passe</h3>
+                <button onclick="closePasswordModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handlePasswordChange(event)" class="p-6 space-y-4">
+                <div id="pass-msg" class="hidden text-xs font-bold p-3 rounded-xl text-center"></div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ancien mot de passe</label>
+                    <input type="password" id="old-pass" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nouveau mot de passe</label>
+                    <input type="password" id="new-pass" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Confirmer le mot de passe</label>
+                    <input type="password" id="confirm-pass" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800">
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closePasswordModal()" class="px-4 py-2 bg-slate-100 text-xs font-bold rounded-xl">Annuler</button>
+                    <button type="submit" class="px-5 py-2 bg-las-700 hover:bg-las-600 text-white text-xs font-bold rounded-xl shadow-md">Valider</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ===================== MODALE AJOUT / ÉDITION MEMBRE ===================== -->
     <div id="member-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
@@ -269,12 +303,12 @@
             </div>
             <form id="member-form" onsubmit="saveMember(event)" class="p-6 space-y-4">
                 <input type="hidden" id="member-id">
-                <!-- Photo -->
+                <!-- Photo de profil -->
                 <div class="flex items-center gap-4">
                     <img id="photo-preview" src="" alt="" class="hidden w-16 h-16 rounded-xl object-cover border border-slate-200">
                     <div id="photo-placeholder" class="w-16 h-16 rounded-xl bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400"><i class="fa-solid fa-camera text-xl"></i></div>
                     <div class="flex-1">
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Photo du membre</label>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Photo de profil</label>
                         <input type="file" id="input-photo" accept="image/*" onchange="handlePhoto(event)" class="block w-full text-[11px] text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-las-100 file:text-las-800 hover:file:bg-las-200 cursor-pointer">
                         <button type="button" id="btn-remove-photo" onclick="removePhoto()" class="hidden text-[10px] text-rose-600 hover:underline mt-1">Retirer la photo</button>
                     </div>
@@ -377,7 +411,7 @@
 
 <script>
 // ============================================================
-//  PARAMÈTRES & DONNÉES
+//  PARAMÈTRES & DONNÉES DE BASE DE TOUS LES 37 MEMBRES
 // ============================================================
 const COTISATION_MENSUELLE = 10;
 const MOIS = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
@@ -385,7 +419,6 @@ const ANNEE_COURANTE = new Date().getFullYear();
 const DB_KEY = "las_members_v2";
 const MEDIA_KEY = "las_media_v1";
 
-// DONNÉES DE BASE COMPLÈTES DE TOUS LES 37 MEMBRES
 const DEFAULT_MEMBERS = [
   { id:1,name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
   { id:2,name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Coordonnateur",profession:"IT DevSecOps",email:"ananiaskasanda2@gmail.com",birthdate:"1982-07-02",birthplace:"Kinshasa",address:"Ngaliema",joined:"2022-01-15" },
@@ -460,7 +493,6 @@ function saveMediaStorage(){
   catch(e){}
 }
 
-// Navigation entre Onglets
 function switchTab(tab){
   const mSec = document.getElementById('section-members');
   const mediaSec = document.getElementById('section-media');
@@ -848,7 +880,48 @@ function markAll(id, year, val){
 }
 
 // ============================================================
-//  AJOUT / ÉDITION DE MEMBRE
+//  MODALE MOT DE PASSE
+// ============================================================
+function openPasswordModal(){
+  document.getElementById('pass-msg').classList.add('hidden');
+  document.getElementById('old-pass').value = '';
+  document.getElementById('new-pass').value = '';
+  document.getElementById('confirm-pass').value = '';
+  document.getElementById('password-modal').classList.remove('hidden');
+}
+function closePasswordModal(){
+  document.getElementById('password-modal').classList.add('hidden');
+}
+
+function handlePasswordChange(e){
+  e.preventDefault();
+  const oldP = document.getElementById('old-pass').value;
+  const newP = document.getElementById('new-pass').value;
+  const confP = document.getElementById('confirm-pass').value;
+  const msgEl = document.getElementById('pass-msg');
+
+  if(newP !== confP){
+    msgEl.className = "text-xs font-bold p-3 rounded-xl text-center bg-rose-50 text-rose-600 border border-rose-200";
+    msgEl.textContent = "Les nouveaux mots de passe ne correspondent pas.";
+    msgEl.classList.remove('hidden');
+    return;
+  }
+
+  const res = changeUserPassword(SESSION.user, oldP, newP);
+  if(res.success){
+    msgEl.className = "text-xs font-bold p-3 rounded-xl text-center bg-emerald-50 text-emerald-600 border border-emerald-200";
+    msgEl.textContent = res.message;
+    msgEl.classList.remove('hidden');
+    setTimeout(() => { closePasswordModal(); }, 1500);
+  } else {
+    msgEl.className = "text-xs font-bold p-3 rounded-xl text-center bg-rose-50 text-rose-600 border border-rose-200";
+    msgEl.textContent = res.message;
+    msgEl.classList.remove('hidden');
+  }
+}
+
+// ============================================================
+//  AJOUT / ÉDITION DE MEMBRE & PHOTO DE PROFIL
 // ============================================================
 let tempPhoto = "";
 function openMemberModal(member=null){
@@ -1118,7 +1191,7 @@ function applyRoleUI(){
 }
 ['search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderData));
 ['filter-asbl','filter-cotis','filter-reunion','filter-forum','sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderData));
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeMemberModal(); closeDetail(); closeMediaModal(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeMemberModal(); closeDetail(); closeMediaModal(); closePasswordModal(); } });
 
 applyRoleUI();
 calculateStats();
