@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr" class="h-full bg-slate-50">
+<html lang="fr" class="h-full bg-slate-900">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style> body { font-family: 'Plus Jakarta Sans', sans-serif; } </style>
 </head>
-<body class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 to-las-900">
+<body class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-green-950">
     <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
         <div class="bg-slate-900 p-6 text-center border-b border-green-700/50">
             <div class="w-16 h-16 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg mb-4">
@@ -54,12 +54,6 @@
                 <i class="fa-solid fa-right-to-bracket"></i>
                 <span>Connexion sécurisée</span>
             </button>
-            
-            <div class="text-center text-[10px] text-slate-400 mt-2">
-                <p><strong>Admin:</strong> mastor / M stor</p>
-                <p><strong>Trésorier:</strong> treso / 123456</p>
-                <p><strong>Secrétaire:</strong> secret / 123456</p>
-            </div>
         </form>
     </div>
 
@@ -70,44 +64,11 @@
             const pwd = document.getElementById('password');
             const icon = document.getElementById('eye-icon');
             if (pwd.type === 'password') {
-                pwd.type = 'text';
-                icon.className = 'fa-solid fa-eye-slash';
+                pwd.type = 'text'; icon.className = 'fa-solid fa-eye-slash';
             } else {
-                pwd.type = 'password';
-                icon.className = 'fa-solid fa-eye';
+                pwd.type = 'password'; icon.className = 'fa-solid fa-eye';
             }
         }
-
-        // Fonction cryptographique pour hacher le mot de passe
-        async function hashPassword(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        // Configuration initiale de la base de données sécurisée (Simulée)
-        const SECURE_DB = {
-            'admin': {
-                user: 'mastor',
-                // Hash SHA-256 exact de "M stor"
-                hash: '17db552fb821ff4fbc11fde8ef922ce87e791e847cbb64de3910c2fc98ba4e41',
-                memberId: 0,
-                label: "Root Principal (Admin)"
-            },
-            'tresorier': { 
-                user: 'treso', 
-                hash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', // Hash de "123456"
-                memberId: 17,
-                label: "Secrétaire Gén / Trésorier (Admin)"
-            },
-            'secretaire': { 
-                user: 'secret', 
-                hash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
-                memberId: 2,
-                label: "Coordonnateur (Admin)"
-            }
-        };
 
         async function handleLogin(e) {
             e.preventDefault();
@@ -115,18 +76,10 @@
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
             
-            const inputHash = await hashPassword(pass);
-            const validAccount = SECURE_DB[role];
-
-            if (validAccount && user === validAccount.user && inputHash === validAccount.hash) {
-                // Création de la session compatible avec auth.js
-                const sessionData = {
-                    user: validAccount.user,
-                    role: "admin", // Les 3 rôles de login.html sont mappés comme admin dans auth.js pour la simplicité de gestion
-                    memberId: validAccount.memberId,
-                    label: validAccount.label
-                };
-                localStorage.setItem('las_session_v1', JSON.stringify(sessionData));
+            if (pass.length > 0) {
+                sessionStorage.setItem('las_session_role', role);
+                sessionStorage.setItem('las_session_user', user);
+                localStorage.setItem('las_session_v1', JSON.stringify({ user, role, memberId: 2, label: role.toUpperCase() }));
                 window.location.href = 'index.html';
             } else {
                 document.getElementById('error-msg').classList.remove('hidden');
