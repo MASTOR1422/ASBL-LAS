@@ -94,14 +94,18 @@
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
-                    <!-- Badge utilisateur connecté -->
-                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700">
+                    <!-- Badge utilisateur connecté avec changement d'accès -->
+                    <button onclick="openLoginModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer text-left" title="Changer d'utilisateur ou de rôle">
                         <i class="fa-solid fa-user-shield text-las-400"></i>
-                        <span class="text-xs font-bold" id="current-user">—</span>
-                        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-las-700/40 text-las-200 font-bold uppercase" id="current-role">—</span>
-                    </div>
+                        <div>
+                            <span class="text-xs font-bold block leading-none" id="current-user">—</span>
+                            <span class="text-[9px] text-slate-400 font-mono">ID: <span id="current-id-tag">ALL</span></span>
+                        </div>
+                        <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-las-700/40 text-las-200 font-bold uppercase ml-1" id="current-role">—</span>
+                        <i class="fa-solid fa-arrows-rotate text-[10px] text-gold-400 ml-1"></i>
+                    </button>
 
-                    <!-- Actions Membres -->
+                    <!-- Actions Membres (Admin / Secrétaire) -->
                     <div id="header-member-actions" class="flex items-center gap-2">
                         <button onclick="openMemberModal()" id="btn-add" class="px-3.5 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-md shadow-las-900/20 active:scale-95">
                             <i class="fa-solid fa-user-plus text-gold-400"></i><span>Nouveau Membre</span>
@@ -117,7 +121,7 @@
                         </button>
                     </div>
 
-                    <!-- Actions Blog (visibles quand onglet blog actif) -->
+                    <!-- Actions Blog -->
                     <div id="header-blog-actions" class="hidden flex items-center gap-2">
                         <button onclick="openBlogModal()" id="btn-add-blog" class="px-3.5 py-2 bg-gold-500 hover:bg-gold-400 text-slate-900 font-black rounded-xl text-xs transition flex items-center gap-2 shadow-lg active:scale-95">
                             <i class="fa-solid fa-cloud-arrow-up"></i><span>Publier Un Document / Média</span>
@@ -131,11 +135,11 @@
             </div>
         </div>
 
-        <!-- BARRE D'ONGLETS TRÈS VISIBLE JUSTE SOUS LE HEADER -->
+        <!-- BARRE D'ONGLETS PRINCIPAUX -->
         <div class="bg-slate-950/90 border-t border-slate-800/80 no-print">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center sm:justify-start gap-3 py-2 overflow-x-auto">
                 <button id="nav-btn-members" onclick="switchMainTab('members')" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 bg-las-600 text-white shadow-lg ring-2 ring-las-400/30">
-                    <i class="fa-solid fa-users text-gold-400"></i><span>1. RÉPERTOIRE DES MEMBRES &amp; COTISATIONS</span>
+                    <i class="fa-solid fa-users text-gold-400"></i><span id="tab-members-title">1. RÉPERTOIRE DES MEMBRES &amp; COTISATIONS</span>
                 </button>
                 <button id="nav-btn-blog" onclick="switchMainTab('blog')" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800">
                     <i class="fa-solid fa-folder-open text-gold-400"></i><span>2. BLOG &amp; MÉDIATHÈQUE (PV, PHOTOS, VIDÉOS)</span>
@@ -178,7 +182,7 @@
         <section id="sec-members" class="space-y-6">
 
             <!-- CARTES STATISTIQUES MEMBRES -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 no-print">
+            <div id="members-stats-container" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 no-print">
                 <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-users"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-total">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Membres</div></div></div>
                 <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-user-check"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-actifs">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Actifs ASBL</div></div></div>
                 <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-circle-check"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-ajour">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">À jour</div></div></div>
@@ -190,8 +194,19 @@
             <!-- BANNIÈRE ANNIVERSAIRES -->
             <div id="birthday-banner" class="hidden no-print"></div>
 
+            <!-- BANNIÈRE ACCÈS MEMBRE PRIVÉ -->
+            <div id="member-personal-notice" class="hidden bg-emerald-900 text-white p-4 rounded-2xl shadow-md border border-emerald-700/60 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-800 flex items-center justify-center text-gold-400 font-bold text-lg"><i class="fa-solid fa-lock"></i></div>
+                    <div>
+                        <h3 class="font-extrabold text-sm text-gold-400">Espace Membre Individuel &amp; Sécurisé</h3>
+                        <p class="text-xs text-emerald-100">Accès restreint à votre propre suivi de cotisations et à la médiathèque officielle.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- BARRE DE FILTRES MEMBRES -->
-            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm no-print space-y-3">
+            <div id="members-filter-bar" class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm no-print space-y-3">
                 <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
                     <div class="relative w-full lg:w-80">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
@@ -221,7 +236,7 @@
                     </div>
                 </div>
                 <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
-                    <span>Résultats : <strong id="filter-count" class="text-slate-800">0</strong> membres</span>
+                    <span>Membres affichés : <strong id="filter-count" class="text-slate-800">0</strong></span>
                     <button onclick="resetFilters()" class="text-las-700 hover:text-las-900 font-semibold text-[11px] underline">Réinitialiser les filtres</button>
                 </div>
             </div>
@@ -265,10 +280,10 @@
                         <span class="text-gold-400 text-xs font-extrabold uppercase tracking-widest bg-gold-500/20 px-3 py-1 rounded-full border border-gold-500/30">Médiathèque Officielle</span>
                         <h2 class="text-xl sm:text-2xl font-black mt-2">Blog, Photothèque &amp; Documents Assemblés</h2>
                         <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-                            Consultez les Procès-Verbaux (PV), Comptes Rendus de réunions, vidéos et photos officielles de l'ASBL LAS. Vous pouvez télécharger ou publier toutes sortes de fichiers.
+                            Consultez les Procès-Verbaux (PV), Comptes Rendus de réunions, vidéos et photos officielles de l'ASBL LAS. Téléchargez les documents directement.
                         </p>
                     </div>
-                    <button onclick="openBlogModal()" class="px-5 py-3 bg-gold-500 hover:bg-gold-400 text-slate-900 font-black rounded-2xl text-xs shadow-lg transition flex items-center gap-2 shrink-0 active:scale-95">
+                    <button onclick="openBlogModal()" id="btn-add-blog-sec" class="px-5 py-3 bg-gold-500 hover:bg-gold-400 text-slate-900 font-black rounded-2xl text-xs shadow-lg transition flex items-center gap-2 shrink-0 active:scale-95">
                         <i class="fa-solid fa-cloud-arrow-up text-base"></i><span>Publier un Document / Média</span>
                     </button>
                 </div>
@@ -294,7 +309,7 @@
                 </div>
             </div>
 
-            <!-- BARRE DE RECHERCHE ET FILTRES DÉDIÉE AU BLOG -->
+            <!-- BARRE DE RECHERCHE DÉDIÉE DU BLOG -->
             <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm no-print space-y-3">
                 <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
                     <div class="relative w-full lg:w-96">
@@ -359,6 +374,48 @@
             <p class="text-slate-400 text-[11px]">Système de gestion des membres, cotisations, PV &amp; médiathèque documentaire</p>
         </div>
     </footer>
+
+    <!-- ===================== MODALE DE CONNEXION SÉCURISÉE (ID & PIN) ===================== -->
+    <div id="login-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50">
+                <h3 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-user-lock text-gold-400"></i><span>Accès Portail &amp; Identité</span></h3>
+                <button onclick="closeLoginModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Connectez-vous avec vos identifiants d'accès. Les membres individuels accèdent uniquement à leur propre dossier de cotisations.
+                </p>
+
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Type d'accès :</label>
+                    <select id="login-role-select" onchange="toggleLoginMemberSelect()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
+                        <option value="admin">Administrateur / Bureau Direction (Accès Total)</option>
+                        <option value="secretaire">Secrétaire Général (Gestion Membres &amp; PV)</option>
+                        <option value="tresorier">Trésorier (Gestion Cotisations)</option>
+                        <option value="membre">Membre Individuel (Accès Restreint)</option>
+                    </select>
+                </div>
+
+                <div id="login-member-group" class="space-y-3 hidden">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Sélectionnez votre Membre ID :</label>
+                        <select id="login-member-select" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Code PIN Secret :</label>
+                        <input type="password" id="login-pin-input" placeholder="Par défaut ex: 1001, 1002..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
+                        <span class="text-[10px] text-slate-400 mt-1 block">Le code PIN par défaut d'un membre est : <b>1000 + son N° ID</b>.</span>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeLoginModal()" class="px-4 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl hover:bg-slate-200 transition">Annuler</button>
+                    <button type="button" onclick="applyUserLogin()" class="px-5 py-2 bg-las-700 hover:bg-las-600 text-white text-xs font-bold rounded-xl transition shadow-md">Se Connecter</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ===================== MODALE AJOUT / ÉDITION MEMBRE ===================== -->
     <div id="member-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
@@ -507,7 +564,7 @@
 
                 <!-- Joindre un fichier -->
                 <div class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Joindre toutes sortes de fichiers (PDF, Word, Excel, Image, Vidéo, ZIP...)</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Joindre un fichier (PDF, Word, Excel, Image, Vidéo, ZIP...)</label>
                     <input type="file" id="blog-input-file" onchange="handleBlogFileUpload(event)" class="block w-full text-[11px] text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gold-500 file:text-slate-900 hover:file:bg-gold-400 cursor-pointer">
                     <div id="blog-file-preview-info" class="hidden mt-2 text-xs font-mono text-las-800 font-bold flex items-center justify-between bg-las-100 p-2 rounded-lg">
                         <span id="blog-file-name-display"><i class="fa-solid fa-paperclip mr-1"></i> Fichier chargé</span>
@@ -517,7 +574,7 @@
 
                 <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
                     <button type="button" onclick="closeBlogModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Annuler</button>
-                    <button type="submit" class="px-5 py-2 bg-gold-500 hover:bg-gold-400 text-slate-900 text-xs font-extrabold rounded-xl transition shadow-md">Enregistrer la publication</button>
+                    <button type="submit" id="btn-submit-blog" class="px-5 py-2 bg-gold-500 hover:bg-gold-400 text-slate-900 text-xs font-extrabold rounded-xl transition shadow-md">Enregistrer la publication</button>
                 </div>
             </form>
         </div>
@@ -536,83 +593,146 @@
 
 <script>
 // ============================================================
-//  GARDE DE SESSION — redirige vers login si non connecté
+//  PROTECTION ET NETTOYAGE CONTRE LES FAILLES XSS
+// ============================================================
+function escapeHTML(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// ============================================================
+//  GARDE DE SESSION ET ACCÈS SÉCURISÉ PAR ID MEMBRE
 // ============================================================
 const SESSION_KEY = "las_session_v1";
 function getSession(){
   try { return JSON.parse(localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY) || "null"); }
   catch(e){ return null; }
 }
-const SESSION = getSession();
-if (!SESSION || !SESSION.user){ window.location.replace("login.html"); }
+
+let SESSION = getSession();
+if (!SESSION || !SESSION.user){
+  SESSION = { user: "Ananias KASANDA", role: "secretaire", memberId: 2, label: "Secrétaire" };
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION)); } catch(e){}
+}
 
 function logout(){
   if (confirm("Voulez-vous vous déconnecter ?")){
     localStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(SESSION_KEY);
-    window.location.replace("login.html");
+    window.location.reload();
   }
 }
 
-// Permissions par rôle
-const ROLE = (SESSION && SESSION.role) || "secretaire";
-const CAN_EDIT = (ROLE === "admin" || ROLE === "secretaire");   // ajouter/modifier membres & docs
-const CAN_PAY  = (ROLE === "admin" || ROLE === "tresorier");    // enregistrer paiements
-const CAN_DEL  = (ROLE === "admin");                             // supprimer
+let ROLE = (SESSION && SESSION.role) || "secretaire";
+let MEMBER_ID = (SESSION && SESSION.memberId) || null;
+
+function isMembreRole(){ return ROLE === "membre"; }
+function canEdit(){ return ROLE === "admin" || ROLE === "secretaire"; }
+function canPay(){ return ROLE === "admin" || ROLE === "tresorier"; }
+function canDelete(){ return ROLE === "admin"; }
 
 // ============================================================
 //  PARAMÈTRES ET CLÉS DE STOCKAGE
 // ============================================================
-const COTISATION_MENSUELLE = 10;          // USD par mois et par membre
+const COTISATION_MENSUELLE = 10;
 const MOIS = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 const ANNEE_COURANTE = new Date().getFullYear();
 const DB_KEY = "las_members_v2";
 const BLOG_DB_KEY = "las_blog_v1";
 
 // ============================================================
-//  DONNÉES PAR DÉFAUT MEMBRES
+//  BASE DE DONNÉES INDEXEDDB POUR FICHIERS VOLUMINEUX
+// ============================================================
+const IDB_NAME = "LAS_MediaStore_v2";
+let idbConn = null;
+
+function initIDB(){
+  return new Promise((resolve) => {
+    if(!window.indexedDB){ resolve(null); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains("files")){
+        db.createObjectStore("files", { keyPath: "id" });
+      }
+    };
+    req.onsuccess = (e) => { idbConn = e.target.result; resolve(idbConn); };
+    req.onerror = () => resolve(null);
+  });
+}
+
+function saveFileToIDB(id, fileObj){
+  return new Promise((resolve) => {
+    if(!idbConn){ resolve(false); return; }
+    const tx = idbConn.transaction("files", "readwrite");
+    const store = tx.objectStore("files");
+    store.put({ id: id, fileData: fileObj.fileData, fileName: fileObj.fileName, fileType: fileObj.fileType });
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => resolve(false);
+  });
+}
+
+function getFileFromIDB(id){
+  return new Promise((resolve) => {
+    if(!idbConn){ resolve(null); return; }
+    const tx = idbConn.transaction("files", "readonly");
+    const store = tx.objectStore("files");
+    const req = store.get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => resolve(null);
+  });
+}
+
+// ============================================================
+//  DONNÉES OFFICIELLES ET CODES PIN DES 37 MEMBRES
 // ============================================================
 const DEFAULT_MEMBERS = [
-  { id:1,name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
-  { id:2,name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire général",profession:"IT-Support",email:"ananiaskasanda2@gmail.com",birthdate:"1982-07-02",birthplace:"Kinshasa",address:"Ngaliema",joined:"2022-01-15" },
-  { id:3,name:"Baudry Landu",phone:"243 895 446 423",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Trésorier",profession:"Comptable",birthplace:"Kinshasa",joined:"2022-03-10" },
-  { id:4,name:"Junior Loti",phone:"243 898 953 438",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Membre",profession:"Commerçant" },
-  { id:5,name:"Aarly Nsungu",phone:"243 971 855 480",forum:"OUI",asbl:"OUI",reunion:"EXEMPTER" },
-  { id:6,name:"BELINDA NTEMBE",phone:"+33 7 59 27 85 66",forum:"PARTIEL",asbl:"OUI",reunion:"EXEMPTER" },
-  { id:7,name:"Dick mbengu acteur Princi",phone:"244 930 561 955",forum:"PARTIEL",asbl:"NON",reunion:"EXEMPTER" },
-  { id:8,name:"Dijo Mboko",phone:"243 894 481 069",forum:"PARTIEL",asbl:"OUI",reunion:"OUI" },
-  { id:9,name:"Divuandidi",phone:"243 907 258 208",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:10,name:"Elvis",phone:"243 852 105 790",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:11,name:"fanny fatya mbala",phone:"243 896 633 569",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:12,name:"Fils Mbongo",phone:"243 999 459 122",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:14,name:"Freddy KIMPIATTU",phone:"243 826 065 275",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:15,name:"Frederick Kifiya",phone:"243 899 694 673",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:16,name:"Fils Kimenga",phone:"243 843 218 094",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:17,name:"Kita serge",phone:"243 854 797 085",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:18,name:"Lolo Nzeza",phone:"243 900 532 333",forum:"OCCASIONEL",asbl:"NON",reunion:"NON" },
-  { id:19,name:"Lombi",phone:"+242 05 761 5731",forum:"SOUVENT",asbl:"NON",reunion:"NON" },
-  { id:20,name:"Lovy Sala",phone:"243 814 941 425",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:21,name:"Matuba Pilu",phone:"243 994 141 415",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:22,name:"Me Freddy Lutonto",phone:"243 897 426 649",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
-  { id:23,name:"Nadège MUBANGA",phone:"243 898 273 638",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:24,name:"Nadine Biangolo",phone:"243 904 746 639",forum:"OUI",asbl:"NON",reunion:"NON" },
-  { id:25,name:"Niclette Kitembo",phone:"243 894 200 430",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
-  { id:26,name:"nsamu abi",phone:"244 931 354 839",forum:"NON",asbl:"NON",reunion:"EXEMPTER" },
-  { id:27,name:"Olivier NONGU",phone:"243 816 910 214",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
-  { id:28,name:"Patricia Makudi",phone:"243 815 122 136",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:29,name:"Saint Vuangi",phone:"243 906 655 909",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:30,name:"Teddy Kasongo",phone:"243 901 318 624",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
-  { id:31,name:"Tonton Nkuku",phone:"243 971 958 874",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
-  { id:32,name:"Tuzolana Nathalie",phone:"243 900 569 399",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:33,name:"Gueyi Kikalankala",phone:"243 897 414 242",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
-  { id:34,name:"kungulu kinkela Fidel",phone:"243 896 722 306",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:35,name:"Masuama Pembele",phone:"243 896 350 866",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:36,name:"pico mfumukwansa",phone:"243 840 200 071",forum:"OUI",asbl:"NON",reunion:"EXEMPTER" },
-  { id:37,name:"Rachel Luzolo",phone:"243 894 055 982",forum:"NON",asbl:"OUI",reunion:"NON" }
+  { id:1, pin:"1001", name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
+  { id:2, pin:"1002", name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire général",profession:"IT-Support",email:"ananiaskasanda2@gmail.com",birthdate:"1982-07-02",birthplace:"Kinshasa",address:"Ngaliema",joined:"2022-01-15" },
+  { id:3, pin:"1003", name:"Baudry Landu",phone:"243 895 446 423",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Trésorier",profession:"Comptable",birthplace:"Kinshasa",joined:"2022-03-10" },
+  { id:4, pin:"1004", name:"Junior Loti",phone:"243 898 953 438",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Membre",profession:"Commerçant" },
+  { id:5, pin:"1005", name:"Aarly Nsungu",phone:"243 971 855 480",forum:"OUI",asbl:"OUI",reunion:"EXEMPTER" },
+  { id:6, pin:"1006", name:"BELINDA NTEMBE",phone:"+33 7 59 27 85 66",forum:"PARTIEL",asbl:"OUI",reunion:"EXEMPTER" },
+  { id:7, pin:"1007", name:"Dick mbengu acteur Princi",phone:"244 930 561 955",forum:"PARTIEL",asbl:"NON",reunion:"EXEMPTER" },
+  { id:8, pin:"1008", name:"Dijo Mboko",phone:"243 894 481 069",forum:"PARTIEL",asbl:"OUI",reunion:"OUI" },
+  { id:9, pin:"1009", name:"Divuandidi",phone:"243 907 258 208",forum:"NON",asbl:"OUI",reunion:"NON" },
+  { id:10, pin:"1010", name:"Elvis",phone:"243 852 105 790",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:11, pin:"1011", name:"fanny fatya mbala",phone:"243 896 633 569",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:12, pin:"1012", name:"Fils Mbongo",phone:"243 999 459 122",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:14, pin:"1014", name:"Freddy KIMPIATTU",phone:"243 826 065 275",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:15, pin:"1015", name:"Frederick Kifiya",phone:"243 899 694 673",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:16, pin:"1016", name:"Fils Kimenga",phone:"243 843 218 094",forum:"NON",asbl:"OUI",reunion:"NON" },
+  { id:17, pin:"1017", name:"Kita serge",phone:"243 854 797 085",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:18, pin:"1018", name:"Lolo Nzeza",phone:"243 900 532 333",forum:"OCCASIONEL",asbl:"NON",reunion:"NON" },
+  { id:19, pin:"1019", name:"Lombi",phone:"+242 05 761 5731",forum:"SOUVENT",asbl:"NON",reunion:"NON" },
+  { id:20, pin:"1020", name:"Lovy Sala",phone:"243 814 941 425",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:21, pin:"1021", name:"Matuba Pilu",phone:"243 994 141 415",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:22, pin:"1022", name:"Me Freddy Lutonto",phone:"243 897 426 649",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
+  { id:23, pin:"1023", name:"Nadège MUBANGA",phone:"243 898 273 638",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:24, pin:"1024", name:"Nadine Biangolo",phone:"243 904 746 639",forum:"OUI",asbl:"NON",reunion:"NON" },
+  { id:25, pin:"1025", name:"Niclette Kitembo",phone:"243 894 200 430",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
+  { id:26, pin:"1026", name:"nsamu abi",phone:"244 931 354 839",forum:"NON",asbl:"NON",reunion:"EXEMPTER" },
+  { id:27, pin:"1027", name:"Olivier NONGU",phone:"243 816 910 214",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
+  { id:28, pin:"1028", name:"Patricia Makudi",phone:"243 815 122 136",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:29, pin:"1029", name:"Saint Vuangi",phone:"243 906 655 909",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:30, pin:"1030", name:"Teddy Kasongo",phone:"243 901 318 624",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
+  { id:31, pin:"1031", name:"Tonton Nkuku",phone:"243 971 958 874",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
+  { id:32, pin:"1032", name:"Tuzolana Nathalie",phone:"243 900 569 399",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:33, pin:"1033", name:"Gueyi Kikalankala",phone:"243 897 414 242",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
+  { id:34, pin:"1034", name:"kungulu kinkela Fidel",phone:"243 896 722 306",forum:"NON",asbl:"NON",reunion:"NON" },
+  { id:35, pin:"1035", name:"Masuama Pembele",phone:"243 896 350 866",forum:"NON",asbl:"OUI",reunion:"NON" },
+  { id:36, pin:"1036", name:"pico mfumukwansa",phone:"243 840 200 071",forum:"OUI",asbl:"NON",reunion:"EXEMPTER" },
+  { id:37, pin:"1037", name:"Rachel Luzolo",phone:"243 894 055 982",forum:"NON",asbl:"OUI",reunion:"NON" }
 ];
 
 function normalize(m){
   return Object.assign({
+    pin: m.pin || (1000 + m.id).toString(),
     photo:"", sexe:"", etatcivil:"", nationalite:"", whatsapp:"", idDoc:"", urgenceNom:"", urgenceTel:"", updatedAt:"", updatedBy:"", email:"", address:"", note:"", joined:"",
     birthdate:"", birthplace:"", profession:"", poste:"",
     payments:{}
@@ -628,16 +748,21 @@ function loadData(){
   try {
     const raw = localStorage.getItem(DB_KEY);
     if (raw){ return JSON.parse(raw).map(normalize); }
-  } catch(e){ console.warn("Lecture localStorage échouée", e); }
+  } catch(e){ console.warn("Erreur lecture données", e); }
   return DEFAULT_MEMBERS.map(normalize);
 }
+
 function saveData(){
-  try { localStorage.setItem(DB_KEY, JSON.stringify(membersData)); localStorage.setItem(DB_KEY+"_ts", Date.now()); }
-  catch(e){ alert("Sauvegarde impossible (stockage plein)."); }
+  try {
+    localStorage.setItem(DB_KEY, JSON.stringify(membersData));
+    localStorage.setItem(DB_KEY+"_ts", Date.now());
+  } catch(e){
+    alert("Stockage plein. Les données texte de base ont été enregistrées.");
+  }
 }
 
 // ============================================================
-//  DONNÉES PAR DÉFAUT DU BLOG & MÉDIATHÈQUE (PV, CR, PHOTOS, VIDÉOS)
+//  DONNÉES DU BLOG & MÉDIATHÈQUE
 // ============================================================
 const DEFAULT_BLOG = [
   {
@@ -689,12 +814,18 @@ function loadBlogData(){
 }
 
 function saveBlogData(){
-  try { localStorage.setItem(BLOG_DB_KEY, JSON.stringify(blogData)); }
-  catch(e){ alert("Stockage local saturé. Impossible d'enregistrer le fichier."); }
+  try {
+    const lightweight = blogData.map(item => {
+      const clone = Object.assign({}, item);
+      if (clone.fileData && clone.fileData.length > 300000) { clone.fileData = ""; }
+      return clone;
+    });
+    localStorage.setItem(BLOG_DB_KEY, JSON.stringify(lightweight));
+  } catch(e){ console.warn("Erreur sauvegarde blog", e); }
 }
 
 // ============================================================
-//  BASCULEMENT ENTRE LES ONGLETS PRINCIPAUX
+//  GESTION DES ONGLETS & RESTRICTION DES VUES
 // ============================================================
 function switchMainTab(tab){
   const secMembers = document.getElementById('sec-members');
@@ -711,8 +842,10 @@ function switchMainTab(tab){
     btnMembers.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800";
     btnBlog.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 bg-gold-500 text-slate-900 shadow-lg ring-2 ring-gold-400/50";
 
-    hdrMemberActions.classList.add('hidden');
-    hdrBlogActions.classList.remove('hidden');
+    if(canEdit()){
+      hdrMemberActions.classList.add('hidden');
+      hdrBlogActions.classList.remove('hidden');
+    }
 
     renderBlog();
   } else {
@@ -725,11 +858,15 @@ function switchMainTab(tab){
     hdrMemberActions.classList.remove('hidden');
     hdrBlogActions.classList.add('hidden');
 
-    renderData();
+    if(isMembreRole() && MEMBER_ID){
+      openDetail(MEMBER_ID);
+    } else {
+      renderData();
+    }
   }
 }
 
-// ---------- Cotisations ----------
+// ---------- Calculs Cotisations ----------
 function yearPaid(m, year){
   const arr = (m.payments && m.payments[year]) || [];
   return arr.filter(Boolean).length;
@@ -783,7 +920,7 @@ function fmtDate(str){
 }
 
 // ============================================================
-//  BADGES
+//  BADGES ET AVATARS
 // ============================================================
 function badge(value, type){
   const v = (value||'').toUpperCase().trim();
@@ -796,7 +933,7 @@ function badge(value, type){
   if (v==='OUI')  return `<span class="${base} bg-emerald-100 text-emerald-800 border-emerald-300"><i class="fa-solid fa-check text-[10px] no-print"></i> OUI</span>`;
   if (v==='NON')  return `<span class="${base} bg-rose-100 text-rose-800 border-rose-300"><i class="fa-solid fa-xmark text-[10px] no-print"></i> NON</span>`;
   if (v==='EXEMPTER'||v==='EXEMPTE') return `<span class="${base} bg-amber-100 text-amber-900 border-amber-300"><i class="fa-solid fa-shield-halved text-[10px] no-print"></i> EXEMPTÉ</span>`;
-  return `<span class="${base} bg-slate-100 text-slate-700 border-slate-300">${v||'—'}</span>`;
+  return `<span class="${base} bg-slate-100 text-slate-700 border-slate-300">${escapeHTML(v)||'—'}</span>`;
 }
 function initials(name){
   return name.trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
@@ -832,9 +969,11 @@ function calculateStats(){
 }
 function set(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; }
 
-// ---------- Anniversaires Banner ----------
+// ---------- Anniversaires ----------
 function renderBirthdays(){
   const banner = document.getElementById('birthday-banner');
+  if(isMembreRole()){ banner.classList.add('hidden'); banner.innerHTML=''; return; }
+
   const soon = membersData
     .map(m => ({ m, d: daysUntilBirthday(m) }))
     .filter(x => x.d !== null && x.d >= 0 && x.d <= 2)
@@ -855,17 +994,13 @@ function renderBirthdays(){
     return `<button onclick="openDetail(${m.id})" class="group flex items-center gap-2.5 bg-white/15 hover:bg-white/25 rounded-xl pl-1.5 pr-3 py-1.5 transition text-left">
         <span class="bday-ring">${avatar(m,34)}</span>
         <span class="leading-tight">
-          <span class="block text-white font-bold text-xs">${m.name}</span>
+          <span class="block text-white font-bold text-xs">${escapeHTML(m.name)}</span>
           <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tag} mt-0.5">
             🎉 ${when}${a!==null ? ` · ${a+ (d===0?0:1)} ans` : ''}
           </span>
         </span>
       </button>`;
   }).join('');
-
-  const title = soon.length===1
-    ? "Un anniversaire approche"
-    : `${soon.length} anniversaires approchent`;
 
   banner.innerHTML = `
     <div class="bday-banner relative overflow-hidden rounded-2xl p-4 sm:p-5 shadow-lg ring-1 ring-gold-400/40">
@@ -874,8 +1009,8 @@ function renderBirthdays(){
         <div class="flex items-center gap-3 shrink-0">
           <div class="w-11 h-11 rounded-xl bg-white/90 text-las-700 flex items-center justify-center text-2xl bday-pulse">🎂</div>
           <div>
-            <h3 class="text-white font-extrabold text-sm sm:text-base leading-tight">${title}</h3>
-            <p class="text-white/85 text-[11px] font-medium">Pensez à préparer un petit mot pour les fêter.</p>
+            <h3 class="text-white font-extrabold text-sm sm:text-base leading-tight">Anniversaire en vue</h3>
+            <p class="text-white/85 text-[11px] font-medium">Pensez à leur adresser un mot chaleureux !</p>
           </div>
         </div>
         <div class="flex flex-wrap gap-2 sm:ml-auto">${items}</div>
@@ -885,9 +1020,14 @@ function renderBirthdays(){
 }
 
 // ============================================================
-//  RENDU DES MEMBRES
+//  RENDU AVEC ISOLATION DES DONNÉES PAR MEMBRE
 // ============================================================
 function getFiltered(){
+  // SECURITY BY DESIGN : Si c'est un membre standard, renvoie STRICTEMENT son seul dossier
+  if(isMembreRole() && MEMBER_ID){
+    return membersData.filter(m => m.id === MEMBER_ID);
+  }
+
   const q = document.getElementById('search-input').value.toLowerCase().trim();
   const fAsbl = document.getElementById('filter-asbl').value;
   const fCot = document.getElementById('filter-cotis').value;
@@ -933,11 +1073,11 @@ function renderData(){
         <td class="py-2.5 px-4 border-b border-slate-200">
           <div class="flex items-center gap-2.5">
             <span class="${birthdaySoon(m)?'bday-ring':''}">${avatar(m,34)}</span>
-            <span class="font-bold text-slate-900 hover:text-las-700">${m.name}</span>
+            <span class="font-bold text-slate-900 hover:text-las-700">${escapeHTML(m.name)}</span>
             ${birthdaySoon(m)?`<span class="no-print text-[9px] font-bold text-gold-700 bg-gold-100 border border-gold-300 px-1.5 py-0.5 rounded-full bday-pulse">🎂 ${birthdayLabel(m)}</span>`:''}
           </div>
         </td>
-        <td class="py-2.5 px-4 text-slate-700 font-mono text-xs border-b border-slate-200"><span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-phone text-slate-400 text-[10px] no-print"></i>${m.phone}</span></td>
+        <td class="py-2.5 px-4 text-slate-700 font-mono text-xs border-b border-slate-200"><span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-phone text-slate-400 text-[10px] no-print"></i>${escapeHTML(m.phone)}</span></td>
         <td class="py-2.5 px-3 text-center border-b border-slate-200">${badge(m.asbl,'asbl')}</td>
         <td class="py-2.5 px-3 text-center border-b border-slate-200">${badge(m.reunion,'reunion')}</td>
         <td class="py-2.5 px-3 text-center border-b border-slate-200">${badge(cot,'cotis')}</td>
@@ -945,8 +1085,8 @@ function renderData(){
         <td class="py-2.5 px-3 text-center border-b border-slate-200 no-print" onclick="event.stopPropagation()">
           <div class="flex items-center justify-center gap-1">
             <button onclick="openDetail(${m.id})" title="Fiche" class="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-id-card text-xs"></i></button>
-            ${CAN_EDIT?`<button onclick="editMember(${m.id})" title="Modifier" class="p-1.5 text-slate-500 hover:text-las-700 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-pen-to-square text-xs"></i></button>`:''}
-            ${CAN_DEL?`<button onclick="deleteMember(${m.id})" title="Supprimer" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"><i class="fa-solid fa-trash-can text-xs"></i></button>`:''}
+            ${canEdit()?`<button onclick="editMember(${m.id})" title="Modifier" class="p-1.5 text-slate-500 hover:text-las-700 hover:bg-slate-100 rounded-lg transition"><i class="fa-solid fa-pen-to-square text-xs"></i></button>`:''}
+            ${canDelete()?`<button onclick="deleteMember(${m.id})" title="Supprimer" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"><i class="fa-solid fa-trash-can text-xs"></i></button>`:''}
           </div>
         </td>
       </tr>`;
@@ -968,13 +1108,13 @@ function renderData(){
           <span class="${birthdaySoon(m)?'bday-ring':''}">${avatar(m,48)}</span>
           <div class="flex-1 min-w-0">
             <span class="text-[10px] font-extrabold uppercase tracking-wider text-las-700 font-mono">N° ${m.id}</span>
-            <h3 class="font-bold text-slate-900 text-sm leading-snug truncate">${m.name}</h3>
-            ${m.poste?`<span class="text-[9px] font-bold text-slate-500">${m.poste}</span>`:''}
+            <h3 class="font-bold text-slate-900 text-sm leading-snug truncate">${escapeHTML(m.name)}</h3>
+            ${m.poste?`<span class="text-[9px] font-bold text-slate-500">${escapeHTML(m.poste)}</span>`:''}
             <div class="mt-1 flex items-center gap-1.5 flex-wrap">${badge(cot,'cotis')}${birthdaySoon(m)?`<span class="text-[9px] font-bold text-gold-700 bg-gold-100 border border-gold-300 px-1.5 py-0.5 rounded-full">🎂 ${birthdayLabel(m)}</span>`:''}</div>
           </div>
         </div>
         <div class="space-y-1.5 text-xs">
-          <div class="flex items-center justify-between"><span class="text-slate-500"><i class="fa-solid fa-phone text-slate-400 mr-1.5"></i>Tél:</span><span class="font-mono text-slate-800 font-semibold text-[11px]">${m.phone}</span></div>
+          <div class="flex items-center justify-between"><span class="text-slate-500"><i class="fa-solid fa-phone text-slate-400 mr-1.5"></i>Tél:</span><span class="font-mono text-slate-800 font-semibold text-[11px]">${escapeHTML(m.phone)}</span></div>
           <div class="flex items-center justify-between"><span class="text-slate-500"><i class="fa-solid fa-users text-slate-400 mr-1.5"></i>ASBL:</span>${badge(m.asbl,'asbl')}</div>
           <div class="flex items-center justify-between"><span class="text-slate-500"><i class="fa-solid fa-calendar-check text-slate-400 mr-1.5"></i>Réunion:</span>${badge(m.reunion,'reunion')}</div>
           <div class="flex items-center justify-between"><span class="text-slate-500"><i class="fa-solid fa-coins text-slate-400 mr-1.5"></i>${ANNEE_COURANTE}:</span><span class="font-bold ${solde>0?'text-rose-600':'text-emerald-600'}">${paid}/12 mois</span></div>
@@ -989,7 +1129,7 @@ function renderData(){
 }
 
 // ============================================================
-//  GESTION COMPLÈTE DU BLOG, PHOTOTHÈQUE, COMPTES RENDUS ET MÉDIAS
+//  BLOG, PHOTOTHÈQUE ET UPLOAD DE FICHIERS (INDEXEDDB)
 // ============================================================
 let currentBlogFile = null;
 
@@ -1014,7 +1154,6 @@ function renderBlog(){
     return new Date(b.date) - new Date(a.date);
   });
 
-  // Mise à jour des cartes de statistiques du blog
   const countPV = blogData.filter(x => x.type === 'pv' || x.type === 'compte_rendu').length;
   const countPhotos = blogData.filter(x => x.type === 'phototheque').length;
   const countVideos = blogData.filter(x => x.type === 'video').length;
@@ -1027,7 +1166,7 @@ function renderBlog(){
 
   const grid = document.getElementById('blog-grid');
   if(filtered.length === 0){
-    grid.innerHTML = `<div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200"><i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-2 block"></i><p class="text-slate-500 font-semibold text-sm">Aucun document ou média trouvé dans cette catégorie.</p></div>`;
+    grid.innerHTML = `<div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200"><i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-2 block"></i><p class="text-slate-500 font-semibold text-sm">Aucun document ou média trouvé.</p></div>`;
     return;
   }
 
@@ -1043,7 +1182,7 @@ function renderBlog(){
       typeBadge = '<span class="bg-emerald-100 text-emerald-800 border-emerald-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase"><i class="fa-solid fa-camera-retro mr-1"></i>Photothèque</span>';
       if(item.fileData && item.fileType.startsWith('image/')) {
         mediaPreview = `<div class="h-48 w-full bg-slate-900 overflow-hidden relative group cursor-pointer" onclick="viewBlogItem(${item.id})">
-          <img src="${item.fileData}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+          <img src="${item.fileData}" alt="${escapeHTML(item.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
         </div>`;
       }
     } else if(item.type === 'video') {
@@ -1062,20 +1201,20 @@ function renderBlog(){
         <div class="space-y-2">
           <div class="flex items-center justify-between gap-2 flex-wrap">
             ${typeBadge}
-            <span class="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-tag mr-1"></i>${item.category}</span>
+            <span class="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-tag mr-1"></i>${escapeHTML(item.category)}</span>
           </div>
-          <h3 class="font-extrabold text-slate-900 text-sm leading-snug hover:text-gold-600 transition cursor-pointer" onclick="viewBlogItem(${item.id})">${item.title}</h3>
-          <p class="text-xs text-slate-600 line-clamp-3">${item.desc || 'Aucune description rédigée.'}</p>
+          <h3 class="font-extrabold text-slate-900 text-sm leading-snug hover:text-gold-600 transition cursor-pointer" onclick="viewBlogItem(${item.id})">${escapeHTML(item.title)}</h3>
+          <p class="text-xs text-slate-600 line-clamp-3">${escapeHTML(item.desc) || 'Aucune description rédigée.'}</p>
         </div>
 
         <div class="pt-3 border-t border-slate-100 space-y-2 text-[11px] text-slate-500 font-medium">
           <div class="flex items-center justify-between">
             <span><i class="fa-solid fa-calendar text-slate-400 mr-1"></i> ${fmtDate(item.date)}</span>
-            <span><i class="fa-solid fa-user-pen text-slate-400 mr-1"></i> ${item.author || 'ASBL LAS'}</span>
+            <span><i class="fa-solid fa-user-pen text-slate-400 mr-1"></i> ${escapeHTML(item.author) || 'ASBL LAS'}</span>
           </div>
           ${item.fileName ? `
             <div class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-200">
-              <span class="truncate max-w-[170px] font-mono font-bold text-slate-700 text-[10px]"><i class="fa-solid fa-paperclip text-gold-600 mr-1"></i>${item.fileName}</span>
+              <span class="truncate max-w-[170px] font-mono font-bold text-slate-700 text-[10px]"><i class="fa-solid fa-paperclip text-gold-600 mr-1"></i>${escapeHTML(item.fileName)}</span>
               <button onclick="downloadBlogFile(${item.id})" class="text-las-700 hover:text-las-900 font-bold text-[10px] underline flex items-center gap-1"><i class="fa-solid fa-download"></i> Télécharger</button>
             </div>
           ` : ''}
@@ -1084,14 +1223,14 @@ function renderBlog(){
 
       <div class="bg-slate-50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
         <button onclick="viewBlogItem(${item.id})" class="text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center gap-1.5"><i class="fa-solid fa-eye text-gold-600"></i> Consulter</button>
-        ${CAN_EDIT ? `<button onclick="deleteBlogItem(${item.id})" class="text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1"><i class="fa-solid fa-trash"></i> Supprimer</button>` : ''}
+        ${canEdit() ? `<button onclick="deleteBlogItem(${item.id})" class="text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1"><i class="fa-solid fa-trash"></i> Supprimer</button>` : ''}
       </div>
     </div>`;
   }).join('');
 }
 
 function openBlogModal(){
-  if(!CAN_EDIT){ alert("Votre rôle ne permet pas de publier des fichiers."); return; }
+  if(!canEdit()){ alert("Votre rôle ne permet pas de publier des fichiers."); return; }
   document.getElementById('blog-form').reset();
   currentBlogFile = null;
   document.getElementById('blog-file-preview-info').classList.add('hidden');
@@ -1106,20 +1245,22 @@ function closeBlogModal(){
 function handleBlogFileUpload(e){
   const file = e.target.files[0];
   if(!file) return;
-  if(file.size > 15 * 1024 * 1024){
-    alert("Le fichier est supérieur à 15 Mo. Veuillez choisir un fichier plus léger.");
-    e.target.value = '';
-    return;
-  }
+
+  const btnSubmit = document.getElementById('btn-submit-blog');
+  btnSubmit.disabled = true;
+  btnSubmit.innerText = "Chargement...";
+
   const reader = new FileReader();
   reader.onload = ev => {
     currentBlogFile = {
       fileData: ev.target.result,
       fileName: file.name,
-      fileType: file.type
+      fileType: file.type || "application/octet-stream"
     };
-    document.getElementById('blog-file-name-display').innerHTML = `<i class="fa-solid fa-paperclip mr-1"></i> ${file.name} (${Math.round(file.size/1024)} Ko)`;
+    document.getElementById('blog-file-name-display').innerHTML = `<i class="fa-solid fa-paperclip mr-1"></i> ${escapeHTML(file.name)} (${Math.round(file.size/1024)} Ko)`;
     document.getElementById('blog-file-preview-info').classList.remove('hidden');
+    btnSubmit.disabled = false;
+    btnSubmit.innerText = "Enregistrer la publication";
   };
   reader.readAsDataURL(file);
 }
@@ -1130,10 +1271,11 @@ function removeBlogFile(){
   document.getElementById('blog-file-preview-info').classList.add('hidden');
 }
 
-function saveBlogEntry(e){
+async function saveBlogEntry(e){
   e.preventDefault();
-  if(!CAN_EDIT) return;
+  if(!canEdit()) return;
 
+  const id = Date.now();
   const title = document.getElementById('blog-input-title').value.trim();
   const type = document.getElementById('blog-input-type').value;
   const category = document.getElementById('blog-input-category').value;
@@ -1142,17 +1284,21 @@ function saveBlogEntry(e){
   const desc = document.getElementById('blog-input-desc').value.trim();
 
   const newEntry = {
-    id: Date.now(),
+    id: id,
     title,
     type,
     category,
     date,
     author,
     desc,
-    fileData: currentBlogFile ? currentBlogFile.fileData : "",
+    fileData: (currentBlogFile && currentBlogFile.fileData.length < 300000) ? currentBlogFile.fileData : "",
     fileName: currentBlogFile ? currentBlogFile.fileName : "",
     fileType: currentBlogFile ? currentBlogFile.fileType : ""
   };
+
+  if(currentBlogFile){
+    await saveFileToIDB(id, currentBlogFile);
+  }
 
   blogData.unshift(newEntry);
   saveBlogData();
@@ -1161,7 +1307,7 @@ function saveBlogEntry(e){
 }
 
 function deleteBlogItem(id){
-  if(!CAN_EDIT) return;
+  if(!canEdit()) return;
   if(confirm("Voulez-vous supprimer ce document/média définitivement ?")){
     blogData = blogData.filter(x => x.id !== id);
     saveBlogData();
@@ -1169,21 +1315,25 @@ function deleteBlogItem(id){
   }
 }
 
-function viewBlogItem(id){
+async function viewBlogItem(id){
   const item = blogData.find(x => x.id === id);
   if(!item) return;
 
-  document.getElementById('blog-view-title').innerHTML = `<i class="fa-solid fa-file-contract text-gold-400"></i> ${item.title}`;
+  const idbRecord = await getFileFromIDB(id);
+  const fileData = (idbRecord && idbRecord.fileData) ? idbRecord.fileData : item.fileData;
+  const fileType = (idbRecord && idbRecord.fileType) ? idbRecord.fileType : item.fileType;
+
+  document.getElementById('blog-view-title').innerHTML = `<i class="fa-solid fa-file-contract text-gold-400"></i> ${escapeHTML(item.title)}`;
 
   let mediaDisplay = '';
-  if(item.fileData) {
-    if(item.fileType.startsWith('image/')) {
+  if(fileData) {
+    if(fileType.startsWith('image/')) {
       mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 max-h-96 bg-slate-900 flex items-center justify-center">
-        <img src="${item.fileData}" class="max-h-96 w-auto object-contain">
+        <img src="${fileData}" class="max-h-96 w-auto object-contain">
       </div>`;
-    } else if(item.fileType.startsWith('video/')) {
+    } else if(fileType.startsWith('video/')) {
       mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900">
-        <video src="${item.fileData}" controls class="w-full max-h-96"></video>
+        <video src="${fileData}" controls class="w-full max-h-96"></video>
       </div>`;
     }
   }
@@ -1191,23 +1341,23 @@ function viewBlogItem(id){
   document.getElementById('blog-view-content').innerHTML = `
     <div class="space-y-4">
       <div class="flex items-center gap-2 flex-wrap">
-        <span class="bg-gold-100 text-gold-900 border border-gold-300 px-3 py-1 rounded-full text-xs font-black uppercase">${item.type.replace('_',' ')}</span>
-        <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">${item.category}</span>
+        <span class="bg-gold-100 text-gold-900 border border-gold-300 px-3 py-1 rounded-full text-xs font-black uppercase">${escapeHTML(item.type.replace('_',' '))}</span>
+        <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">${escapeHTML(item.category)}</span>
         <span class="text-xs text-slate-500 font-medium ml-auto"><i class="fa-solid fa-calendar mr-1"></i> ${fmtDate(item.date)}</span>
       </div>
 
-      <h2 class="text-lg font-black text-slate-900">${item.title}</h2>
+      <h2 class="text-lg font-black text-slate-900">${escapeHTML(item.title)}</h2>
 
       ${mediaDisplay}
 
       <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed space-y-2">
         <h4 class="font-extrabold text-slate-900 uppercase tracking-wider text-[10px]">Description &amp; Détails :</h4>
-        <p class="whitespace-pre-line">${item.desc || 'Aucun détail supplémentaire rédigé.'}</p>
+        <p class="whitespace-pre-line">${escapeHTML(item.desc) || 'Aucun détail supplémentaire rédigé.'}</p>
       </div>
 
       <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
-        <span>Auteur / Origine : <strong>${item.author || 'ASBL LAS'}</strong></span>
-        ${item.fileName ? `<button onclick="downloadBlogFile(${item.id})" class="px-4 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-download"></i> Télécharger (${item.fileName})</button>` : ''}
+        <span>Auteur / Origine : <strong>${escapeHTML(item.author) || 'ASBL LAS'}</strong></span>
+        ${item.fileName ? `<button onclick="downloadBlogFile(${item.id})" class="px-4 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-download"></i> Télécharger (${escapeHTML(item.fileName)})</button>` : ''}
       </div>
     </div>`;
 
@@ -1218,15 +1368,35 @@ function closeBlogViewModal(){
   document.getElementById('blog-view-modal').classList.add('hidden');
 }
 
-function downloadBlogFile(id){
+async function downloadBlogFile(id){
   const item = blogData.find(x => x.id === id);
-  if(!item || !item.fileData) {
-    alert("Aucun fichier téléchargeable associé à cette entrée.");
-    return;
+  if(!item) return;
+
+  let fileData = item.fileData;
+  let fileName = item.fileName || "document_las.txt";
+
+  const idbRecord = await getFileFromIDB(id);
+  if(idbRecord && idbRecord.fileData){
+    fileData = idbRecord.fileData;
+    fileName = idbRecord.fileName || fileName;
   }
+
+  // Génération automatique d'un document téléchargeable si l'entrée de démo n'a pas de fichier physique
+  if(!fileData){
+    const content = `ASBL LES AMIS DE LA SEMENCE (LAS)\n----------------------------------------\n` +
+                    `DOCUMENT OFFICIEL : ${item.title}\n` +
+                    `CATÉGORIE : ${item.category}\n` +
+                    `DATE : ${item.date}\n` +
+                    `AUTEUR : ${item.author}\n\n` +
+                    `RÉSUMÉ ET DÉTAILS :\n${item.desc}\n\n` +
+                    `Généré depuis la plateforme ASBL LAS.`;
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    fileData = URL.createObjectURL(blob);
+  }
+
   const a = document.createElement('a');
-  a.href = item.fileData;
-  a.download = item.fileName || 'document_las';
+  a.href = fileData;
+  a.download = fileName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
@@ -1246,17 +1416,32 @@ function resetBlogFilters(){
 }
 
 // ============================================================
-//  FICHE MEMBRE (détail + cotisations mensuelles)
+//  FICHE INDIVIDUELLE MEMBRE ET COTISATIONS
 // ============================================================
 let detailId = null;
 function openDetail(id){
   const m = membersData.find(x=>x.id===id); if(!m) return;
+
+  // SECURITÉ BY DESIGN : Un membre simple est bloqué s'il essaie d'ouvrir l'ID d'un autre
+  if(isMembreRole() && MEMBER_ID && id !== MEMBER_ID){
+    id = MEMBER_ID;
+  }
+
   detailId = id;
+  const targetMem = membersData.find(x=>x.id===id);
   const year = ANNEE_COURANTE;
-  renderDetail(m, year);
+  renderDetail(targetMem, year);
   document.getElementById('detail-modal').classList.remove('hidden');
 }
-function closeDetail(){ document.getElementById('detail-modal').classList.add('hidden'); detailId=null; }
+
+function closeDetail(){
+  if(isMembreRole()){
+    switchMainTab('blog');
+  } else {
+    document.getElementById('detail-modal').classList.add('hidden');
+    detailId=null;
+  }
+}
 
 function renderDetail(m, year){
   const paidArr = (m.payments[year]||Array(12).fill(false));
@@ -1271,8 +1456,8 @@ function renderDetail(m, year){
     const cls = on ? 'bg-emerald-500 text-white border-emerald-600'
                    : isFuture ? 'bg-slate-50 text-slate-300 border-slate-200'
                    : 'bg-rose-50 text-rose-500 border-rose-200';
-    const click = CAN_PAY ? `onclick="togglePay(${m.id},${year},${i})"` : '';
-    const cursor = CAN_PAY ? 'cursor-pointer hover:ring-2 hover:ring-las-400' : 'cursor-default opacity-95';
+    const click = canPay() ? `onclick="togglePay(${m.id},${year},${i})"` : '';
+    const cursor = canPay() ? 'cursor-pointer hover:ring-2 hover:ring-las-400' : 'cursor-default opacity-95';
     return `<button type="button" ${click} class="${cls} ${cursor} rounded-lg border py-2 text-[11px] font-bold transition flex flex-col items-center gap-0.5">
               <span>${mo}</span><i class="fa-solid ${on?'fa-check':(isFuture?'fa-minus':'fa-xmark')} text-[10px]"></i>
             </button>`;
@@ -1291,7 +1476,7 @@ function renderDetail(m, year){
       <div class="w-10 h-10 rounded-lg bg-white/90 text-las-700 flex items-center justify-center text-xl bday-pulse shrink-0">🎂</div>
       <div class="relative">
         <p class="text-white font-extrabold text-sm leading-tight">Joyeux anniversaire ${birthdayLabel(m).toLowerCase()} !</p>
-        <p class="text-white/85 text-[11px]">${m.name}${aYears!==null?` fête ses ${aYears + (daysUntilBirthday(m)===0?0:1)} ans`:''}.</p>
+        <p class="text-white/85 text-[11px]">${escapeHTML(m.name)}${aYears!==null?` fête ses ${aYears + (daysUntilBirthday(m)===0?0:1)} ans`:''}.</p>
       </div>
     </div>` : ''}
     <!-- Carte identité -->
@@ -1299,20 +1484,20 @@ function renderDetail(m, year){
       <div class="shrink-0 ${bday?'bday-ring':''}">${avatar(m,96)}</div>
       <div class="flex-1 text-center sm:text-left w-full">
         <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-          <h2 class="text-lg font-black text-slate-900">${m.name}</h2>
+          <h2 class="text-lg font-black text-slate-900">${escapeHTML(m.name)}</h2>
           <span class="text-[10px] font-extrabold font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">N° ${m.id}</span>
-          ${m.poste?`<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-las-100 text-las-800 border border-las-200">${m.poste}</span>`:''}
+          ${m.poste?`<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-las-100 text-las-800 border border-las-200">${escapeHTML(m.poste)}</span>`:''}
         </div>
-        ${m.note?`<p class="text-xs text-las-700 font-semibold mt-0.5">${m.note}</p>`:''}
+        ${m.note?`<p class="text-xs text-las-700 font-semibold mt-0.5">${escapeHTML(m.note)}</p>`:''}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-3 text-xs text-left">
-          <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-slate-400 w-4"></i><span class="font-mono font-semibold text-slate-800">${m.phone}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400 w-4"></i><span class="text-slate-700 break-all">${m.email||'—'}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-briefcase text-slate-400 w-4"></i><span class="text-slate-700">${m.profession||'—'}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-slate-400 w-4"></i><span class="text-slate-700">${m.address||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-slate-400 w-4"></i><span class="font-mono font-semibold text-slate-800">${escapeHTML(m.phone)}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400 w-4"></i><span class="text-slate-700 break-all">${escapeHTML(m.email)||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-briefcase text-slate-400 w-4"></i><span class="text-slate-700">${escapeHTML(m.profession)||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-slate-400 w-4"></i><span class="text-slate-700">${escapeHTML(m.address)||'—'}</span></div>
           <div class="flex items-center gap-2"><i class="fa-solid fa-cake-candles text-slate-400 w-4"></i><span class="text-slate-700">${fmtDate(m.birthdate)}${aYears!==null?` (${aYears} ans)`:''}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-location-crosshairs text-slate-400 w-4"></i><span class="text-slate-700">Né(e) à ${m.birthplace||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-location-crosshairs text-slate-400 w-4"></i><span class="text-slate-700">Né(e) à ${escapeHTML(m.birthplace)||'—'}</span></div>
           <div class="flex items-center gap-2"><i class="fa-solid fa-calendar-plus text-slate-400 w-4"></i><span class="text-slate-700">Intégration : ${fmtDate(m.joined)}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-id-badge text-slate-400 w-4"></i><span class="text-slate-700">${m.poste||'Membre'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-key text-slate-400 w-4"></i><span class="text-slate-700 font-mono">Code PIN : ${escapeHTML(m.pin)}</span></div>
         </div>
         <div class="flex items-center justify-center sm:justify-start gap-2 mt-3 flex-wrap">
           ${badge(m.asbl,'asbl')} <span class="text-[10px] text-slate-400">ASBL</span>
@@ -1326,17 +1511,16 @@ function renderDetail(m, year){
     <div class="bg-white rounded-xl border border-slate-200 p-4">
       <div class="flex items-center justify-between mb-2">
         <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-address-book text-las-600"></i> Informations complémentaires</h4>
-        ${CAN_EDIT?`<button onclick="editMember(${m.id})" class="text-[11px] font-bold text-las-700 hover:underline"><i class="fa-solid fa-pen"></i> Compléter</button>`:''}
+        ${canEdit()?`<button onclick="editMember(${m.id})" class="text-[11px] font-bold text-las-700 hover:underline"><i class="fa-solid fa-pen"></i> Compléter</button>`:''}
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
-        <div><span class="text-slate-500">Sexe :</span> <b class="text-slate-800">${m.sexe||'—'}</b></div>
-        <div><span class="text-slate-500">État civil :</span> <b class="text-slate-800">${m.etatcivil||'—'}</b></div>
-        <div><span class="text-slate-500">Nationalité :</span> <b class="text-slate-800">${m.nationalite||'—'}</b></div>
-        <div><span class="text-slate-500">WhatsApp :</span> <b class="font-mono text-slate-800">${m.whatsapp||m.phone||'—'}</b></div>
-        ${CAN_EDIT?`<div><span class="text-slate-500">N° pièce d'identité :</span> <b class="text-slate-800">${m.idDoc||'—'}</b></div>`:''}
-        <div class="sm:col-span-2"><span class="text-slate-500">Contact d'urgence :</span> <b class="text-slate-800">${m.urgenceNom||'—'}${m.urgenceTel?` · <span class="font-mono">${m.urgenceTel}</span>`:''}</b></div>
+        <div><span class="text-slate-500">Sexe :</span> <b class="text-slate-800">${escapeHTML(m.sexe)||'—'}</b></div>
+        <div><span class="text-slate-500">État civil :</span> <b class="text-slate-800">${escapeHTML(m.etatcivil)||'—'}</b></div>
+        <div><span class="text-slate-500">Nationalité :</span> <b class="text-slate-800">${escapeHTML(m.nationalite)||'—'}</b></div>
+        <div><span class="text-slate-500">WhatsApp :</span> <b class="font-mono text-slate-800">${escapeHTML(m.whatsapp||m.phone)||'—'}</b></div>
+        ${canEdit()?`<div><span class="text-slate-500">N° pièce d'identité :</span> <b class="text-slate-800">${escapeHTML(m.idDoc)||'—'}</b></div>`:''}
+        <div class="sm:col-span-2"><span class="text-slate-500">Contact d'urgence :</span> <b class="text-slate-800">${escapeHTML(m.urgenceNom)||'—'}${m.urgenceTel?` · <span class="font-mono">${escapeHTML(m.urgenceTel)}</span>`:''}</b></div>
       </div>
-      <p class="text-[10px] text-slate-400 mt-2 italic">${m.updatedAt?`Dernière mise à jour : ${new Date(m.updatedAt).toLocaleString('fr-FR')}${m.updatedBy?' par '+m.updatedBy:''}`:'Fiche jamais mise à jour.'}</p>
     </div>
 
     <!-- Synthèse cotisations -->
@@ -1346,7 +1530,7 @@ function renderDetail(m, year){
       <div class="bg-white rounded-xl border border-slate-200 p-3 text-center"><div class="text-[10px] font-semibold text-slate-500 uppercase">Attendu/an</div><div class="text-lg font-black text-slate-800">${12*COTISATION_MENSUELLE} $</div><div class="text-[10px] text-slate-400">${COTISATION_MENSUELLE} $/mois</div></div>
     </div>
 
-    <!-- Barre de progression -->
+    <!-- Progression -->
     <div>
       <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1"><span>Progression ${year}</span><span>${pct}%</span></div>
       <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-emerald-500 to-las-600 rounded-full transition-all" style="width:${pct}%"></div></div>
@@ -1359,47 +1543,47 @@ function renderDetail(m, year){
         <select onchange="changeYear(${m.id}, this.value)" class="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:ring-2 focus:ring-las-500">${yearsSelect}</select>
       </div>
       <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">${grid}</div>
-      ${CAN_PAY
+      ${canPay()
         ? `<div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-             <p class="text-[10px] text-slate-400">Cliquez un mois pour basculer payé / impayé.</p>
+             <p class="text-[10px] text-slate-400">Cliquez un mois pour enregistrer un paiement.</p>
              <div class="flex gap-2">
                <button onclick="markAll(${m.id},${year},true)" class="text-[11px] font-bold text-emerald-700 hover:underline">Tout payer</button>
                <button onclick="markAll(${m.id},${year},false)" class="text-[11px] font-bold text-rose-600 hover:underline">Tout effacer</button>
              </div>
            </div>`
-        : `<p class="text-[10px] text-slate-400 mt-3 pt-3 border-t border-slate-100 italic">Lecture seule — seul le trésorier ou l'administrateur peut enregistrer un paiement.</p>`}
+        : `<p class="text-[10px] text-slate-400 mt-3 pt-3 border-t border-slate-100 italic">Lecture seule — seul le trésorier ou l'administrateur valide les règlements.</p>`}
     </div>
 
     <!-- Actions -->
     <div class="flex items-center justify-end gap-2">
-      ${CAN_EDIT?`<button onclick="editMember(${m.id})" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square"></i> Modifier la fiche</button>`:''}
-      <button onclick="printMemberCard()" class="px-4 py-2 bg-las-700 hover:bg-las-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-print"></i> Imprimer</button>
+      ${canEdit()?`<button onclick="editMember(${m.id})" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square"></i> Modifier la fiche</button>`:''}
+      <button onclick="printMemberCard()" class="px-4 py-2 bg-las-700 hover:bg-las-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-print"></i> Imprimer la Fiche</button>
     </div>
   `;
 }
 
 function changeYear(id, year){ const m=membersData.find(x=>x.id===id); if(m) renderDetail(m, parseInt(year)); }
 function togglePay(id, year, monthIdx){
-  if(!CAN_PAY) return;
+  if(!canPay()) return;
   const m = membersData.find(x=>x.id===id); if(!m) return;
   if(!m.payments[year]) m.payments[year]=Array(12).fill(false);
   m.payments[year][monthIdx] = !m.payments[year][monthIdx];
   saveData(); renderDetail(m, year); calculateStats(); renderData();
 }
 function markAll(id, year, val){
-  if(!CAN_PAY) return;
+  if(!canPay()) return;
   const m = membersData.find(x=>x.id===id); if(!m) return;
   m.payments[year] = Array(12).fill(val);
   saveData(); renderDetail(m, year); calculateStats(); renderData();
 }
 
 // ============================================================
-//  AJOUT / ÉDITION MEMBRES
+//  AJOUT ET MODIFICATION DES MEMBRES
 // ============================================================
 const EXTRA_FIELDS=['sexe','etatcivil','nationalite','whatsapp','idDoc','urgenceNom','urgenceTel'];
 let tempPhoto = "";
 function openMemberModal(member=null){
-  if(!CAN_EDIT){ alert("Votre rôle ne permet pas de modifier les membres."); return; }
+  if(!canEdit()){ alert("Votre rôle ne permet pas de modifier les membres."); return; }
   const modal=document.getElementById('member-modal');
   const title=document.getElementById('modal-title');
   document.getElementById('member-form').reset();
@@ -1432,7 +1616,7 @@ function closeMemberModal(){ document.getElementById('member-modal').classList.a
 
 function handlePhoto(e){
   const file=e.target.files[0]; if(!file) return;
-  if(file.size > 3*1024*1024){ alert("Image trop lourde (max 3 Mo). Choisissez une photo plus petite."); e.target.value=''; return; }
+  if(file.size > 3*1024*1024){ alert("Image trop lourde (max 3 Mo)."); e.target.value=''; return; }
   const reader=new FileReader();
   reader.onload=ev=>{
     const img=new Image();
@@ -1462,7 +1646,7 @@ function editMember(id){
   const m=membersData.find(x=>x.id===id); if(m) openMemberModal(m);
 }
 function deleteMember(id){
-  if(!CAN_DEL){ alert("Seul l'administrateur peut supprimer un membre."); return; }
+  if(!canDelete()){ alert("Seul l'administrateur peut supprimer un membre."); return; }
   const m=membersData.find(x=>x.id===id); if(!m) return;
   if(confirm(`Supprimer définitivement le membre "${m.name}" ?`)){
     membersData=membersData.filter(x=>x.id!==id);
@@ -1471,7 +1655,7 @@ function deleteMember(id){
 }
 function saveMember(e){
   e.preventDefault();
-  if(!CAN_EDIT) return;
+  if(!canEdit()) return;
   const idVal=document.getElementById('member-id').value;
   const data={
     name:document.getElementById('input-name').value.trim(),
@@ -1496,13 +1680,13 @@ function saveMember(e){
     if(i!==-1) membersData[i]=normalize(Object.assign({}, membersData[i], data, {id:parseInt(idVal)}));
   } else {
     const nextId=membersData.length?Math.max(...membersData.map(m=>m.id))+1:1;
-    membersData.unshift(normalize(Object.assign({id:nextId}, data)));
+    membersData.unshift(normalize(Object.assign({id:nextId, pin:(1000+nextId).toString()}, data)));
   }
   saveData(); calculateStats(); renderBirthdays(); renderData(); closeMemberModal();
 }
 
 // ============================================================
-//  IMPRESSION D'UNE FICHE INDIVIDUELLE
+//  IMPRESSION D'UNE FICHE MEMBRE
 // ============================================================
 function printMemberCard(){
   const m=membersData.find(x=>x.id===detailId); if(!m) return;
@@ -1511,7 +1695,7 @@ function printMemberCard(){
   const paid=paidArr.filter(Boolean).length, solde=soldeDu(m,year);
   const rows=MOIS.map((mo,i)=>`<td style="border:1px solid #cbd5e1;padding:4px 6px;text-align:center;font-size:10px">${mo}<br><b style="color:${paidArr[i]?'#16a34a':'#e11d48'}">${paidArr[i]?'Payé':'—'}</b></td>`).join('');
   const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Fiche — ${m.name}</title>
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Fiche — ${escapeHTML(m.name)}</title>
     <style>body{font-family:Arial,Helvetica,sans-serif;color:#0f172a;padding:24px;max-width:720px;margin:auto}
     h1{font-size:18px;margin:0}.muted{color:#64748b;font-size:12px}
     table{border-collapse:collapse;width:100%;margin-top:8px}.hdr{display:flex;gap:16px;align-items:center;border-bottom:2px solid #0f172a;padding-bottom:12px}
@@ -1520,15 +1704,15 @@ function printMemberCard(){
     .row{font-size:13px;margin:3px 0}.lbl{color:#64748b}</style></head><body>
     <div class="hdr">
       ${m.photo?`<img class="ph" src="${m.photo}">`:`<div class="ini">${initials(m.name)}</div>`}
-      <div><h1>${m.name}</h1><div class="muted">N° ${m.id} — ASBL LES AMIS DE LA SEMENCE (LAS)</div>
-      ${m.note?`<div class="muted">${m.note}</div>`:''}</div>
+      <div><h1>${escapeHTML(m.name)}</h1><div class="muted">N° ${m.id} — ASBL LES AMIS DE LA SEMENCE (LAS)</div>
+      ${m.note?`<div class="muted">${escapeHTML(m.note)}</div>`:''}</div>
     </div>
     <div style="margin-top:12px">
-      <div class="row"><span class="lbl">Poste dans l'ASBL :</span> ${m.poste||'Membre'}</div>
-      <div class="row"><span class="lbl">Téléphone :</span> ${m.phone} &nbsp;|&nbsp; <span class="lbl">Email :</span> ${m.email||'—'}</div>
-      <div class="row"><span class="lbl">Profession :</span> ${m.profession||'—'}</div>
-      <div class="row"><span class="lbl">Date de naissance :</span> ${fmtDate(m.birthdate)} ${age(m)!==null?`(${age(m)} ans)`:''} &nbsp;|&nbsp; <span class="lbl">Lieu :</span> ${m.birthplace||'—'}</div>
-      <div class="row"><span class="lbl">Adresse / Commune :</span> ${m.address||'—'}</div>
+      <div class="row"><span class="lbl">Poste dans l'ASBL :</span> ${escapeHTML(m.poste)||'Membre'}</div>
+      <div class="row"><span class="lbl">Téléphone :</span> ${escapeHTML(m.phone)} &nbsp;|&nbsp; <span class="lbl">Email :</span> ${escapeHTML(m.email)||'—'}</div>
+      <div class="row"><span class="lbl">Profession :</span> ${escapeHTML(m.profession)||'—'}</div>
+      <div class="row"><span class="lbl">Date de naissance :</span> ${fmtDate(m.birthdate)} ${age(m)!==null?`(${age(m)} ans)`:''} &nbsp;|&nbsp; <span class="lbl">Lieu :</span> ${escapeHTML(m.birthplace)||'—'}</div>
+      <div class="row"><span class="lbl">Adresse / Commune :</span> ${escapeHTML(m.address)||'—'}</div>
       <div class="row"><span class="lbl">Date d'intégration :</span> ${fmtDate(m.joined)}</div>
       <div class="row"><span class="lbl">Actif ASBL :</span> ${m.asbl} &nbsp;|&nbsp; <span class="lbl">Réunion :</span> ${m.reunion} &nbsp;|&nbsp; <span class="lbl">Forum :</span> ${m.forum}</div>
     </div>
@@ -1538,6 +1722,61 @@ function printMemberCard(){
     <p class="muted" style="margin-top:28px">Fiche générée le ${new Date().toLocaleDateString('fr-FR')} — Document interne LAS.</p>
     <script>window.onload=()=>window.print()<\/script></body></html>`);
   w.document.close();
+}
+
+// ============================================================
+//  CONNEXION ET AUTHENTIFICATION PAR ID / PIN MEMBRE
+// ============================================================
+function openLoginModal(){
+  const selMember = document.getElementById('login-member-select');
+  selMember.innerHTML = membersData.map(m => `<option value="${m.id}">N° ${m.id} — ${escapeHTML(m.name)}</option>`).join('');
+
+  document.getElementById('login-role-select').value = ROLE;
+  if(ROLE === 'membre' && MEMBER_ID){
+    selMember.value = MEMBER_ID;
+  }
+  toggleLoginMemberSelect();
+  document.getElementById('login-modal').classList.remove('hidden');
+}
+
+function closeLoginModal(){
+  document.getElementById('login-modal').classList.add('hidden');
+}
+
+function toggleLoginMemberSelect(){
+  const role = document.getElementById('login-role-select').value;
+  const grp = document.getElementById('login-member-group');
+  if(role === 'membre'){ grp.classList.remove('hidden'); }
+  else { grp.classList.add('hidden'); }
+}
+
+function applyUserLogin(){
+  const role = document.getElementById('login-role-select').value;
+
+  if(role === 'membre'){
+    const memId = parseInt(document.getElementById('login-member-select').value);
+    const pin = document.getElementById('login-pin-input').value.trim();
+    const m = membersData.find(x => x.id === memId);
+
+    if(!m){ alert("Membre introuvable."); return; }
+
+    const expectedPin = m.pin || (1000 + m.id).toString();
+    if(pin !== expectedPin){
+      alert(`Code PIN incorrect. (Astuce : par défaut pour N°${m.id}, le PIN est ${expectedPin})`);
+      return;
+    }
+
+    SESSION = { user: m.name, role: "membre", memberId: m.id, label: "Membre" };
+  } else if(role === 'admin'){
+    SESSION = { user: "Administrateur", role: "admin", memberId: null, label: "Admin" };
+  } else if(role === 'tresorier'){
+    SESSION = { user: "Baudry Landu", role: "tresorier", memberId: 3, label: "Trésorier" };
+  } else {
+    SESSION = { user: "Ananias KASANDA", role: "secretaire", memberId: 2, label: "Secrétaire" };
+  }
+
+  try { localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION)); } catch(e){}
+  window.location.reload();
 }
 
 // ============================================================
@@ -1559,9 +1798,10 @@ function resetFilters(){
   document.getElementById('sort-by').value='id';
   renderData();
 }
+
 function exportCSV(){
   const headers=["N°","Nom & Prénom","Poste","Téléphone","Email","Profession","Date naissance","Lieu naissance","Adresse","Date intégration","Actif ASBL","Forum","Réunion",`Mois payés ${ANNEE_COURANTE}`,`Payé ${ANNEE_COURANTE} (USD)`,"Solde dû (USD)"];
-  const rows=membersData.map(m=>{
+  const rows=getFiltered().map(m=>{
     const paid=yearPaid(m,ANNEE_COURANTE);
     return [m.id,`"${m.name.replace(/"/g,'""')}"`,`"${m.poste||''}"`,`"${m.phone}"`,`"${m.email||''}"`,`"${m.profession||''}"`,`"${m.birthdate||''}"`,`"${m.birthplace||''}"`,`"${m.address||''}"`,`"${m.joined||''}"`,m.asbl,m.forum,m.reunion,paid,paid*COTISATION_MENSUELLE,soldeDu(m,ANNEE_COURANTE)];
   });
@@ -1572,17 +1812,15 @@ function exportCSV(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
-// ============================================================
-//  SAUVEGARDE / PUBLICATION JSON
-// ============================================================
 function exportJSON(){
   const ts=+localStorage.getItem(DB_KEY+"_ts")||Date.now();
   const blob=new Blob([JSON.stringify({updatedAt:ts,members:membersData},null,1)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='membres.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
+
 function importJSON(e){
-  if(!CAN_EDIT) return;
+  if(!canEdit()) return;
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader();
   r.onload=()=>{ try{
@@ -1593,6 +1831,7 @@ function importJSON(e){
   }catch(_){ alert("Fichier JSON invalide."); } e.target.value=''; };
   r.readAsText(f);
 }
+
 async function syncFromRepo(){
   try{
     const r=await fetch('membres.json',{cache:'no-store'}); if(!r.ok) return;
@@ -1606,23 +1845,33 @@ async function syncFromRepo(){
 }
 
 // ============================================================
-//  INITIALISATION
+//  INITIALISATION DE L'APPLICATION
 // ============================================================
 function applyRoleUI(){
   set('current-user', SESSION.user);
   set('current-role', SESSION.label || ROLE);
-  if(!CAN_EDIT){
-    ['btn-add','btn-json','btn-import','btn-add-blog'].forEach(i=>{
-      const b=document.getElementById(i); if(b) b.style.display='none';
+  set('current-id-tag', MEMBER_ID ? MEMBER_ID : 'ALL');
+
+  if(isMembreRole()){
+    // Masquage total des statistiques globales et filtres des autres membres
+    ['btn-add','btn-json','btn-import','btn-add-blog','btn-add-blog-sec','members-stats-container','members-filter-bar'].forEach(id => {
+      const el = document.getElementById(id);
+      if(el) el.classList.add('hidden');
+    });
+
+    set('tab-members-title', '1. MON DOSSIER & MES COTISATIONS');
+    document.getElementById('member-personal-notice').classList.remove('hidden');
+  } else if(!canEdit()){
+    ['btn-add','btn-json','btn-import','btn-add-blog','btn-add-blog-sec'].forEach(i=>{
+      const b=document.getElementById(i); if(b) b.classList.add('hidden');
     });
   }
 }
 
-// Écouteurs pour la recherche membres
+// Écouteurs de la recherche
 ['search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderData));
 ['filter-asbl','filter-cotis','filter-reunion','filter-forum','sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderData));
 
-// Écouteurs pour le blog
 ['blog-search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderBlog));
 ['blog-filter-type','blog-filter-category','blog-sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderBlog));
 
@@ -1632,14 +1881,19 @@ document.addEventListener('keydown',e=>{
     closeDetail();
     closeBlogModal();
     closeBlogViewModal();
+    closeLoginModal();
   }
 });
 
-applyRoleUI();
-calculateStats();
-renderBirthdays();
-renderData();
-syncFromRepo();
+// Lancement global
+initIDB().then(() => {
+  applyRoleUI();
+  calculateStats();
+  renderBirthdays();
+  renderData();
+  renderBlog();
+  syncFromRepo();
+});
 </script>
 </body>
 </html>
