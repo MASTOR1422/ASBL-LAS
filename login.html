@@ -24,21 +24,21 @@
     <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
         <div class="bg-slate-900 p-8 text-center border-b border-las-700/40 relative">
             <div class="w-20 h-20 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg border border-las-500/30 p-1.5 mb-4">
-                <img src="logo LAS_2.jpg" alt="Logo LAS" class="w-full h-full object-contain rounded-xl" onerror="this.onerror=null;this.src='logo LAS.jpg';this.replaceWith(document.createElement('i'));this.className='fa-solid fa-seedling text-3xl text-las-600';">
+                <i class="fa-solid fa-seedling text-3xl text-las-600"></i>
             </div>
             <h1 class="text-xl font-extrabold text-white tracking-tight flex items-center justify-center gap-2">
                 ASBL LES AMIS DE LA SEMENCE <span class="text-gold-400 text-xs px-2 py-0.5 rounded-full bg-gold-500/20 border border-gold-500/40">LAS</span>
             </h1>
-            <p class="text-slate-300 text-xs mt-1.5 font-medium">Portail officiel d'authentification et de gestion</p>
+            <p class="text-slate-300 text-xs mt-1.5 font-medium">Portail officiel d'authentification &amp; Médias</p>
         </div>
 
         <form id="login-form" class="p-8 space-y-4" onsubmit="handleLogin(event)">
             <div id="error-msg" class="hidden bg-rose-50 text-rose-700 text-xs font-bold p-3.5 rounded-xl text-center border border-rose-200 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-triangle-exclamation"></i> <span>Identifiant, rôle ou mot de passe incorrect.</span>
+                <i class="fa-solid fa-triangle-exclamation"></i> <span>Identifiant ou mot de passe incorrect.</span>
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Rôle sur la plateforme</label>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Rôle</label>
                 <select id="role" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
                     <option value="admin">Administrateur / Coordonnateur</option>
                     <option value="tresorier">Trésorier(e)</option>
@@ -47,81 +47,49 @@
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Identifiant / Nom d'utilisateur</label>
-                <div class="relative">
-                    <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <input type="text" id="username" required placeholder="Ex: ananias, serge, treso..." 
-                           class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
-                </div>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Identifiant</label>
+                <input type="text" id="username" required placeholder="Ex: ananias, serge, treso..." 
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mot de passe / Code PIN</label>
+                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Mot de passe</label>
                 <div class="relative">
-                    <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                     <input type="password" id="password" required placeholder="••••••••" 
-                           class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
                     <button type="button" onclick="togglePassword()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                         <i class="fa-solid fa-eye text-xs" id="eye-icon"></i>
                     </button>
                 </div>
-                <p class="text-[10px] text-slate-400 mt-1">Codes par défaut : Admin (<code class="text-slate-600 font-bold">0000</code> ou <code class="text-slate-600 font-bold">root</code>), Trésorier / Secrétaire (<code class="text-slate-600 font-bold">1234</code>)</p>
+                <p class="text-[10px] text-slate-400 mt-1">Par défaut : <code class="text-slate-600 font-bold">0000</code> ou <code class="text-slate-600 font-bold">1234</code></p>
             </div>
 
             <button type="submit" class="w-full py-3.5 mt-3 bg-las-700 hover:bg-las-600 text-white font-extrabold rounded-xl shadow-lg shadow-las-900/30 transition active:scale-95 flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
                 <i class="fa-solid fa-right-to-bracket text-gold-400"></i>
-                <span>Accéder au répertoire</span>
+                <span>Connexion sécurisée</span>
             </button>
         </form>
     </div>
 
     <script>
         checkAuthGuard(false);
-
         function togglePassword() {
             const pwd = document.getElementById('password');
             const icon = document.getElementById('eye-icon');
             if (pwd.type === 'password') {
-                pwd.type = 'text';
-                icon.className = 'fa-solid fa-eye-slash text-xs';
+                pwd.type = 'text'; icon.className = 'fa-solid fa-eye-slash text-xs';
             } else {
-                pwd.type = 'password';
-                icon.className = 'fa-solid fa-eye text-xs';
+                pwd.type = 'password'; icon.className = 'fa-solid fa-eye text-xs';
             }
         }
-
-        async function handleLogin(e) {
+        function handleLogin(e) {
             e.preventDefault();
             const role = document.getElementById('role').value;
             const user = document.getElementById('username').value.trim().toLowerCase();
             const pass = document.getElementById('password').value.trim();
             
-            // Comptes autorisés par défaut robustes
-            let isValid = false;
-            let labelName = "Membre Dirigeant";
-
-            if (role === 'admin' && (user === 'ananias' || user === 'serge' || user === 'root' || user === 'mastor') && (pass === '0000' || pass === 'root' || pass === '1234')) {
-                isValid = true;
-                labelName = user === 'serge' ? "Serge KITA (Secrétaire Général / Admin)" : "Ananias KASANDA (Coordonnateur / Admin)";
-            } else if (role === 'tresorier' && (pass === '1234' || pass === 'treso')) {
-                isValid = true;
-                labelName = "Baudry LANDU (Trésorier)";
-            } else if (role === 'secretaire' && (pass === '1234' || pass === 'secret')) {
-                isValid = true;
-                labelName = "Secrétariat Général LAS";
-            } else if (pass === '0000' || pass === '1234') {
-                // Connexion universelle tolérante pour les tests
-                isValid = true;
-                labelName = user ? user.toUpperCase() : "Membre LAS";
-            }
-
-            if (isValid) {
-                const sessionData = {
-                    user: user || 'Utilisateur LAS',
-                    role: role,
-                    label: labelName,
-                    memberId: role === 'admin' ? 2 : 3
-                };
+            if (pass === '0000' || pass === '1234' || pass === 'root' || user) {
+                const sessionData = { user: user || 'Utilisateur LAS', role: role, label: role.toUpperCase() };
                 localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
                 sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
                 window.location.replace("index.html");
