@@ -94,7 +94,7 @@
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
-                    <!-- Badge utilisateur connecté avec changement d'accès -->
+                    <!-- Badge utilisateur connecté -->
                     <button onclick="openLoginModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer text-left" title="Changer d'utilisateur ou de rôle">
                         <i class="fa-solid fa-user-shield text-las-400"></i>
                         <div>
@@ -105,7 +105,7 @@
                         <i class="fa-solid fa-arrows-rotate text-[10px] text-gold-400 ml-1"></i>
                     </button>
 
-                    <!-- Actions Membres (Admin / Secrétaire) -->
+                    <!-- Actions Membres -->
                     <div id="header-member-actions" class="flex items-center gap-2">
                         <button onclick="openMemberModal()" id="btn-add" class="px-3.5 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-md shadow-las-900/20 active:scale-95">
                             <i class="fa-solid fa-user-plus text-gold-400"></i><span>Nouveau Membre</span>
@@ -280,7 +280,7 @@
                         <span class="text-gold-400 text-xs font-extrabold uppercase tracking-widest bg-gold-500/20 px-3 py-1 rounded-full border border-gold-500/30">Médiathèque Officielle</span>
                         <h2 class="text-xl sm:text-2xl font-black mt-2">Blog, Photothèque &amp; Documents Assemblés</h2>
                         <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-                            Consultez les Procès-Verbaux (PV), Comptes Rendus de réunions, vidéos et photos officielles de l'ASBL LAS. Téléchargez les documents directement.
+                            Consultez les Procès-Verbaux (PV au format PDF), les photos HD et vidéos officielles de l'ASBL LAS. Téléchargez ou lisez les fichiers directement avec lecteur intégré.
                         </p>
                     </div>
                     <button onclick="openBlogModal()" id="btn-add-blog-sec" class="px-5 py-3 bg-gold-500 hover:bg-gold-400 text-slate-900 font-black rounded-2xl text-xs shadow-lg transition flex items-center gap-2 shrink-0 active:scale-95">
@@ -292,8 +292,8 @@
             <!-- STATISTIQUES DU BLOG -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 no-print">
                 <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-file-contract"></i></div>
-                    <div><div class="text-2xl font-black text-slate-900 leading-none" id="blog-stat-pv">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">PV &amp; Comptes Rendus</div></div>
+                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-file-pdf"></i></div>
+                    <div><div class="text-2xl font-black text-slate-900 leading-none" id="blog-stat-pv">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">PV &amp; Documents PDF</div></div>
                 </div>
                 <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
                     <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-images"></i></div>
@@ -321,11 +321,11 @@
                     <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
                         <select id="blog-filter-type" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500">
                             <option value="ALL">Tous les types</option>
-                            <option value="pv">Procès-Verbaux (PV)</option>
-                            <option value="compte_rendu">Comptes Rendus de Réunions</option>
+                            <option value="pv">Procès-Verbaux (PV PDF)</option>
+                            <option value="compte_rendu">Comptes Rendus (PDF)</option>
                             <option value="phototheque">Photothèque / Images</option>
                             <option value="video">Vidéos</option>
-                            <option value="document">Autres Documents Officiels</option>
+                            <option value="document">Autres Documents PDF</option>
                         </select>
 
                         <select id="blog-filter-category" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500">
@@ -512,7 +512,7 @@
     <div id="blog-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
         <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-gold-500/30 sticky top-0">
-                <h3 class="font-bold text-base flex items-center gap-2" id="blog-modal-title"><i class="fa-solid fa-cloud-arrow-up text-gold-400"></i><span>Ajouter un Document / Média / PV</span></h3>
+                <h3 class="font-bold text-base flex items-center gap-2" id="blog-modal-title"><i class="fa-solid fa-cloud-arrow-up text-gold-400"></i><span>Publier un Document (PDF) / Média</span></h3>
                 <button onclick="closeBlogModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form id="blog-form" onsubmit="saveBlogEntry(event)" class="p-6 space-y-4">
@@ -526,12 +526,12 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Type de contenu *</label>
-                        <select id="blog-input-type" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-gold-500">
-                            <option value="pv">Procès-Verbal (PV)</option>
-                            <option value="compte_rendu">Compte Rendu de Réunion</option>
-                            <option value="phototheque">Photothèque (Image)</option>
-                            <option value="video">Vidéo / Clip</option>
-                            <option value="document">Autre Document Officiel</option>
+                        <select id="blog-input-type" required onchange="updateBlogFileAccept()" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-gold-500">
+                            <option value="pv">Procès-Verbal (Strictement PDF)</option>
+                            <option value="compte_rendu">Compte Rendu (Strictement PDF)</option>
+                            <option value="phototheque">Photothèque (Toutes Images)</option>
+                            <option value="video">Vidéo / Clip (Toutes Vidéos)</option>
+                            <option value="document">Autre Document Officiel (PDF)</option>
                         </select>
                     </div>
                     <div>
@@ -562,13 +562,15 @@
                     <textarea id="blog-input-desc" rows="3" placeholder="Saisissez un bref résumé des résolutions, de la réunion ou de la photo..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:bg-white transition"></textarea>
                 </div>
 
-                <!-- Joindre un fichier -->
+                <!-- Joindre un fichier avec restriction automatique -->
                 <div class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Joindre un fichier (PDF, Word, Excel, Image, Vidéo, ZIP...)</label>
-                    <input type="file" id="blog-input-file" onchange="handleBlogFileUpload(event)" class="block w-full text-[11px] text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gold-500 file:text-slate-900 hover:file:bg-gold-400 cursor-pointer">
-                    <div id="blog-file-preview-info" class="hidden mt-2 text-xs font-mono text-las-800 font-bold flex items-center justify-between bg-las-100 p-2 rounded-lg">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="blog-file-input-label">Joindre un fichier (PDF uniquement pour les documents)</label>
+                    <input type="file" id="blog-input-file" accept=".pdf,application/pdf" onchange="handleBlogFileUpload(event)" class="block w-full text-[11px] text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gold-500 file:text-slate-900 hover:file:bg-gold-400 cursor-pointer">
+                    <span class="text-[10px] text-slate-500 mt-1 block" id="blog-file-format-hint">Formats : PDF uniquement pour PV/Documents · Images (JPG, PNG, WEBP) · Vidéos (MP4, WEBM).</span>
+                    
+                    <div id="blog-file-preview-info" class="hidden mt-3 text-xs font-mono text-las-800 font-bold flex items-center justify-between bg-las-100 p-2.5 rounded-xl border border-las-300">
                         <span id="blog-file-name-display"><i class="fa-solid fa-paperclip mr-1"></i> Fichier chargé</span>
-                        <button type="button" onclick="removeBlogFile()" class="text-rose-600 hover:underline"><i class="fa-solid fa-trash"></i> Retirer</button>
+                        <button type="button" onclick="removeBlogFile()" class="text-rose-600 hover:underline text-xs"><i class="fa-solid fa-trash"></i> Retirer</button>
                     </div>
                 </div>
 
@@ -580,11 +582,11 @@
         </div>
     </div>
 
-    <!-- ===================== MODALE APERÇU / DÉTAIL D'UN DOCUMENT DU BLOG ===================== -->
+    <!-- ===================== MODALE APERÇU / LECTEUR SÉCURISÉ DES MÉDIAS & PDF ===================== -->
     <div id="blog-view-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 no-print overflow-y-auto">
-        <div class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden my-4 max-h-[90vh] flex flex-col">
+        <div class="bg-white rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden my-4 max-h-[92vh] flex flex-col">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white shrink-0">
-                <h3 class="font-bold text-base flex items-center gap-2" id="blog-view-title"><i class="fa-solid fa-file-contract text-gold-400"></i> Détails de la publication</h3>
+                <h3 class="font-bold text-base flex items-center gap-2" id="blog-view-title"><i class="fa-solid fa-file-contract text-gold-400"></i> Consultation du Document</h3>
                 <button onclick="closeBlogViewModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div id="blog-view-content" class="p-6 space-y-4 overflow-y-auto flex-grow"></div>
@@ -603,6 +605,26 @@ function escapeHTML(str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#039;");
+}
+
+// Convertit un DataURL Base64 en Blob binaire strict pour garantir l'ouverture parfaite des téléchargements
+function dataURLtoBlob(dataurl) {
+  if (!dataurl || !dataurl.includes(',')) return null;
+  try {
+    const arr = dataurl.split(',');
+    const mimeMatch = arr[0].match(/:(.*?);/);
+    const mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  } catch(e) {
+    console.error("Erreur conversion binaire Blob", e);
+    return null;
+  }
 }
 
 // ============================================================
@@ -643,12 +665,12 @@ const COTISATION_MENSUELLE = 10;
 const MOIS = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 const ANNEE_COURANTE = new Date().getFullYear();
 const DB_KEY = "las_members_v2";
-const BLOG_DB_KEY = "las_blog_v1";
+const BLOG_DB_KEY = "las_blog_v2";
 
 // ============================================================
-//  BASE DE DONNÉES INDEXEDDB POUR FICHIERS VOLUMINEUX
+//  BASE DE DONNÉES INDEXEDDB POUR STOCKAGE MEDIA LOURD
 // ============================================================
-const IDB_NAME = "LAS_MediaStore_v2";
+const IDB_NAME = "LAS_MediaStore_v3";
 let idbConn = null;
 
 function initIDB(){
@@ -689,7 +711,7 @@ function getFileFromIDB(id){
 }
 
 // ============================================================
-//  DONNÉES OFFICIELLES ET CODES PIN DES 37 MEMBRES
+//  DONNÉES OFFICIELLES ET CODES PIN DES MEMBRES
 // ============================================================
 const DEFAULT_MEMBERS = [
   { id:1, pin:"1001", name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
@@ -762,7 +784,7 @@ function saveData(){
 }
 
 // ============================================================
-//  DONNÉES DU BLOG & MÉDIATHÈQUE
+//  DONNÉES DU BLOG & MÉDIATHÈQUE DÉFAUT
 // ============================================================
 const DEFAULT_BLOG = [
   {
@@ -786,8 +808,8 @@ const DEFAULT_BLOG = [
     author: "Secrétariat Général",
     desc: "Synthèse des échanges, état des cotisations mensuelles et planification de l'entraide sociale.",
     fileData: "",
-    fileName: "CR_Reunion_Avril_2026.docx",
-    fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    fileName: "CR_Reunion_Avril_2026.pdf",
+    fileType: "application/pdf"
   },
   {
     id: 103,
@@ -817,7 +839,7 @@ function saveBlogData(){
   try {
     const lightweight = blogData.map(item => {
       const clone = Object.assign({}, item);
-      if (clone.fileData && clone.fileData.length > 300000) { clone.fileData = ""; }
+      if (clone.fileData && clone.fileData.length > 200000) { clone.fileData = ""; }
       return clone;
     });
     localStorage.setItem(BLOG_DB_KEY, JSON.stringify(lightweight));
@@ -1023,7 +1045,6 @@ function renderBirthdays(){
 //  RENDU AVEC ISOLATION DES DONNÉES PAR MEMBRE
 // ============================================================
 function getFiltered(){
-  // SECURITY BY DESIGN : Si c'est un membre standard, renvoie STRICTEMENT son seul dossier
   if(isMembreRole() && MEMBER_ID){
     return membersData.filter(m => m.id === MEMBER_ID);
   }
@@ -1129,9 +1150,29 @@ function renderData(){
 }
 
 // ============================================================
-//  BLOG, PHOTOTHÈQUE ET UPLOAD DE FICHIERS (INDEXEDDB)
+//  BLOG, PHOTOTHÈQUE, LECTEUR PDF & APERÇUS DYNAMIQUES
 // ============================================================
 let currentBlogFile = null;
+
+function updateBlogFileAccept(){
+  const type = document.getElementById('blog-input-type').value;
+  const input = document.getElementById('blog-input-file');
+  const label = document.getElementById('blog-file-input-label');
+
+  if(type === 'pv' || type === 'compte_rendu' || type === 'document'){
+    input.accept = ".pdf,application/pdf";
+    label.innerText = "Joindre un document (Format PDF obligatoire)";
+  } else if(type === 'phototheque'){
+    input.accept = "image/*";
+    label.innerText = "Joindre une image / photo (JPG, PNG, WEBP...)";
+  } else if(type === 'video'){
+    input.accept = "video/*";
+    label.innerText = "Joindre une vidéo (MP4, WEBM, OGG...)";
+  } else {
+    input.accept = ".pdf,image/*,video/*";
+    label.innerText = "Joindre un fichier";
+  }
+}
 
 function renderBlog(){
   const search = document.getElementById('blog-search-input').value.toLowerCase().trim();
@@ -1154,7 +1195,7 @@ function renderBlog(){
     return new Date(b.date) - new Date(a.date);
   });
 
-  const countPV = blogData.filter(x => x.type === 'pv' || x.type === 'compte_rendu').length;
+  const countPV = blogData.filter(x => x.type === 'pv' || x.type === 'compte_rendu' || x.type === 'document').length;
   const countPhotos = blogData.filter(x => x.type === 'phototheque').length;
   const countVideos = blogData.filter(x => x.type === 'video').length;
 
@@ -1171,18 +1212,31 @@ function renderBlog(){
   }
 
   grid.innerHTML = filtered.map(item => {
-    let typeBadge = '<span class="bg-indigo-100 text-indigo-800 border-indigo-200 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase">Document</span>';
+    let typeBadge = '<span class="bg-indigo-100 text-indigo-800 border-indigo-200 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase">Document PDF</span>';
     let mediaPreview = '';
 
     if(item.type === 'pv') {
-      typeBadge = '<span class="bg-amber-100 text-amber-900 border-amber-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase"><i class="fa-solid fa-file-contract mr-1"></i>Procès-Verbal</span>';
-    } else if(item.type === 'compte_rendu') {
-      typeBadge = '<span class="bg-blue-100 text-blue-800 border-blue-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase"><i class="fa-solid fa-clipboard-list mr-1"></i>Compte Rendu</span>';
+      typeBadge = '<span class="bg-amber-100 text-amber-900 border-amber-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase"><i class="fa-solid fa-file-pdf mr-1 text-rose-600"></i>PV (PDF)</span>';
+      mediaPreview = `<div class="h-36 w-full bg-slate-100 border-b border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200/80 transition" onclick="viewBlogItem(${item.id})">
+        <i class="fa-solid fa-file-pdf text-4xl text-rose-600 mb-1"></i>
+        <span class="text-[11px] font-bold text-slate-700">Aperçu du PDF disponible</span>
+      </div>`;
+    } else if(item.type === 'compte_rendu' || item.type === 'document') {
+      typeBadge = '<span class="bg-blue-100 text-blue-800 border-blue-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase"><i class="fa-solid fa-file-pdf mr-1 text-rose-600"></i>Compte Rendu (PDF)</span>';
+      mediaPreview = `<div class="h-36 w-full bg-slate-100 border-b border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200/80 transition" onclick="viewBlogItem(${item.id})">
+        <i class="fa-solid fa-file-pdf text-4xl text-rose-600 mb-1"></i>
+        <span class="text-[11px] font-bold text-slate-700">Aperçu du PDF disponible</span>
+      </div>`;
     } else if(item.type === 'phototheque') {
       typeBadge = '<span class="bg-emerald-100 text-emerald-800 border-emerald-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase"><i class="fa-solid fa-camera-retro mr-1"></i>Photothèque</span>';
       if(item.fileData && item.fileType.startsWith('image/')) {
         mediaPreview = `<div class="h-48 w-full bg-slate-900 overflow-hidden relative group cursor-pointer" onclick="viewBlogItem(${item.id})">
           <img src="${item.fileData}" alt="${escapeHTML(item.title)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+        </div>`;
+      } else {
+        mediaPreview = `<div class="h-36 w-full bg-slate-100 border-b border-slate-200 flex flex-col items-center justify-center cursor-pointer" onclick="viewBlogItem(${item.id})">
+          <i class="fa-solid fa-image text-3xl text-emerald-600 mb-1"></i>
+          <span class="text-[11px] font-bold text-slate-600">Image jointe</span>
         </div>`;
       }
     } else if(item.type === 'video') {
@@ -1190,6 +1244,11 @@ function renderBlog(){
       if(item.fileData && item.fileType.startsWith('video/')) {
         mediaPreview = `<div class="h-48 w-full bg-slate-950 flex items-center justify-center">
           <video src="${item.fileData}" controls class="max-h-full max-w-full"></video>
+        </div>`;
+      } else {
+        mediaPreview = `<div class="h-36 w-full bg-slate-900 text-white flex flex-col items-center justify-center cursor-pointer" onclick="viewBlogItem(${item.id})">
+          <i class="fa-solid fa-circle-play text-4xl text-rose-500 mb-1"></i>
+          <span class="text-[11px] font-bold">Lire la vidéo</span>
         </div>`;
       }
     }
@@ -1222,7 +1281,7 @@ function renderBlog(){
       </div>
 
       <div class="bg-slate-50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
-        <button onclick="viewBlogItem(${item.id})" class="text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center gap-1.5"><i class="fa-solid fa-eye text-gold-600"></i> Consulter</button>
+        <button onclick="viewBlogItem(${item.id})" class="text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center gap-1.5"><i class="fa-solid fa-eye text-gold-600"></i> Aperçu / Consulter</button>
         ${canEdit() ? `<button onclick="deleteBlogItem(${item.id})" class="text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1"><i class="fa-solid fa-trash"></i> Supprimer</button>` : ''}
       </div>
     </div>`;
@@ -1235,6 +1294,7 @@ function openBlogModal(){
   currentBlogFile = null;
   document.getElementById('blog-file-preview-info').classList.add('hidden');
   document.getElementById('blog-input-date').value = new Date().toISOString().slice(0,10);
+  updateBlogFileAccept();
   document.getElementById('blog-modal').classList.remove('hidden');
 }
 
@@ -1246,16 +1306,25 @@ function handleBlogFileUpload(e){
   const file = e.target.files[0];
   if(!file) return;
 
+  const type = document.getElementById('blog-input-type').value;
+
+  // Validation stricte du PDF pour les documents
+  if((type === 'pv' || type === 'compte_rendu' || type === 'document') && !file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf'){
+    alert("Format refusé : Les procès-verbaux et documents officiels doivent STRICTEMENT être au format PDF.");
+    e.target.value = '';
+    return;
+  }
+
   const btnSubmit = document.getElementById('btn-submit-blog');
   btnSubmit.disabled = true;
-  btnSubmit.innerText = "Chargement...";
+  btnSubmit.innerText = "Chargement du fichier...";
 
   const reader = new FileReader();
   reader.onload = ev => {
     currentBlogFile = {
       fileData: ev.target.result,
       fileName: file.name,
-      fileType: file.type || "application/octet-stream"
+      fileType: file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : "application/octet-stream")
     };
     document.getElementById('blog-file-name-display').innerHTML = `<i class="fa-solid fa-paperclip mr-1"></i> ${escapeHTML(file.name)} (${Math.round(file.size/1024)} Ko)`;
     document.getElementById('blog-file-preview-info').classList.remove('hidden');
@@ -1291,9 +1360,9 @@ async function saveBlogEntry(e){
     date,
     author,
     desc,
-    fileData: (currentBlogFile && currentBlogFile.fileData.length < 300000) ? currentBlogFile.fileData : "",
-    fileName: currentBlogFile ? currentBlogFile.fileName : "",
-    fileType: currentBlogFile ? currentBlogFile.fileType : ""
+    fileData: (currentBlogFile && currentBlogFile.fileData.length < 200000) ? currentBlogFile.fileData : "",
+    fileName: currentBlogFile ? currentBlogFile.fileName : (type==='pv'||type==='compte_rendu' ? title+'.pdf' : ''),
+    fileType: currentBlogFile ? currentBlogFile.fileType : (type==='pv'||type==='compte_rendu' ? 'application/pdf' : '')
   };
 
   if(currentBlogFile){
@@ -1326,16 +1395,31 @@ async function viewBlogItem(id){
   document.getElementById('blog-view-title').innerHTML = `<i class="fa-solid fa-file-contract text-gold-400"></i> ${escapeHTML(item.title)}`;
 
   let mediaDisplay = '';
+
   if(fileData) {
-    if(fileType.startsWith('image/')) {
-      mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 max-h-96 bg-slate-900 flex items-center justify-center">
-        <img src="${fileData}" class="max-h-96 w-auto object-contain">
+    if(fileType.startsWith('image/') || item.type === 'phototheque') {
+      mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 max-h-[500px] bg-slate-900 flex items-center justify-center">
+        <img src="${fileData}" class="max-h-[500px] w-auto object-contain">
       </div>`;
-    } else if(fileType.startsWith('video/')) {
+    } else if(fileType.startsWith('video/') || item.type === 'video') {
       mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900">
-        <video src="${fileData}" controls class="w-full max-h-96"></video>
+        <video src="${fileData}" controls class="w-full max-h-[500px]"></video>
+      </div>`;
+    } else if(fileType === 'application/pdf' || item.fileName.endsWith('.pdf') || item.type === 'pv' || item.type === 'compte_rendu') {
+      mediaDisplay = `<div class="space-y-2">
+        <div class="flex items-center justify-between text-xs font-bold text-slate-700 bg-slate-100 p-2 rounded-lg border border-slate-200">
+          <span><i class="fa-solid fa-file-pdf text-rose-600 mr-1.5"></i> Aperçu dynamique du document PDF</span>
+          <a href="${fileData}" target="_blank" class="text-las-700 hover:underline flex items-center gap-1"><i class="fa-solid fa-up-right-from-square"></i> Plein écran</a>
+        </div>
+        <iframe src="${fileData}#toolbar=0" class="w-full h-[500px] rounded-xl border border-slate-300 bg-slate-100"></iframe>
       </div>`;
     }
+  } else if(item.type === 'pv' || item.type === 'compte_rendu' || item.type === 'document') {
+    mediaDisplay = `<div class="p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-3">
+      <i class="fa-solid fa-file-pdf text-5xl text-rose-600"></i>
+      <h4 class="font-extrabold text-slate-800 text-sm">Document PDF Officiel de l'ASBL LAS</h4>
+      <p class="text-xs text-slate-500 max-w-md mx-auto">Ce document est disponible au téléchargement binaire direct via le bouton ci-dessous.</p>
+    </div>`;
   }
 
   document.getElementById('blog-view-content').innerHTML = `
@@ -1351,13 +1435,13 @@ async function viewBlogItem(id){
       ${mediaDisplay}
 
       <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed space-y-2">
-        <h4 class="font-extrabold text-slate-900 uppercase tracking-wider text-[10px]">Description &amp; Détails :</h4>
+        <h4 class="font-extrabold text-slate-900 uppercase tracking-wider text-[10px]">Description &amp; Résumé :</h4>
         <p class="whitespace-pre-line">${escapeHTML(item.desc) || 'Aucun détail supplémentaire rédigé.'}</p>
       </div>
 
       <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
         <span>Auteur / Origine : <strong>${escapeHTML(item.author) || 'ASBL LAS'}</strong></span>
-        ${item.fileName ? `<button onclick="downloadBlogFile(${item.id})" class="px-4 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-download"></i> Télécharger (${escapeHTML(item.fileName)})</button>` : ''}
+        ${item.fileName ? `<button onclick="downloadBlogFile(${item.id})" class="px-5 py-2.5 bg-las-700 hover:bg-las-600 text-white font-extrabold rounded-xl transition flex items-center gap-2 shadow-md"><i class="fa-solid fa-download"></i> Télécharger (${escapeHTML(item.fileName)})</button>` : ''}
       </div>
     </div>`;
 
@@ -1373,7 +1457,7 @@ async function downloadBlogFile(id){
   if(!item) return;
 
   let fileData = item.fileData;
-  let fileName = item.fileName || "document_las.txt";
+  let fileName = item.fileName || (item.title + ".pdf");
 
   const idbRecord = await getFileFromIDB(id);
   if(idbRecord && idbRecord.fileData){
@@ -1381,21 +1465,29 @@ async function downloadBlogFile(id){
     fileName = idbRecord.fileName || fileName;
   }
 
-  // Génération automatique d'un document téléchargeable si l'entrée de démo n'a pas de fichier physique
-  if(!fileData){
+  // Si le fichier de démo n'a pas de data binaire, on génère un document PDF textuel de secours
+  let downloadUrl = "";
+  if(fileData && fileData.startsWith('data:')){
+    const blob = dataURLtoBlob(fileData);
+    if(blob){
+      downloadUrl = URL.createObjectURL(blob);
+    } else {
+      downloadUrl = fileData;
+    }
+  } else {
     const content = `ASBL LES AMIS DE LA SEMENCE (LAS)\n----------------------------------------\n` +
                     `DOCUMENT OFFICIEL : ${item.title}\n` +
                     `CATÉGORIE : ${item.category}\n` +
                     `DATE : ${item.date}\n` +
                     `AUTEUR : ${item.author}\n\n` +
                     `RÉSUMÉ ET DÉTAILS :\n${item.desc}\n\n` +
-                    `Généré depuis la plateforme ASBL LAS.`;
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    fileData = URL.createObjectURL(blob);
+                    `Document officiel généré depuis la plateforme ASBL LAS.`;
+    const blob = new Blob([content], { type: 'application/pdf;charset=utf-8' });
+    downloadUrl = URL.createObjectURL(blob);
   }
 
   const a = document.createElement('a');
-  a.href = fileData;
+  a.href = downloadUrl;
   a.download = fileName;
   document.body.appendChild(a);
   a.click();
@@ -1422,7 +1514,6 @@ let detailId = null;
 function openDetail(id){
   const m = membersData.find(x=>x.id===id); if(!m) return;
 
-  // SECURITÉ BY DESIGN : Un membre simple est bloqué s'il essaie d'ouvrir l'ID d'un autre
   if(isMembreRole() && MEMBER_ID && id !== MEMBER_ID){
     id = MEMBER_ID;
   }
@@ -1853,7 +1944,6 @@ function applyRoleUI(){
   set('current-id-tag', MEMBER_ID ? MEMBER_ID : 'ALL');
 
   if(isMembreRole()){
-    // Masquage total des statistiques globales et filtres des autres membres
     ['btn-add','btn-json','btn-import','btn-add-blog','btn-add-blog-sec','members-stats-container','members-filter-bar'].forEach(id => {
       const el = document.getElementById(id);
       if(el) el.classList.add('hidden');
