@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>ASBL LES AMIS DE LA SEMENCE (LAS) — Répertoire des Membres</title>
+    <title>ASBL LES AMIS DE LA SEMENCE (LAS) — Portail Officiel</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -51,7 +51,7 @@
         ::-webkit-scrollbar { height:6px; width:6px; }
         ::-webkit-scrollbar-track { background:#f1f5f9; }
         ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
-    .fl{display:block;font-size:.75rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem}
+        .fl{display:block;font-size:.75rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.25rem}
         .fi{width:100%;padding:.55rem .85rem;background:#f8fafc;border:1px solid #e2e8f0;border-radius:.75rem;font-size:.75rem;font-weight:600;color:#1e293b}
         .fi:focus{outline:none;box-shadow:0 0 0 2px #22c55e;background:#fff}
         .sec{font-size:.65rem;font-weight:800;color:#15803d;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid #dcfce7;padding-bottom:.25rem;margin-top:.5rem}
@@ -87,8 +87,18 @@
                         <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
                             ASBL LES AMIS DE LA SEMENCE <span class="text-gold-400 font-bold text-xs px-2.5 py-0.5 rounded-full bg-gold-500/20 border border-gold-500/40">LAS</span>
                         </h1>
-                        <p class="text-xs text-slate-300 font-medium">Répertoire officiel des membres &amp; Suivi des cotisations</p>
+                        <p class="text-xs text-slate-300 font-medium">Répertoire Officiel, Cotisations &amp; Documentation Médias</p>
                     </div>
+                </div>
+
+                <!-- ONGLET DE NAVIGATION PRINCIPAL -->
+                <div class="flex items-center gap-2 bg-slate-800/80 p-1.5 rounded-2xl border border-slate-700/60 shadow-inner w-full lg:w-auto justify-center">
+                    <button id="nav-tab-members" onclick="switchMainTab('members')" class="px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 bg-las-600 text-white shadow-md">
+                        <i class="fa-solid fa-users"></i><span>Répertoire Membres</span>
+                    </button>
+                    <button id="nav-tab-blog" onclick="switchMainTab('blog')" class="px-4 py-2 rounded-xl text-xs font-extrabold text-slate-300 hover:text-white transition flex items-center gap-2">
+                        <i class="fa-solid fa-photo-film text-gold-400"></i><span>Blog &amp; Documentation</span>
+                    </button>
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
@@ -99,18 +109,27 @@
                         <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-las-700/40 text-las-200 font-bold uppercase" id="current-role">—</span>
                     </div>
 
-                    <button onclick="openMemberModal()" id="btn-add" class="px-3.5 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-md shadow-las-900/20 active:scale-95">
-                        <i class="fa-solid fa-user-plus text-gold-400"></i><span>Nouveau Membre</span>
-                    </button>
-                    <button onclick="exportCSV()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95">
-                        <i class="fa-solid fa-file-csv text-emerald-400"></i><span class="hidden md:inline">Exporter</span> CSV
-                    </button>
-                    <button onclick="exportJSON()" id="btn-json" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95" title="Sauvegarde / publication (membres.json)"><i class="fa-solid fa-cloud-arrow-down text-sky-400"></i><span class="hidden md:inline">Sauvegarde</span> JSON</button>
-                    <button onclick="document.getElementById('import-json').click()" id="btn-import" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95" title="Restaurer depuis un fichier JSON"><i class="fa-solid fa-cloud-arrow-up text-amber-400"></i><span class="hidden md:inline">Importer</span></button>
-                    <input type="file" id="import-json" accept=".json,application/json" class="hidden" onchange="importJSON(event)">
-                    <button onclick="window.print()" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-las-600 hover:from-emerald-500 hover:to-las-500 text-white font-extrabold rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-900/30 active:scale-95 ring-2 ring-emerald-400/20">
-                        <i class="fa-solid fa-print"></i><span>Imprimer / PDF</span>
-                    </button>
+                    <div id="header-member-actions" class="flex items-center gap-2">
+                        <button onclick="openMemberModal()" id="btn-add" class="px-3.5 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-md shadow-las-900/20 active:scale-95">
+                            <i class="fa-solid fa-user-plus text-gold-400"></i><span>Nouveau Membre</span>
+                        </button>
+                        <button onclick="exportCSV()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95">
+                            <i class="fa-solid fa-file-csv text-emerald-400"></i><span class="hidden md:inline">CSV</span>
+                        </button>
+                        <button onclick="exportJSON()" id="btn-json" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95" title="Sauvegarde / publication (membres.json)"><i class="fa-solid fa-cloud-arrow-down text-sky-400"></i><span class="hidden md:inline">JSON</span></button>
+                        <button onclick="document.getElementById('import-json').click()" id="btn-import" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-slate-700 active:scale-95" title="Restaurer depuis un fichier JSON"><i class="fa-solid fa-cloud-arrow-up text-amber-400"></i></button>
+                        <input type="file" id="import-json" accept=".json,application/json" class="hidden" onchange="importJSON(event)">
+                        <button onclick="window.print()" class="px-3.5 py-2 bg-gradient-to-r from-emerald-600 to-las-600 hover:from-emerald-500 hover:to-las-500 text-white font-extrabold rounded-xl text-xs transition flex items-center gap-2 shadow-lg shadow-emerald-900/30 active:scale-95 ring-2 ring-emerald-400/20">
+                            <i class="fa-solid fa-print"></i><span>Imprimer</span>
+                        </button>
+                    </div>
+
+                    <div id="header-blog-actions" class="hidden flex items-center gap-2">
+                        <button onclick="openBlogModal()" id="btn-add-blog" class="px-3.5 py-2 bg-gold-600 hover:bg-gold-500 text-slate-900 font-extrabold rounded-xl text-xs transition flex items-center gap-2 shadow-md active:scale-95">
+                            <i class="fa-solid fa-cloud-arrow-up"></i><span>Publier un Document / Média</span>
+                        </button>
+                    </div>
+
                     <button onclick="logout()" class="px-3 py-2 bg-rose-900/40 hover:bg-rose-800/60 text-rose-200 font-bold rounded-xl text-xs transition flex items-center gap-2 border border-rose-800 active:scale-95" title="Se déconnecter">
                         <i class="fa-solid fa-right-from-bracket"></i><span class="hidden sm:inline">Quitter</span>
                     </button>
@@ -147,78 +166,156 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex-grow w-full">
 
-        <!-- ===================== CARTES STATISTIQUES ===================== -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-6 no-print">
-            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-users"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-total">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Membres</div></div></div>
-            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-user-check"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-actifs">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Actifs ASBL</div></div></div>
-            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-circle-check"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-ajour">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">À jour</div></div></div>
-            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-retard">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">En retard</div></div></div>
-            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-sack-dollar"></i></div><div><div class="text-xl font-black text-slate-900 leading-none"><span id="stat-encaisse">0</span><span class="text-xs font-bold text-slate-400">$</span></div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Encaissé</div></div></div>
-            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-hand-holding-dollar"></i></div><div><div class="text-xl font-black text-slate-900 leading-none"><span id="stat-attendu">0</span><span class="text-xs font-bold text-slate-400">$</span></div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Attendu/an</div></div></div>
-        </div>
+        <!-- ========================================================================= -->
+        <!-- SECTION 1 : RÉPERTOIRE DES MEMBRES & COTISATIONS                         -->
+        <!-- ========================================================================= -->
+        <section id="section-members" class="space-y-6">
 
-        <!-- ===================== RAPPEL ANNIVERSAIRES ===================== -->
-        <div id="birthday-banner" class="hidden no-print mb-6"></div>
+            <!-- CARTES STATISTIQUES -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 no-print">
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-users"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-total">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Membres</div></div></div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-user-check"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-actifs">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Actifs ASBL</div></div></div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-circle-check"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-ajour">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">À jour</div></div></div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-triangle-exclamation"></i></div><div><div class="text-2xl font-black text-slate-900 leading-none" id="stat-retard">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">En retard</div></div></div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-sack-dollar"></i></div><div><div class="text-xl font-black text-slate-900 leading-none"><span id="stat-encaisse">0</span><span class="text-xs font-bold text-slate-400">$</span></div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Encaissé</div></div></div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-hand-holding-dollar"></i></div><div><div class="text-xl font-black text-slate-900 leading-none"><span id="stat-attendu">0</span><span class="text-xs font-bold text-slate-400">$</span></div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Attendu/an</div></div></div>
+            </div>
 
-        <!-- ===================== BARRE DE FILTRES ===================== -->
-        <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm mb-6 no-print space-y-3">
-            <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
-                <div class="relative w-full lg:w-80">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-                    <input type="text" id="search-input" placeholder="Rechercher nom, téléphone, N°..." class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-white transition">
-                    <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
-                </div>
-                <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
-                    <select id="filter-asbl" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
-                        <option value="ALL">Statut ASBL</option><option value="OUI">Actif ASBL</option><option value="NON">Inactif ASBL</option>
-                    </select>
-                    <select id="filter-cotis" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
-                        <option value="ALL">Cotisation</option><option value="AJOUR">À jour</option><option value="RETARD">En retard</option>
-                    </select>
-                    <select id="filter-reunion" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
-                        <option value="ALL">Présence réunion</option><option value="OUI">Présent</option><option value="NON">Absent</option><option value="EXEMPTER">Exempté</option>
-                    </select>
-                    <select id="filter-forum" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
-                        <option value="ALL">Forum</option><option value="OUI">Actif</option><option value="NON">Inactif</option><option value="PARTIEL">Partiel</option><option value="OCCASIONEL">Occasionnel</option><option value="SOUVENT">Souvent</option><option value="PARFOIS">Parfois</option>
-                    </select>
-                    <select id="sort-by" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
-                        <option value="id">Tri : N°</option><option value="name">Tri : Nom A→Z</option><option value="solde">Tri : Solde dû</option><option value="paid">Tri : Mois payés</option>
-                    </select>
-                    <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
-                        <button id="btn-view-table" onclick="setView('table')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm"><i class="fa-solid fa-table-list text-las-700"></i><span class="hidden sm:inline">Tableau</span></button>
-                        <button id="btn-view-cards" onclick="setView('cards')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5"><i class="fa-solid fa-address-card"></i><span class="hidden sm:inline">Cartes</span></button>
+            <!-- RAPPEL ANNIVERSAIRES -->
+            <div id="birthday-banner" class="hidden no-print"></div>
+
+            <!-- BARRE DE FILTRES MEMBRES -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm no-print space-y-3">
+                <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+                    <div class="relative w-full lg:w-80">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="search-input" placeholder="Rechercher nom, téléphone, N°..." class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-white transition">
+                        <button id="clear-search" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
+                        <select id="filter-asbl" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
+                            <option value="ALL">Statut ASBL</option><option value="OUI">Actif ASBL</option><option value="NON">Inactif ASBL</option>
+                        </select>
+                        <select id="filter-cotis" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
+                            <option value="ALL">Cotisation</option><option value="AJOUR">À jour</option><option value="RETARD">En retard</option>
+                        </select>
+                        <select id="filter-reunion" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
+                            <option value="ALL">Présence réunion</option><option value="OUI">Présent</option><option value="NON">Absent</option><option value="EXEMPTER">Exempté</option>
+                        </select>
+                        <select id="filter-forum" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
+                            <option value="ALL">Forum</option><option value="OUI">Actif</option><option value="NON">Inactif</option><option value="PARTIEL">Partiel</option><option value="OCCASIONEL">Occasionnel</option><option value="SOUVENT">Souvent</option><option value="PARFOIS">Parfois</option>
+                        </select>
+                        <select id="sort-by" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-las-500">
+                            <option value="id">Tri : N°</option><option value="name">Tri : Nom A→Z</option><option value="solde">Tri : Solde dû</option><option value="paid">Tri : Mois payés</option>
+                        </select>
+                        <div class="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                            <button id="btn-view-table" onclick="setView('table')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm"><i class="fa-solid fa-table-list text-las-700"></i><span class="hidden sm:inline">Tableau</span></button>
+                            <button id="btn-view-cards" onclick="setView('cards')" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5"><i class="fa-solid fa-address-card"></i><span class="hidden sm:inline">Cartes</span></button>
+                        </div>
                     </div>
                 </div>
+                <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+                    <span>Résultats : <strong id="filter-count" class="text-slate-800">0</strong> membres</span>
+                    <button onclick="resetFilters()" class="text-las-700 hover:text-las-900 font-semibold text-[11px] underline">Réinitialiser les filtres</button>
+                </div>
             </div>
-            <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
-                <span>Résultats : <strong id="filter-count" class="text-slate-800">0</strong> membres</span>
-                <button onclick="resetFilters()" class="text-las-700 hover:text-las-900 font-semibold text-[11px] underline">Réinitialiser les filtres</button>
-            </div>
-        </div>
 
-        <!-- ===================== VUE TABLEAU ===================== -->
-        <div id="view-table" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden mb-8 print-container">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-900 text-slate-100 text-[11px] font-extrabold uppercase tracking-wider border-b-2 border-slate-900">
-                            <th class="py-3 px-3 text-center w-12">N°</th>
-                            <th class="py-3 px-4">Membre</th>
-                            <th class="py-3 px-4">Téléphone / WhatsApp</th>
-                            <th class="py-3 px-3 text-center">Actif ASBL</th>
-                            <th class="py-3 px-3 text-center">Réunion</th>
-                            <th class="py-3 px-3 text-center">Cotisation</th>
-                            <th class="py-3 px-3 text-center">Solde dû</th>
-                            <th class="py-3 px-3 text-center no-print w-24">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body" class="divide-y divide-slate-200 text-xs font-medium bg-white"></tbody>
-                </table>
+            <!-- VUE TABLEAU MEMBRES -->
+            <div id="view-table" class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden mb-8 print-container">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900 text-slate-100 text-[11px] font-extrabold uppercase tracking-wider border-b-2 border-slate-900">
+                                <th class="py-3 px-3 text-center w-12">N°</th>
+                                <th class="py-3 px-4">Membre</th>
+                                <th class="py-3 px-4">Téléphone / WhatsApp</th>
+                                <th class="py-3 px-3 text-center">Actif ASBL</th>
+                                <th class="py-3 px-3 text-center">Réunion</th>
+                                <th class="py-3 px-3 text-center">Cotisation</th>
+                                <th class="py-3 px-3 text-center">Solde dû</th>
+                                <th class="py-3 px-3 text-center no-print w-24">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-slate-200 text-xs font-medium bg-white"></tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <!-- ===================== VUE CARTES ===================== -->
-        <div id="view-cards" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8 no-print"></div>
+            <!-- VUE CARTES MEMBRES -->
+            <div id="view-cards" class="hidden grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8 no-print"></div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SECTION 2 : BLOG, PHOTOTHÈQUE & DOCUMENTAIRE (NOUVEAU)                    -->
+        <!-- ========================================================================= -->
+        <section id="section-blog" class="hidden space-y-6">
+
+            <!-- CARTES STATISTIQUES BLOG / MÉDIATHÈQUE -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 no-print">
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-file-pdf"></i></div>
+                    <div><div class="text-2xl font-black text-slate-900 leading-none" id="blog-stat-pv">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">PV &amp; Comptes Rendus</div></div>
+                </div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-images"></i></div>
+                    <div><div class="text-2xl font-black text-slate-900 leading-none" id="blog-stat-photos">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Photos &amp; Albums</div></div>
+                </div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-film"></i></div>
+                    <div><div class="text-2xl font-black text-slate-900 leading-none" id="blog-stat-videos">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Vidéos</div></div>
+                </div>
+                <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-folder-closed"></i></div>
+                    <div><div class="text-2xl font-black text-slate-900 leading-none" id="blog-stat-total">0</div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Total Fichiers</div></div>
+                </div>
+            </div>
+
+            <!-- BARRE DE RECHERCHE ET FILTRES DU BLOG -->
+            <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm no-print space-y-3">
+                <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+                    <div class="relative w-full lg:w-96">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="blog-search-input" placeholder="Rechercher par titre, mot-clé, auteur..." class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-gold-500 focus:bg-white transition">
+                        <button id="blog-clear-search" onclick="clearBlogSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-sm"></i></button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto justify-start lg:justify-end">
+                        <select id="blog-filter-type" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                            <option value="ALL">Tous les contenus</option>
+                            <option value="pv">Procès-Verbaux (PV)</option>
+                            <option value="compte_rendu">Comptes Rendus de Réunion</option>
+                            <option value="phototheque">Photothèque / Images</option>
+                            <option value="video">Vidéos</option>
+                            <option value="document">Autres Documents Officiels</option>
+                        </select>
+
+                        <select id="blog-filter-category" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                            <option value="ALL">Toutes catégories</option>
+                            <option value="Assemblée Générale">Assemblée Générale</option>
+                            <option value="Réunion Mensuelle">Réunion Mensuelle</option>
+                            <option value="Événement / Fête">Événement / Fête</option>
+                            <option value="Statuts & Textes">Statuts &amp; Textes</option>
+                            <option value="Communiqué Officiel">Communiqué Officiel</option>
+                        </select>
+
+                        <select id="blog-sort-by" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-gold-500">
+                            <option value="recent">Plus récent d'abord</option>
+                            <option value="oldest">Plus ancien d'abord</option>
+                            <option value="title">Titre (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
+                    <span>Publications &amp; Documents : <strong id="blog-filter-count" class="text-slate-800">0</strong> éléments</span>
+                    <button onclick="resetBlogFilters()" class="text-gold-700 hover:text-gold-900 font-semibold text-[11px] underline">Réinitialiser les filtres</button>
+                </div>
+            </div>
+
+            <!-- GRILLE DES PUBLICATIONS / MÉDIAS -->
+            <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        </section>
 
     </main>
 
@@ -236,11 +333,11 @@
     <footer class="no-print bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <p class="font-medium text-slate-600"><strong>ASBL LES AMIS DE LA SEMENCE (LAS)</strong> &copy; <span id="current-year">2026</span> — Tous droits réservés.</p>
-            <p class="text-slate-400 text-[11px]">Système de gestion interne des membres &amp; cotisations</p>
+            <p class="text-slate-400 text-[11px]">Système de gestion interne, cotisations &amp; médiathèque documentaire</p>
         </div>
     </footer>
 
-    <!-- ===================== MODALE AJOUT / ÉDITION ===================== -->
+    <!-- ===================== MODALE AJOUT / ÉDITION MEMBRE ===================== -->
     <div id="member-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
         <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50 sticky top-0">
@@ -332,6 +429,89 @@
         </div>
     </div>
 
+    <!-- ===================== MODALE PUBLICATION BLOG / MÉDIA / PV (NOUVEAU) ===================== -->
+    <div id="blog-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
+            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-gold-500/30 sticky top-0">
+                <h3 class="font-bold text-base flex items-center gap-2" id="blog-modal-title"><i class="fa-solid fa-cloud-arrow-up text-gold-400"></i><span>Ajouter un Document / Média / PV</span></h3>
+                <button onclick="closeBlogModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="blog-form" onsubmit="saveBlogEntry(event)" class="p-6 space-y-4">
+                <input type="hidden" id="blog-id">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Titre de la publication ou du Document *</label>
+                    <input type="text" id="blog-input-title" required placeholder="Ex: Procès-Verbal de l'Assemblée Générale Extraordinaire" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:bg-white transition">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Type de contenu *</label>
+                        <select id="blog-input-type" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-gold-500">
+                            <option value="pv">Procès-Verbal (PV)</option>
+                            <option value="compte_rendu">Compte Rendu de Réunion</option>
+                            <option value="phototheque">Photothèque (Image)</option>
+                            <option value="video">Vidéo / Clip</option>
+                            <option value="document">Autre Document Officiel</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Catégorie *</label>
+                        <select id="blog-input-category" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-gold-500">
+                            <option value="Assemblée Générale">Assemblée Générale</option>
+                            <option value="Réunion Mensuelle">Réunion Mensuelle</option>
+                            <option value="Événement / Fête">Événement / Fête</option>
+                            <option value="Statuts & Textes">Statuts &amp; Textes</option>
+                            <option value="Communiqué Officiel">Communiqué Officiel</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Date du document / événement</label>
+                        <input type="date" id="blog-input-date" required class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-gold-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Auteur / Publié par</label>
+                        <input type="text" id="blog-input-author" placeholder="Ex: Secrétariat Général" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-gold-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Description / Résumé du contenu</label>
+                    <textarea id="blog-input-desc" rows="3" placeholder="Saisissez un bref résumé des résolutions, de la réunion ou de la photo..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:bg-white transition"></textarea>
+                </div>
+
+                <!-- Joindre un fichier -->
+                <div class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Joindre un Fichier (Image, Vidéo, PDF, Word, Excel, ZIP...)</label>
+                    <input type="file" id="blog-input-file" onchange="handleBlogFileUpload(event)" class="block w-full text-[11px] text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gold-500 file:text-slate-900 hover:file:bg-gold-400 cursor-pointer">
+                    <div id="blog-file-preview-info" class="hidden mt-2 text-xs font-mono text-las-800 font-bold flex items-center justify-between bg-las-100 p-2 rounded-lg">
+                        <span id="blog-file-name-display"><i class="fa-solid fa-paperclip mr-1"></i> Fichier chargé</span>
+                        <button type="button" onclick="removeBlogFile()" class="text-rose-600 hover:underline"><i class="fa-solid fa-trash"></i> Retirer</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeBlogModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Annuler</button>
+                    <button type="submit" class="px-5 py-2 bg-gold-500 hover:bg-gold-400 text-slate-900 text-xs font-extrabold rounded-xl transition shadow-md">Enregistrer la publication</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================== MODALE LECTEUR / APERÇU FICHIER (NOUVEAU) ===================== -->
+    <div id="blog-view-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 no-print overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-200 overflow-hidden my-4 max-h-[90vh] flex flex-col">
+            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white shrink-0">
+                <h3 class="font-bold text-base flex items-center gap-2" id="blog-view-title"><i class="fa-solid fa-file-contract text-gold-400"></i> Détails de la publication</h3>
+                <button onclick="closeBlogViewModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="blog-view-content" class="p-6 space-y-4 overflow-y-auto flex-grow"></div>
+        </div>
+    </div>
+
 <script>
 // ============================================================
 //  GARDE DE SESSION — redirige vers login si non connecté
@@ -354,7 +534,7 @@ function logout(){
 
 // Permissions par rôle
 const ROLE = (SESSION && SESSION.role) || "secretaire";
-const CAN_EDIT = (ROLE === "admin" || ROLE === "secretaire");   // ajouter/modifier membres
+const CAN_EDIT = (ROLE === "admin" || ROLE === "secretaire");   // ajouter/modifier membres & docs
 const CAN_PAY  = (ROLE === "admin" || ROLE === "tresorier");    // enregistrer paiements
 const CAN_DEL  = (ROLE === "admin");                             // supprimer
 
@@ -365,9 +545,10 @@ const COTISATION_MENSUELLE = 10;          // USD par mois et par membre
 const MOIS = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 const ANNEE_COURANTE = new Date().getFullYear();
 const DB_KEY = "las_members_v2";
+const BLOG_DB_KEY = "las_blog_v1";
 
 // ============================================================
-//  DONNÉES PAR DÉFAUT (chargées une seule fois, puis localStorage)
+//  DONNÉES PAR DÉFAUT MEMBRES
 // ============================================================
 const DEFAULT_MEMBERS = [
   { id:1,name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
@@ -408,12 +589,12 @@ const DEFAULT_MEMBERS = [
   { id:37,name:"Rachel Luzolo",phone:"243 894 055 982",forum:"NON",asbl:"OUI",reunion:"NON" }
 ];
 
-// Normalise un membre : garantit tous les champs (photo, email, cotisations…)
+// Normalise un membre : garantit tous les champs
 function normalize(m){
   return Object.assign({
     photo:"", sexe:"", etatcivil:"", nationalite:"", whatsapp:"", idDoc:"", urgenceNom:"", urgenceTel:"", updatedAt:"", updatedBy:"", email:"", address:"", note:"", joined:"",
     birthdate:"", birthplace:"", profession:"", poste:"",
-    payments:{}            // { "2026": [bool x12] }
+    payments:{}
   }, m, {
     payments: m.payments || {}
   });
@@ -434,13 +615,69 @@ function saveData(){
   catch(e){ alert("Sauvegarde impossible (stockage plein ou photo trop lourde)."); }
 }
 
+// ============================================================
+//  DONNÉES PAR DÉFAUT BLOG / DOCUMENTATION / PHOTOTHÈQUE
+// ============================================================
+const DEFAULT_BLOG = [
+  {
+    id: 101,
+    title: "Procès-Verbal de l'Assemblée Générale Ordinaire 2026",
+    type: "pv",
+    category: "Assemblée Générale",
+    date: "2026-02-15",
+    author: "Ananias KASANDA (SG)",
+    desc: "Adoption du rapport financier annuel, validation du budget prévisionnel et renouvellement des comités de suivi.",
+    fileData: "",
+    fileName: "PV_AG_2026_LAS.pdf",
+    fileType: "application/pdf"
+  },
+  {
+    id: 102,
+    title: "Compte Rendu de la Réunion Mensuelle de Mars 2026",
+    type: "compte_rendu",
+    category: "Réunion Mensuelle",
+    date: "2026-03-05",
+    author: "Secrétariat Général",
+    desc: "Synthèse des interventions, état d'avancement du projet Colibri et planification de la grande collecte.",
+    fileData: "",
+    fileName: "CR_Reunion_Mars_2026.docx",
+    fileType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  },
+  {
+    id: 103,
+    title: "Photo de Famille — Retrouvailles des Alumni",
+    type: "phototheque",
+    category: "Événement / Fête",
+    date: "2026-01-01",
+    author: "Comité d'Organisation",
+    desc: "Souvenir de la grande rencontre annuelle des anciens élèves de la Semence.",
+    fileData: "",
+    fileName: "Photo_Groupe_2026.jpg",
+    fileType: "image/jpeg"
+  }
+];
+
+let blogData = loadBlogData();
+
+function loadBlogData(){
+  try {
+    const raw = localStorage.getItem(BLOG_DB_KEY);
+    if (raw){ return JSON.parse(raw); }
+  } catch(e){ console.warn("Erreur lecture blog", e); }
+  return DEFAULT_BLOG;
+}
+
+function saveBlogData(){
+  try { localStorage.setItem(BLOG_DB_KEY, JSON.stringify(blogData)); }
+  catch(e){ alert("Stockage plein. Impossible de sauvegarder ce document."); }
+}
+
 // ---------- Cotisations ----------
 function yearPaid(m, year){
   const arr = (m.payments && m.payments[year]) || [];
   return arr.filter(Boolean).length;
 }
 function monthsDue(m, year){
-  // mois dus = de janvier au mois courant (année en cours), sinon 12
   if (year > ANNEE_COURANTE) return 0;
   if (year < ANNEE_COURANTE) return 12;
   return new Date().getMonth() + 1;
@@ -453,8 +690,6 @@ function isAJour(m, year){
 }
 
 // ---------- Anniversaires ----------
-// Renvoie le nombre de jours avant le prochain anniversaire (0 = aujourd'hui),
-// ou null si aucune date de naissance.
 function daysUntilBirthday(m){
   if(!m.birthdate) return null;
   const d = new Date(m.birthdate);
@@ -474,7 +709,6 @@ function age(m){
   if(mth < 0 || (mth === 0 && now.getDate() < d.getDate())) a--;
   return a;
 }
-// Alerte si l'anniversaire est dans 0, 1 ou 2 jours
 function birthdaySoon(m){
   const d = daysUntilBirthday(m);
   return d !== null && d >= 0 && d <= 2;
@@ -594,7 +828,7 @@ function renderBirthdays(){
 }
 
 // ============================================================
-//  RENDU
+//  RENDU MEMBRES
 // ============================================================
 function getFiltered(){
   const q = document.getElementById('search-input').value.toLowerCase().trim();
@@ -695,6 +929,295 @@ function renderData(){
       </div>`;
     }).join('');
   }
+}
+
+// ============================================================
+//  GESTION DU BLOG, PHOTOTHÈQUE & DOCUMENTAIRE (NOUVEAU)
+// ============================================================
+let currentBlogFile = null;
+
+function switchMainTab(tab){
+  const secMembers = document.getElementById('section-members');
+  const secBlog = document.getElementById('section-blog');
+  const btnTabMembers = document.getElementById('nav-tab-members');
+  const btnTabBlog = document.getElementById('nav-tab-blog');
+  const hdrMemberActions = document.getElementById('header-member-actions');
+  const hdrBlogActions = document.getElementById('header-blog-actions');
+
+  if(tab === 'blog'){
+    secMembers.classList.add('hidden');
+    secBlog.classList.remove('hidden');
+    btnTabMembers.className = "px-4 py-2 rounded-xl text-xs font-extrabold text-slate-300 hover:text-white transition flex items-center gap-2";
+    btnTabBlog.className = "px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 bg-gold-600 text-slate-900 shadow-md";
+    hdrMemberActions.classList.add('hidden');
+    hdrBlogActions.classList.remove('hidden');
+    renderBlog();
+  } else {
+    secMembers.classList.remove('hidden');
+    secBlog.classList.add('hidden');
+    btnTabMembers.className = "px-4 py-2 rounded-xl text-xs font-extrabold transition flex items-center gap-2 bg-las-600 text-white shadow-md";
+    btnTabBlog.className = "px-4 py-2 rounded-xl text-xs font-extrabold text-slate-300 hover:text-white transition flex items-center gap-2";
+    hdrMemberActions.classList.remove('hidden');
+    hdrBlogActions.classList.add('hidden');
+    renderData();
+  }
+}
+
+function renderBlog(){
+  const search = document.getElementById('blog-search-input').value.toLowerCase().trim();
+  const fType = document.getElementById('blog-filter-type').value;
+  const fCat = document.getElementById('blog-filter-category').value;
+  const sort = document.getElementById('blog-sort-by').value;
+
+  document.getElementById('blog-clear-search').classList.toggle('hidden', search.length === 0);
+
+  let filtered = blogData.filter(item => {
+    const matchSearch = item.title.toLowerCase().includes(search) || (item.desc || '').toLowerCase().includes(search) || (item.author || '').toLowerCase().includes(search);
+    const matchType = fType === 'ALL' || item.type === fType;
+    const matchCat = fCat === 'ALL' || item.category === fCat;
+    return matchSearch && matchType && matchCat;
+  });
+
+  filtered.sort((a, b) => {
+    if(sort === 'oldest') return new Date(a.date) - new Date(b.date);
+    if(sort === 'title') return a.title.localeCompare(b.title, 'fr');
+    return new Date(b.date) - new Date(a.date);
+  });
+
+  // Calcul statistiques
+  const countPV = blogData.filter(x => x.type === 'pv' || x.type === 'compte_rendu').length;
+  const countPhotos = blogData.filter(x => x.type === 'phototheque').length;
+  const countVideos = blogData.filter(x => x.type === 'video').length;
+
+  set('blog-stat-pv', countPV);
+  set('blog-stat-photos', countPhotos);
+  set('blog-stat-videos', countVideos);
+  set('blog-stat-total', blogData.length);
+  set('blog-filter-count', filtered.length);
+
+  const grid = document.getElementById('blog-grid');
+  if(filtered.length === 0){
+    grid.innerHTML = `<div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200"><i class="fa-solid fa-folder-open text-4xl text-slate-300 mb-2 block"></i><p class="text-slate-500 font-semibold text-sm">Aucun document ou média trouvé.</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(item => {
+    let iconHeader = '<i class="fa-solid fa-file-lines text-las-600"></i>';
+    let typeBadge = '<span class="bg-indigo-100 text-indigo-800 border-indigo-200 px-2 py-0.5 rounded-full text-[10px] font-extrabold border uppercase">Document</span>';
+    let mediaPreview = '';
+
+    if(item.type === 'pv') {
+      iconHeader = '<i class="fa-solid fa-gavel text-amber-600"></i>';
+      typeBadge = '<span class="bg-amber-100 text-amber-900 border-amber-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase">Procès-Verbal</span>';
+    } else if(item.type === 'compte_rendu') {
+      iconHeader = '<i class="fa-solid fa-clipboard-list text-blue-600"></i>';
+      typeBadge = '<span class="bg-blue-100 text-blue-800 border-blue-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase">Compte Rendu</span>';
+    } else if(item.type === 'phototheque') {
+      iconHeader = '<i class="fa-solid fa-camera-retro text-emerald-600"></i>';
+      typeBadge = '<span class="bg-emerald-100 text-emerald-800 border-emerald-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase">Photothèque</span>';
+      if(item.fileData && item.fileType.startsWith('image/')) {
+        mediaPreview = `<div class="h-44 w-full bg-slate-900 overflow-hidden relative group">
+          <img src="${item.fileData}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+        </div>`;
+      }
+    } else if(item.type === 'video') {
+      iconHeader = '<i class="fa-solid fa-circle-play text-rose-600"></i>';
+      typeBadge = '<span class="bg-rose-100 text-rose-800 border-rose-300 px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase">Vidéo</span>';
+      if(item.fileData && item.fileType.startsWith('video/')) {
+        mediaPreview = `<div class="h-44 w-full bg-slate-900 flex items-center justify-center">
+          <video src="${item.fileData}" controls class="max-h-full max-w-full"></video>
+        </div>`;
+      }
+    }
+
+    return `
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition">
+      ${mediaPreview}
+      <div class="p-5 space-y-3 flex-grow flex flex-col justify-between">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            ${typeBadge}
+            <span class="text-[10px] font-extrabold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-tag mr-1"></i>${item.category}</span>
+          </div>
+          <h3 class="font-extrabold text-slate-900 text-sm leading-snug hover:text-gold-600 transition cursor-pointer" onclick="viewBlogItem(${item.id})">${item.title}</h3>
+          <p class="text-xs text-slate-600 line-clamp-3">${item.desc || 'Aucune description fournie.'}</p>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 space-y-2 text-[11px] text-slate-500 font-medium">
+          <div class="flex items-center justify-between">
+            <span><i class="fa-solid fa-calendar text-slate-400 mr-1"></i> ${fmtDate(item.date)}</span>
+            <span><i class="fa-solid fa-user-pen text-slate-400 mr-1"></i> ${item.author || 'ASBL LAS'}</span>
+          </div>
+          ${item.fileName ? `
+            <div class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-200">
+              <span class="truncate max-w-[180px] font-mono font-bold text-slate-700 text-[10px]"><i class="fa-solid fa-paperclip text-gold-600 mr-1"></i>${item.fileName}</span>
+              <button onclick="downloadBlogFile(${item.id})" class="text-las-700 hover:text-las-900 font-bold text-[10px] underline flex items-center gap-1"><i class="fa-solid fa-download"></i> Télécharger</button>
+            </div>
+          ` : ''}
+        </div>
+      </div>
+
+      <div class="bg-slate-50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+        <button onclick="viewBlogItem(${item.id})" class="text-xs font-bold text-slate-700 hover:text-slate-900 flex items-center gap-1.5"><i class="fa-solid fa-eye text-gold-600"></i> Consulter</button>
+        ${CAN_EDIT ? `<button onclick="deleteBlogItem(${item.id})" class="text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1"><i class="fa-solid fa-trash"></i> Supprimer</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openBlogModal(){
+  if(!CAN_EDIT){ alert("Seul le secrétariat ou l'administrateur peut ajouter des documents."); return; }
+  document.getElementById('blog-form').reset();
+  currentBlogFile = null;
+  document.getElementById('blog-file-preview-info').classList.add('hidden');
+  document.getElementById('blog-input-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('blog-modal').classList.remove('hidden');
+}
+
+function closeBlogModal(){
+  document.getElementById('blog-modal').classList.add('hidden');
+}
+
+function handleBlogFileUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 15 * 1024 * 1024){
+    alert("Le fichier est trop volumineux (max 15 Mo).");
+    e.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    currentBlogFile = {
+      fileData: ev.target.result,
+      fileName: file.name,
+      fileType: file.type
+    };
+    document.getElementById('blog-file-name-display').innerHTML = `<i class="fa-solid fa-paperclip mr-1"></i> ${file.name} (${Math.round(file.size/1024)} Ko)`;
+    document.getElementById('blog-file-preview-info').classList.remove('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeBlogFile(){
+  currentBlogFile = null;
+  document.getElementById('blog-input-file').value = '';
+  document.getElementById('blog-file-preview-info').classList.add('hidden');
+}
+
+function saveBlogEntry(e){
+  e.preventDefault();
+  if(!CAN_EDIT) return;
+
+  const title = document.getElementById('blog-input-title').value.trim();
+  const type = document.getElementById('blog-input-type').value;
+  const category = document.getElementById('blog-input-category').value;
+  const date = document.getElementById('blog-input-date').value;
+  const author = document.getElementById('blog-input-author').value.trim() || 'Secrétariat Général';
+  const desc = document.getElementById('blog-input-desc').value.trim();
+
+  const newEntry = {
+    id: Date.now(),
+    title,
+    type,
+    category,
+    date,
+    author,
+    desc,
+    fileData: currentBlogFile ? currentBlogFile.fileData : "",
+    fileName: currentBlogFile ? currentBlogFile.fileName : "",
+    fileType: currentBlogFile ? currentBlogFile.fileType : ""
+  };
+
+  blogData.unshift(newEntry);
+  saveBlogData();
+  renderBlog();
+  closeBlogModal();
+}
+
+function deleteBlogItem(id){
+  if(!CAN_EDIT) return;
+  if(confirm("Voulez-vous supprimer ce document/média définitivement ?")){
+    blogData = blogData.filter(x => x.id !== id);
+    saveBlogData();
+    renderBlog();
+  }
+}
+
+function viewBlogItem(id){
+  const item = blogData.find(x => x.id === id);
+  if(!item) return;
+
+  document.getElementById('blog-view-title').innerHTML = `<i class="fa-solid fa-file-contract text-gold-400"></i> ${item.title}`;
+
+  let mediaDisplay = '';
+  if(item.fileData) {
+    if(item.fileType.startsWith('image/')) {
+      mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 max-h-96 bg-slate-900 flex items-center justify-center">
+        <img src="${item.fileData}" class="max-h-96 w-auto object-contain">
+      </div>`;
+    } else if(item.fileType.startsWith('video/')) {
+      mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900">
+        <video src="${item.fileData}" controls class="w-full max-h-96"></video>
+      </div>`;
+    }
+  }
+
+  document.getElementById('blog-view-content').innerHTML = `
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="bg-gold-100 text-gold-900 border border-gold-300 px-3 py-1 rounded-full text-xs font-black uppercase">${item.type.replace('_',' ')}</span>
+        <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">${item.category}</span>
+        <span class="text-xs text-slate-500 font-medium ml-auto"><i class="fa-solid fa-calendar mr-1"></i> ${fmtDate(item.date)}</span>
+      </div>
+
+      <h2 class="text-lg font-black text-slate-900">${item.title}</h2>
+
+      ${mediaDisplay}
+
+      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed space-y-2">
+        <h4 class="font-extrabold text-slate-900 uppercase tracking-wider text-[10px]">Description / Résumé :</h4>
+        <p class="whitespace-pre-line">${item.desc || 'Aucun détail rédigé.'}</p>
+      </div>
+
+      <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
+        <span>Publié par : <strong>${item.author || 'ASBL LAS'}</strong></span>
+        ${item.fileName ? `<button onclick="downloadBlogFile(${item.id})" class="px-4 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl transition flex items-center gap-2"><i class="fa-solid fa-download"></i> Télécharger (${item.fileName})</button>` : ''}
+      </div>
+    </div>`;
+
+  document.getElementById('blog-view-modal').classList.remove('hidden');
+}
+
+function closeBlogViewModal(){
+  document.getElementById('blog-view-modal').classList.add('hidden');
+}
+
+function downloadBlogFile(id){
+  const item = blogData.find(x => x.id === id);
+  if(!item || !item.fileData) {
+    alert("Aucun fichier téléchargeable associé à ce document.");
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = item.fileData;
+  a.download = item.fileName || 'document_las';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function clearBlogSearch(){
+  document.getElementById('blog-search-input').value = '';
+  renderBlog();
+}
+
+function resetBlogFilters(){
+  document.getElementById('blog-search-input').value = '';
+  document.getElementById('blog-filter-type').value = 'ALL';
+  document.getElementById('blog-filter-category').value = 'ALL';
+  document.getElementById('blog-sort-by').value = 'recent';
+  renderBlog();
 }
 
 // ============================================================
@@ -846,7 +1369,7 @@ function markAll(id, year, val){
 }
 
 // ============================================================
-//  AJOUT / ÉDITION
+//  AJOUT / ÉDITION MEMBRE
 // ============================================================
 const EXTRA_FIELDS=['sexe','etatcivil','nationalite','whatsapp','idDoc','urgenceNom','urgenceTel'];
 let tempPhoto = "";
@@ -887,7 +1410,6 @@ function handlePhoto(e){
   if(file.size > 3*1024*1024){ alert("Image trop lourde (max 3 Mo). Choisissez une photo plus petite."); e.target.value=''; return; }
   const reader=new FileReader();
   reader.onload=ev=>{
-    // Redimensionner pour limiter le poids en localStorage
     const img=new Image();
     img.onload=()=>{
       const max=400, scale=Math.min(1, max/Math.max(img.width,img.height));
@@ -994,7 +1516,7 @@ function printMemberCard(){
 }
 
 // ============================================================
-//  OUTILS
+//  OUTILS & LISTENERS
 // ============================================================
 function setView(view){
   currentView=view;
@@ -1026,7 +1548,7 @@ function exportCSV(){
 }
 
 // ============================================================
-//  SAUVEGARDE / PUBLICATION JSON  (membres.json à la racine du dépôt)
+//  SAUVEGARDE / PUBLICATION JSON
 // ============================================================
 function exportJSON(){
   const ts=+localStorage.getItem(DB_KEY+"_ts")||Date.now();
@@ -1046,7 +1568,6 @@ function importJSON(e){
   }catch(_){ alert("Fichier JSON invalide."); } e.target.value=''; };
   r.readAsText(f);
 }
-// Les visiteurs récupèrent la dernière version publiée dans le dépôt
 async function syncFromRepo(){
   try{
     const r=await fetch('membres.json',{cache:'no-store'}); if(!r.ok) return;
@@ -1060,16 +1581,34 @@ async function syncFromRepo(){
 }
 
 // ============================================================
-//  INITIALISATION
+//  INITIALISATION ET EVENT LISTENERS
 // ============================================================
 function applyRoleUI(){
   set('current-user', SESSION.user);
   set('current-role', SESSION.label || ROLE);
-  if(!CAN_EDIT){ ['btn-add','btn-json','btn-import'].forEach(i=>{const b=document.getElementById(i); if(b) b.style.display='none';}); }
+  if(!CAN_EDIT){
+    ['btn-add','btn-json','btn-import','btn-add-blog'].forEach(i=>{
+      const b=document.getElementById(i); if(b) b.style.display='none';
+    });
+  }
 }
+
+// Écouteurs de recherche Membres
 ['search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderData));
 ['filter-asbl','filter-cotis','filter-reunion','filter-forum','sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderData));
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeMemberModal(); closeDetail(); } });
+
+// Écouteurs de recherche Blog
+['blog-search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderBlog));
+['blog-filter-type','blog-filter-category','blog-sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderBlog));
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeMemberModal();
+    closeDetail();
+    closeBlogModal();
+    closeBlogViewModal();
+  }
+});
 
 applyRoleUI();
 calculateStats();
