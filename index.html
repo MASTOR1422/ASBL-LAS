@@ -36,6 +36,18 @@
             .badge-print { border-width:1px !important; font-weight:700 !important; padding:1px 5px !important; font-size:7.5pt !important; }
         }
         .print-only { display:none; }
+
+        /* ===== Effets visuels anniversaire ===== */
+        @keyframes bdayPulse { 0%,100%{box-shadow:0 0 0 0 rgba(234,179,8,.45)} 50%{box-shadow:0 0 0 6px rgba(234,179,8,0)} }
+        @keyframes bdayShine { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+        @keyframes bdayFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+        @keyframes confettiFall { 0%{transform:translateY(-10px) rotate(0);opacity:1} 100%{transform:translateY(60px) rotate(360deg);opacity:0} }
+        .bday-pulse { animation:bdayPulse 1.8s infinite; }
+        .bday-ring { position:relative; }
+        .bday-ring::after { content:'🎂'; position:absolute; top:-7px; right:-7px; font-size:14px; animation:bdayFloat 2s ease-in-out infinite; filter:drop-shadow(0 1px 1px rgba(0,0,0,.2)); }
+        .bday-banner { background:linear-gradient(110deg,#15803d,#eab308,#15803d); background-size:200% 100%; animation:bdayShine 4s linear infinite; }
+        .confetti { position:absolute; width:7px; height:7px; border-radius:1px; animation:confettiFall 1.6s ease-in infinite; }
+
         ::-webkit-scrollbar { height:6px; width:6px; }
         ::-webkit-scrollbar-track { background:#f1f5f9; }
         ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
@@ -137,6 +149,9 @@
             <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-sack-dollar"></i></div><div><div class="text-xl font-black text-slate-900 leading-none"><span id="stat-encaisse">0</span><span class="text-xs font-bold text-slate-400">$</span></div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Encaissé</div></div></div>
             <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-hand-holding-dollar"></i></div><div><div class="text-xl font-black text-slate-900 leading-none"><span id="stat-attendu">0</span><span class="text-xs font-bold text-slate-400">$</span></div><div class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mt-1">Attendu/an</div></div></div>
         </div>
+
+        <!-- ===================== RAPPEL ANNIVERSAIRES ===================== -->
+        <div id="birthday-banner" class="hidden no-print mb-6"></div>
 
         <!-- ===================== BARRE DE FILTRES ===================== -->
         <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm mb-6 no-print space-y-3">
@@ -242,12 +257,24 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Téléphone *</label>
                         <input type="text" id="input-phone" required placeholder="243 895 446 423" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-white transition"></div>
-                    <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Date d'adhésion</label>
+                    <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Date d'intégration</label>
                         <input type="date" id="input-joined" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Date de naissance</label>
+                        <input type="date" id="input-birthdate" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
+                    <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Lieu de naissance</label>
+                        <input type="text" id="input-birthplace" placeholder="Ex: Kinshasa" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email</label>
                         <input type="email" id="input-email" placeholder="exemple@mail.com" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
+                    <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Profession</label>
+                        <input type="text" id="input-profession" placeholder="Ex: Enseignant" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Poste dans l'ASBL</label>
+                        <input type="text" id="input-poste" placeholder="Ex: Trésorier, Membre" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Adresse / Commune</label>
                         <input type="text" id="input-address" placeholder="Ex: Ngaliema" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
@@ -323,10 +350,10 @@ const DB_KEY = "las_members_v2";
 //  DONNÉES PAR DÉFAUT (chargées une seule fois, puis localStorage)
 // ============================================================
 const DEFAULT_MEMBERS = [
-  { id:1,name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:2,name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:3,name:"Baudry Landu",phone:"243 895 446 423",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:4,name:"Junior Loti",phone:"243 898 953 438",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:1,name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
+  { id:2,name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire général",profession:"IT-Support",email:"ananiaskasanda2@gmail.com",birthdate:"1982-07-02",birthplace:"Kinshasa",address:"Ngaliema",joined:"2022-01-15" },
+  { id:3,name:"Baudry Landu",phone:"243 895 446 423",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Trésorier",profession:"Comptable",birthplace:"Kinshasa",joined:"2022-03-10" },
+  { id:4,name:"Junior Loti",phone:"243 898 953 438",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Membre",profession:"Commerçant" },
   { id:5,name:"Aarly Nsungu",phone:"243 971 855 480",forum:"OUI",asbl:"OUI",reunion:"EXEMPTER" },
   { id:6,name:"BELINDA NTEMBE",phone:"+33 7 59 27 85 66",forum:"PARTIEL",asbl:"OUI",reunion:"EXEMPTER" },
   { id:7,name:"Dick mbengu acteur Princi",phone:"244 930 561 955",forum:"PARTIEL",asbl:"NON",reunion:"EXEMPTER" },
@@ -365,6 +392,7 @@ const DEFAULT_MEMBERS = [
 function normalize(m){
   return Object.assign({
     photo:"", email:"", address:"", note:"", joined:"",
+    birthdate:"", birthplace:"", profession:"", poste:"",
     payments:{}            // { "2026": [bool x12] }
   }, m, {
     payments: m.payments || {}
@@ -402,6 +430,45 @@ function soldeDu(m, year){
 }
 function isAJour(m, year){
   return soldeDu(m, year) === 0;
+}
+
+// ---------- Anniversaires ----------
+// Renvoie le nombre de jours avant le prochain anniversaire (0 = aujourd'hui),
+// ou null si aucune date de naissance.
+function daysUntilBirthday(m){
+  if(!m.birthdate) return null;
+  const d = new Date(m.birthdate);
+  if(isNaN(d)) return null;
+  const now = new Date(); now.setHours(0,0,0,0);
+  let next = new Date(now.getFullYear(), d.getMonth(), d.getDate());
+  next.setHours(0,0,0,0);
+  if(next < now) next = new Date(now.getFullYear()+1, d.getMonth(), d.getDate());
+  return Math.round((next - now) / 86400000);
+}
+function age(m){
+  if(!m.birthdate) return null;
+  const d = new Date(m.birthdate); if(isNaN(d)) return null;
+  const now = new Date();
+  let a = now.getFullYear() - d.getFullYear();
+  const mth = now.getMonth() - d.getMonth();
+  if(mth < 0 || (mth === 0 && now.getDate() < d.getDate())) a--;
+  return a;
+}
+// Alerte si l'anniversaire est dans 0, 1 ou 2 jours
+function birthdaySoon(m){
+  const d = daysUntilBirthday(m);
+  return d !== null && d >= 0 && d <= 2;
+}
+function birthdayLabel(m){
+  const d = daysUntilBirthday(m);
+  if(d === 0) return "Aujourd'hui";
+  if(d === 1) return "Demain";
+  return "Dans 2 jours";
+}
+function fmtDate(str){
+  if(!str) return '—';
+  const d = new Date(str); if(isNaN(d)) return str;
+  return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
 }
 
 // ============================================================
@@ -454,6 +521,58 @@ function calculateStats(){
 }
 function set(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; }
 
+// ---------- Bannière de rappel des anniversaires ----------
+function renderBirthdays(){
+  const banner = document.getElementById('birthday-banner');
+  const soon = membersData
+    .map(m => ({ m, d: daysUntilBirthday(m) }))
+    .filter(x => x.d !== null && x.d >= 0 && x.d <= 2)
+    .sort((a,b) => a.d - b.d);
+
+  if(soon.length === 0){ banner.classList.add('hidden'); banner.innerHTML=''; return; }
+
+  const confetti = Array.from({length:14}).map((_,i)=>{
+    const colors=['#eab308','#15803d','#ef4444','#3b82f6','#f97316','#ffffff'];
+    const c=colors[i%colors.length], left=(i*7+4)%100, delay=(i*0.12).toFixed(2);
+    return `<span class="confetti" style="left:${left}%;background:${c};animation-delay:${delay}s"></span>`;
+  }).join('');
+
+  const items = soon.map(({m,d})=>{
+    const a = age(m);
+    const when = d===0 ? "aujourd'hui" : d===1 ? "demain" : "dans 2 jours";
+    const tag = d===0 ? 'bg-white text-las-800' : 'bg-white/20 text-white';
+    return `<button onclick="openDetail(${m.id})" class="group flex items-center gap-2.5 bg-white/15 hover:bg-white/25 rounded-xl pl-1.5 pr-3 py-1.5 transition text-left">
+        <span class="bday-ring">${avatar(m,34)}</span>
+        <span class="leading-tight">
+          <span class="block text-white font-bold text-xs">${m.name}</span>
+          <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-full ${tag} mt-0.5">
+            🎉 ${when}${a!==null ? ` · ${a+ (d===0?0:1)} ans` : ''}
+          </span>
+        </span>
+      </button>`;
+  }).join('');
+
+  const title = soon.length===1
+    ? "Un anniversaire approche"
+    : `${soon.length} anniversaires approchent`;
+
+  banner.innerHTML = `
+    <div class="bday-banner relative overflow-hidden rounded-2xl p-4 sm:p-5 shadow-lg ring-1 ring-gold-400/40">
+      <div class="absolute inset-0 pointer-events-none">${confetti}</div>
+      <div class="relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+        <div class="flex items-center gap-3 shrink-0">
+          <div class="w-11 h-11 rounded-xl bg-white/90 text-las-700 flex items-center justify-center text-2xl bday-pulse">🎂</div>
+          <div>
+            <h3 class="text-white font-extrabold text-sm sm:text-base leading-tight">${title}</h3>
+            <p class="text-white/85 text-[11px] font-medium">Pensez à préparer un petit mot pour les fêter.</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2 sm:ml-auto">${items}</div>
+      </div>
+    </div>`;
+  banner.classList.remove('hidden');
+}
+
 // ============================================================
 //  RENDU
 // ============================================================
@@ -501,7 +620,11 @@ function renderData(){
       <tr class="hover:bg-slate-50 transition-colors cursor-pointer" onclick="openDetail(${m.id})">
         <td class="py-2.5 px-3 text-center font-extrabold text-slate-500 border-b border-slate-200 font-mono text-[11px]">${m.id}</td>
         <td class="py-2.5 px-4 border-b border-slate-200">
-          <div class="flex items-center gap-2.5">${avatar(m,34)}<span class="font-bold text-slate-900 hover:text-las-700">${m.name}</span></div>
+          <div class="flex items-center gap-2.5">
+            <span class="${birthdaySoon(m)?'bday-ring':''}">${avatar(m,34)}</span>
+            <span class="font-bold text-slate-900 hover:text-las-700">${m.name}</span>
+            ${birthdaySoon(m)?`<span class="no-print text-[9px] font-bold text-gold-700 bg-gold-100 border border-gold-300 px-1.5 py-0.5 rounded-full bday-pulse">🎂 ${birthdayLabel(m)}</span>`:''}
+          </div>
         </td>
         <td class="py-2.5 px-4 text-slate-700 font-mono text-xs border-b border-slate-200"><span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-phone text-slate-400 text-[10px] no-print"></i>${m.phone}</span></td>
         <td class="py-2.5 px-3 text-center border-b border-slate-200">${badge(m.asbl,'asbl')}</td>
@@ -531,11 +654,12 @@ function renderData(){
       return `
       <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col justify-between space-y-3 hover:shadow-md transition cursor-pointer" onclick="openDetail(${m.id})">
         <div class="flex items-start gap-3 border-b border-slate-100 pb-2.5">
-          ${avatar(m,48)}
+          <span class="${birthdaySoon(m)?'bday-ring':''}">${avatar(m,48)}</span>
           <div class="flex-1 min-w-0">
             <span class="text-[10px] font-extrabold uppercase tracking-wider text-las-700 font-mono">N° ${m.id}</span>
             <h3 class="font-bold text-slate-900 text-sm leading-snug truncate">${m.name}</h3>
-            <div class="mt-1">${badge(cot,'cotis')}</div>
+            ${m.poste?`<span class="text-[9px] font-bold text-slate-500">${m.poste}</span>`:''}
+            <div class="mt-1 flex items-center gap-1.5 flex-wrap">${badge(cot,'cotis')}${birthdaySoon(m)?`<span class="text-[9px] font-bold text-gold-700 bg-gold-100 border border-gold-300 px-1.5 py-0.5 rounded-full">🎂 ${birthdayLabel(m)}</span>`:''}</div>
           </div>
         </div>
         <div class="space-y-1.5 text-xs">
@@ -591,21 +715,36 @@ function renderDetail(m, year){
     return ys.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y}</option>`).join('');
   })();
 
+  const bday = birthdaySoon(m);
+  const aYears = age(m);
   document.getElementById('detail-content').innerHTML = `
+    ${bday ? `
+    <div class="bday-banner relative overflow-hidden rounded-xl p-3.5 shadow ring-1 ring-gold-400/40 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-lg bg-white/90 text-las-700 flex items-center justify-center text-xl bday-pulse shrink-0">🎂</div>
+      <div class="relative">
+        <p class="text-white font-extrabold text-sm leading-tight">Joyeux anniversaire ${birthdayLabel(m).toLowerCase()} !</p>
+        <p class="text-white/85 text-[11px]">${m.name}${aYears!==null?` fête ses ${aYears + (daysUntilBirthday(m)===0?0:1)} ans`:''}.</p>
+      </div>
+    </div>` : ''}
     <!-- Carte identité -->
-    <div class="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
-      <div class="shrink-0">${avatar(m,96)}</div>
+    <div class="bg-white rounded-xl border ${bday?'border-gold-300 ring-1 ring-gold-200':'border-slate-200'} p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+      <div class="shrink-0 ${bday?'bday-ring':''}">${avatar(m,96)}</div>
       <div class="flex-1 text-center sm:text-left w-full">
         <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
           <h2 class="text-lg font-black text-slate-900">${m.name}</h2>
           <span class="text-[10px] font-extrabold font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">N° ${m.id}</span>
+          ${m.poste?`<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-las-100 text-las-800 border border-las-200">${m.poste}</span>`:''}
         </div>
         ${m.note?`<p class="text-xs text-las-700 font-semibold mt-0.5">${m.note}</p>`:''}
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-3 text-xs text-left">
           <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-slate-400 w-4"></i><span class="font-mono font-semibold text-slate-800">${m.phone}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400 w-4"></i><span class="text-slate-700">${m.email||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400 w-4"></i><span class="text-slate-700 break-all">${m.email||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-briefcase text-slate-400 w-4"></i><span class="text-slate-700">${m.profession||'—'}</span></div>
           <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-slate-400 w-4"></i><span class="text-slate-700">${m.address||'—'}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-calendar-plus text-slate-400 w-4"></i><span class="text-slate-700">Adhésion : ${m.joined||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-cake-candles text-slate-400 w-4"></i><span class="text-slate-700">${fmtDate(m.birthdate)}${aYears!==null?` (${aYears} ans)`:''}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-location-crosshairs text-slate-400 w-4"></i><span class="text-slate-700">Né(e) à ${m.birthplace||'—'}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-calendar-plus text-slate-400 w-4"></i><span class="text-slate-700">Intégration : ${fmtDate(m.joined)}</span></div>
+          <div class="flex items-center gap-2"><i class="fa-solid fa-id-badge text-slate-400 w-4"></i><span class="text-slate-700">${m.poste||'Membre'}</span></div>
         </div>
         <div class="flex items-center justify-center sm:justify-start gap-2 mt-3 flex-wrap">
           ${badge(m.asbl,'asbl')} <span class="text-[10px] text-slate-400">ASBL</span>
@@ -689,6 +828,10 @@ function openMemberModal(member=null){
     document.getElementById('input-address').value=member.address||"";
     document.getElementById('input-joined').value=member.joined||"";
     document.getElementById('input-note').value=member.note||"";
+    document.getElementById('input-birthdate').value=member.birthdate||"";
+    document.getElementById('input-birthplace').value=member.birthplace||"";
+    document.getElementById('input-profession').value=member.profession||"";
+    document.getElementById('input-poste').value=member.poste||"";
     document.getElementById('input-asbl').value=member.asbl;
     document.getElementById('input-forum').value=member.forum;
     document.getElementById('input-reunion').value=member.reunion;
@@ -737,7 +880,7 @@ function deleteMember(id){
   const m=membersData.find(x=>x.id===id); if(!m) return;
   if(confirm(`Supprimer définitivement le membre "${m.name}" ?`)){
     membersData=membersData.filter(x=>x.id!==id);
-    saveData(); calculateStats(); renderData();
+    saveData(); calculateStats(); renderBirthdays(); renderData();
   }
 }
 function saveMember(e){
@@ -751,6 +894,10 @@ function saveMember(e){
     address:document.getElementById('input-address').value.trim(),
     joined:document.getElementById('input-joined').value,
     note:document.getElementById('input-note').value.trim(),
+    birthdate:document.getElementById('input-birthdate').value,
+    birthplace:document.getElementById('input-birthplace').value.trim(),
+    profession:document.getElementById('input-profession').value.trim(),
+    poste:document.getElementById('input-poste').value.trim(),
     asbl:document.getElementById('input-asbl').value,
     forum:document.getElementById('input-forum').value,
     reunion:document.getElementById('input-reunion').value,
@@ -763,7 +910,7 @@ function saveMember(e){
     const nextId=membersData.length?Math.max(...membersData.map(m=>m.id))+1:1;
     membersData.unshift(normalize(Object.assign({id:nextId}, data)));
   }
-  saveData(); calculateStats(); renderData(); closeMemberModal();
+  saveData(); calculateStats(); renderBirthdays(); renderData(); closeMemberModal();
 }
 
 // ============================================================
@@ -789,10 +936,12 @@ function printMemberCard(){
       ${m.note?`<div class="muted">${m.note}</div>`:''}</div>
     </div>
     <div style="margin-top:12px">
-      <div class="row"><span class="lbl">Téléphone :</span> ${m.phone}</div>
-      <div class="row"><span class="lbl">Email :</span> ${m.email||'—'}</div>
-      <div class="row"><span class="lbl">Adresse :</span> ${m.address||'—'}</div>
-      <div class="row"><span class="lbl">Date d'adhésion :</span> ${m.joined||'—'}</div>
+      <div class="row"><span class="lbl">Poste dans l'ASBL :</span> ${m.poste||'Membre'}</div>
+      <div class="row"><span class="lbl">Téléphone :</span> ${m.phone} &nbsp;|&nbsp; <span class="lbl">Email :</span> ${m.email||'—'}</div>
+      <div class="row"><span class="lbl">Profession :</span> ${m.profession||'—'}</div>
+      <div class="row"><span class="lbl">Date de naissance :</span> ${fmtDate(m.birthdate)} ${age(m)!==null?`(${age(m)} ans)`:''} &nbsp;|&nbsp; <span class="lbl">Lieu :</span> ${m.birthplace||'—'}</div>
+      <div class="row"><span class="lbl">Adresse / Commune :</span> ${m.address||'—'}</div>
+      <div class="row"><span class="lbl">Date d'intégration :</span> ${fmtDate(m.joined)}</div>
       <div class="row"><span class="lbl">Actif ASBL :</span> ${m.asbl} &nbsp;|&nbsp; <span class="lbl">Réunion :</span> ${m.reunion} &nbsp;|&nbsp; <span class="lbl">Forum :</span> ${m.forum}</div>
     </div>
     <h3 style="margin-top:16px;font-size:14px">Cotisations ${year} — ${COTISATION_MENSUELLE} $/mois</h3>
@@ -823,10 +972,10 @@ function resetFilters(){
   renderData();
 }
 function exportCSV(){
-  const headers=["N°","Nom & Prénom","Téléphone","Email","Adresse","Date adhésion","Actif ASBL","Forum","Réunion",`Mois payés ${ANNEE_COURANTE}`,`Payé ${ANNEE_COURANTE} (USD)`,"Solde dû (USD)"];
+  const headers=["N°","Nom & Prénom","Poste","Téléphone","Email","Profession","Date naissance","Lieu naissance","Adresse","Date intégration","Actif ASBL","Forum","Réunion",`Mois payés ${ANNEE_COURANTE}`,`Payé ${ANNEE_COURANTE} (USD)`,"Solde dû (USD)"];
   const rows=membersData.map(m=>{
     const paid=yearPaid(m,ANNEE_COURANTE);
-    return [m.id,`"${m.name.replace(/"/g,'""')}"`,`"${m.phone}"`,`"${m.email||''}"`,`"${m.address||''}"`,`"${m.joined||''}"`,m.asbl,m.forum,m.reunion,paid,paid*COTISATION_MENSUELLE,soldeDu(m,ANNEE_COURANTE)];
+    return [m.id,`"${m.name.replace(/"/g,'""')}"`,`"${m.poste||''}"`,`"${m.phone}"`,`"${m.email||''}"`,`"${m.profession||''}"`,`"${m.birthdate||''}"`,`"${m.birthplace||''}"`,`"${m.address||''}"`,`"${m.joined||''}"`,m.asbl,m.forum,m.reunion,paid,paid*COTISATION_MENSUELLE,soldeDu(m,ANNEE_COURANTE)];
   });
   const csv="\uFEFF"+[headers.join(";"),...rows.map(r=>r.join(";"))].join("\n");
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
@@ -849,6 +998,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeMemberModal(
 
 applyRoleUI();
 calculateStats();
+renderBirthdays();
 renderData();
 </script>
 </body>
