@@ -148,15 +148,34 @@
 
     </main>
 
-    <!-- MODALE MEMBRE -->
+    <!-- ================= MODALE FICHE DÉTAILLÉE DU MEMBRE (AVEC COTISATIONS & PHOTO) ================= -->
+    <div id="detail-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-slate-50 rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden my-4 max-h-[90vh] flex flex-col">
+            <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white shrink-0">
+                <h3 class="font-bold text-base flex items-center gap-2"><i class="fa-solid fa-id-card text-gold-400"></i> Fiche d'identification du Membre</h3>
+                <button onclick="closeDetail()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div id="detail-content" class="p-6 space-y-5 overflow-y-auto flex-1"></div>
+        </div>
+    </div>
+
+    <!-- MODALE AJOUT / ÉDITION MEMBRE -->
     <div id="member-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden max-h-[92vh] overflow-y-auto">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white sticky top-0">
-                <h3 class="font-bold text-sm">Gestion Membre</h3>
+                <h3 class="font-bold text-sm" id="modal-title-text">Gestion Membre</h3>
                 <button onclick="closeMemberModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form onsubmit="saveMember(event)" class="p-6 space-y-4">
-                <input type="hidden" id="member-id">
+                <input type="hidden" id="input-edit-id">
+                <div class="flex items-center gap-4">
+                    <img id="photo-preview" src="" alt="" class="hidden w-16 h-16 rounded-xl object-cover border border-slate-200">
+                    <div id="photo-placeholder" class="w-16 h-16 rounded-xl bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400"><i class="fa-solid fa-camera text-xl"></i></div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Photo du membre</label>
+                        <input type="file" id="input-photo" accept="image/*" onchange="handlePhoto(event)" class="block w-full text-[11px] text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-las-100 file:text-las-800 cursor-pointer">
+                    </div>
+                </div>
                 <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nom &amp; Prénom *</label>
                     <input type="text" id="input-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"></div>
                 <div class="grid grid-cols-2 gap-3">
@@ -164,6 +183,12 @@
                         <input type="text" id="input-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Poste</label>
                         <input type="text" id="input-poste" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"></div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Date naissance</label>
+                        <input type="date" id="input-birthdate" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"></div>
+                    <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Lieu naissance</label>
+                        <input type="text" id="input-birthplace" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Actif ASBL</label>
@@ -218,10 +243,10 @@
 <script>
 const COTISATION_MENSUELLE = 10;
 const ANNEE_COURANTE = new Date().getFullYear();
+const MOIS = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 const MEMBERS_KEY = "las_members_v2";
 const MEDIA_KEY = "las_media_v1";
 
-// Intégration complète et exacte des 37 membres de l'ASBL LAS
 const DEFAULT_MEMBERS = [
   { id:1, name:"Ander Malala", phone:"243 894 726 836", forum:"OUI", asbl:"OUI", reunion:"OUI", poste:"Président", payments:{} },
   { id:2, name:"Ananias KASANDA", phone:"243 819 978 801", forum:"OUI", asbl:"OUI", reunion:"OUI", poste:"Coordonnateur", payments:{} },
@@ -287,17 +312,28 @@ function switchTab(tab){
   }
 }
 
+// Cotisations helpers
+function yearPaid(m, year){
+  const arr = (m.payments && m.payments[year]) || [];
+  return arr.filter(Boolean).length;
+}
+function monthsDue(m, year){
+  if (year > ANNEE_COURANTE) return 0;
+  if (year < ANNEE_COURANTE) return 12;
+  return new Date().getMonth() + 1;
+}
+function soldeDu(m, year){
+  return Math.max(0, (monthsDue(m, year) - yearPaid(m, year))) * COTISATION_MENSUELLE;
+}
 function isAJour(m, year){
-  const paid = (m.payments && m.payments[year]) ? m.payments[year].filter(Boolean).length : 0;
-  const due = year === ANNEE_COURANTE ? new Date().getMonth() + 1 : 12;
-  return Math.max(0, due - paid) === 0;
+  return soldeDu(m, year) === 0;
 }
 
 function renderStats(){
   const total = membersData.length;
   const actifs = membersData.filter(m=>m.asbl==='OUI').length;
   const ajour = membersData.filter(m=>isAJour(m, ANNEE_COURANTE)).length;
-  const encaisse = membersData.reduce((s,m)=> s + ((m.payments && m.payments[ANNEE_COURANTE]) ? m.payments[ANNEE_COURANTE].filter(Boolean).length : 0)*COTISATION_MENSUELLE, 0);
+  const encaisse = membersData.reduce((s,m)=> s + yearPaid(m, ANNEE_COURANTE)*COTISATION_MENSUELLE, 0);
 
   document.getElementById('stat-total').textContent = total;
   document.getElementById('stat-actifs').textContent = actifs;
@@ -310,6 +346,17 @@ function renderStats(){
   document.getElementById('current-user').textContent = sess.user || 'Administrateur';
 }
 
+function initials(name){
+  return (name||'LAS').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+function avatar(m, size){
+  const s = size||40;
+  if (m.photo){
+    return `<img src="${m.photo}" alt="" class="rounded-lg object-cover border border-slate-200" style="width:${s}px;height:${s}px">`;
+  }
+  return `<div class="rounded-lg bg-las-100 text-las-800 flex items-center justify-center font-extrabold border border-las-200" style="width:${s}px;height:${s}px;font-size:${Math.round(s*0.36)}px">${initials(m.name)}</div>`;
+}
+
 function renderMembers(){
   const q = (document.getElementById('search-input').value || '').toLowerCase();
   const filtered = membersData.filter(m => m.name.toLowerCase().includes(q) || m.phone.includes(q));
@@ -317,24 +364,169 @@ function renderMembers(){
 
   tbody.innerHTML = filtered.map(m => {
     const ajour = isAJour(m, ANNEE_COURANTE);
-    const solde = Math.max(0, (new Date().getMonth()+1) - ((m.payments && m.payments[ANNEE_COURANTE]) ? m.payments[ANNEE_COURANTE].filter(Boolean).length : 0)) * COTISATION_MENSUELLE;
+    const solde = soldeDu(m, ANNEE_COURANTE);
     return `
-      <tr class="hover:bg-slate-50">
+      <tr class="hover:bg-slate-50 cursor-pointer" onclick="openDetail(${m.id})">
         <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-500">${m.id}</td>
-        <td class="py-2.5 px-4 font-bold text-slate-900">${m.name} <span class="block text-[10px] text-slate-500 font-normal">${m.poste||'Membre'}</span></td>
-        <td class="py-2.5 px-4 font-mono text-slate-700">${m.phone}</td>
+        <td class="py-2.5 px-4 font-bold text-slate-900">
+          <div class="flex items-center gap-2.5">
+            ${avatar(m, 32)}
+            <div>${escapeHTML(m.name)} <span class="block text-[10px] text-slate-500 font-normal">${escapeHTML(m.poste||'Membre')}</span></div>
+          </div>
+        </td>
+        <td class="py-2.5 px-4 font-mono text-slate-700">${escapeHTML(m.phone)}</td>
         <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${m.asbl==='OUI'?'bg-emerald-100 text-emerald-800':'bg-rose-100 text-rose-800'}">${m.asbl}</span></td>
         <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">${m.reunion}</span></td>
         <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${ajour?'bg-emerald-100 text-emerald-800':'bg-rose-100 text-rose-800'}">${ajour?'À JOUR':'RETARD'}</span></td>
         <td class="py-2.5 px-3 text-center font-mono font-bold ${solde>0?'text-rose-600':'text-emerald-600'}">${solde}$</td>
-        <td class="py-2.5 px-3 text-center">
-          <button onclick="deleteMember(${m.id})" class="text-slate-400 hover:text-rose-600 p-1"><i class="fa-solid fa-trash-can text-xs"></i></button>
+        <td class="py-2.5 px-3 text-center no-print" onclick="event.stopPropagation()">
+          <button onclick="openDetail(${m.id})" title="Fiche" class="p-1.5 text-slate-500 hover:text-blue-600 rounded-lg"><i class="fa-solid fa-id-card text-xs"></i></button>
+          <button onclick="editMember(${m.id})" title="Modifier" class="p-1.5 text-slate-500 hover:text-las-700 rounded-lg"><i class="fa-solid fa-pen-to-square text-xs"></i></button>
+          <button onclick="deleteMember(${m.id})" title="Supprimer" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg"><i class="fa-solid fa-trash-can text-xs"></i></button>
         </td>
       </tr>`;
   }).join('');
 }
 
-// Logique du Blog / Photothèque / Documents
+// ================= FICHE DÉTAILLÉE & COTISATIONS MENSUELLES =================
+let detailId = null;
+function openDetail(id){
+  const m = membersData.find(x=>x.id===id); if(!m) return;
+  detailId = id;
+  renderDetail(m, ANNEE_COURANTE);
+  document.getElementById('detail-modal').classList.remove('hidden');
+}
+function closeDetail(){ document.getElementById('detail-modal').classList.add('hidden'); detailId=null; }
+
+function renderDetail(m, year){
+  const paidArr = (m.payments && m.payments[year]) || Array(12).fill(false);
+  const paid = paidArr.filter(Boolean).length;
+  const solde = soldeDu(m, year);
+  const pct = Math.round(paid/12*100);
+
+  const grid = MOIS.map((mo, i)=>{
+    const on = !!paidArr[i];
+    const cls = on ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-rose-50 text-rose-600 border-rose-200';
+    return `<button type="button" onclick="togglePay(${m.id},${year},${i})" class="${cls} rounded-lg border py-2 text-[11px] font-bold transition flex flex-col items-center gap-0.5 hover:ring-2 hover:ring-las-400">
+              <span>${mo}</span><i class="fa-solid ${on?'fa-check':'fa-xmark'} text-[10px]"></i>
+            </button>`;
+  }).join('');
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
+      <div class="shrink-0">${avatar(m, 80)}</div>
+      <div class="flex-1">
+        <h2 class="text-base font-black text-slate-900">${escapeHTML(m.name)} <span class="text-xs font-mono text-slate-500">(N° ${m.id})</span></h2>
+        <p class="text-xs font-bold text-las-700">${escapeHTML(m.poste || 'Membre')}</p>
+        <div class="grid grid-cols-2 gap-2 mt-2 text-xs text-slate-600">
+          <div><i class="fa-solid fa-phone"></i> ${escapeHTML(m.phone)}</div>
+          <div><i class="fa-solid fa-briefcase"></i> ${escapeHTML(m.profession || '—')}</div>
+          <div><i class="fa-solid fa-cake-candles"></i> ${escapeHTML(m.birthdate || '—')}</div>
+          <div><i class="fa-solid fa-location-dot"></i> ${escapeHTML(m.birthplace || '—')}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-3">
+      <div class="bg-white rounded-xl border border-slate-200 p-3 text-center"><div class="text-[10px] text-slate-500 uppercase">Payé ${year}</div><div class="text-base font-black text-emerald-600">${paid*COTISATION_MENSUELLE} $</div></div>
+      <div class="bg-white rounded-xl border border-slate-200 p-3 text-center"><div class="text-[10px] text-slate-500 uppercase">Solde dû</div><div class="text-base font-black ${solde>0?'text-rose-600':'text-emerald-600'}">${solde} $</div></div>
+      <div class="bg-white rounded-xl border border-slate-200 p-3 text-center"><div class="text-[10px] text-slate-500 uppercase">Progression</div><div class="text-base font-black text-slate-800">${pct}%</div></div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
+      <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider"><i class="fa-solid fa-coins text-gold-500"></i> Cotisations Mensuelles (${year})</h4>
+      <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">${grid}</div>
+      <p class="text-[10px] text-slate-400 italic">Cliquez sur un mois pour basculer son statut (Payé / Impayé).</p>
+    </div>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button onclick="editMember(${m.id}); closeDetail();" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl">Modifier la fiche</button>
+      <button onclick="closeDetail()" class="px-4 py-2 bg-las-700 text-white text-xs font-bold rounded-xl">Fermer</button>
+    </div>
+  `;
+}
+
+function togglePay(id, year, monthIdx){
+  const m = membersData.find(x=>x.id===id); if(!m) return;
+  if(!m.payments) m.payments = {};
+  if(!m.payments[year]) m.payments[year] = Array(12).fill(false);
+  m.payments[year][monthIdx] = !m.payments[year][monthIdx];
+  saveMembers();
+  renderDetail(m, year);
+  renderStats();
+  renderMembers();
+}
+
+// ================= AJOUT / ÉDITION MEMBRE & PHOTO =================
+let tempPhoto = "";
+function openMemberModal(member=null){
+  document.getElementById('member-modal').classList.remove('hidden');
+  document.getElementById('input-edit-id').value = member ? member.id : '';
+  document.getElementById('input-name').value = member ? member.name : '';
+  document.getElementById('input-phone').value = member ? member.phone : '';
+  document.getElementById('input-poste').value = member ? member.poste || '' : '';
+  document.getElementById('input-birthdate').value = member ? member.birthdate || '' : '';
+  document.getElementById('input-birthplace').value = member ? member.birthplace || '' : '';
+  document.getElementById('input-asbl').value = member ? member.asbl : 'OUI';
+  document.getElementById('input-reunion').value = member ? member.reunion : 'OUI';
+  tempPhoto = member ? member.photo || '' : '';
+  updatePhotoPreview();
+}
+function closeMemberModal(){ document.getElementById('member-modal').classList.add('hidden'); tempPhoto=""; }
+
+function handlePhoto(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    tempPhoto = ev.target.result;
+    updatePhotoPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function updatePhotoPreview(){
+  const prev = document.getElementById('photo-preview');
+  const ph = document.getElementById('photo-placeholder');
+  if(tempPhoto){ prev.src = tempPhoto; prev.classList.remove('hidden'); ph.classList.add('hidden'); }
+  else { prev.classList.add('hidden'); ph.classList.remove('hidden'); }
+}
+
+function editMember(id){
+  const m = membersData.find(x=>x.id===id); if(m) openMemberModal(m);
+}
+
+function saveMember(e){
+  e.preventDefault();
+  const editId = document.getElementById('input-edit-id').value;
+  const data = {
+    name: document.getElementById('input-name').value.trim(),
+    phone: document.getElementById('input-phone').value.trim(),
+    poste: document.getElementById('input-poste').value.trim(),
+    birthdate: document.getElementById('input-birthdate').value,
+    birthplace: document.getElementById('input-birthplace').value.trim(),
+    asbl: document.getElementById('input-asbl').value,
+    reunion: document.getElementById('input-reunion').value,
+    photo: tempPhoto
+  };
+
+  if(editId){
+    const idx = membersData.findIndex(m=>m.id===parseInt(editId));
+    if(idx !== -1) membersData[idx] = Object.assign({}, membersData[idx], data);
+  } else {
+    const nextId = membersData.length ? Math.max(...membersData.map(m=>m.id))+1 : 1;
+    membersData.unshift(Object.assign({ id: nextId, payments:{} }, data));
+  }
+  saveMembers(); closeMemberModal(); renderStats(); renderMembers();
+}
+
+function deleteMember(id){
+  if(confirm("Supprimer ce membre ?")){
+    membersData = membersData.filter(m=>m.id!==id);
+    saveMembers(); renderStats(); renderMembers();
+  }
+}
+
+// ================= BLOG / MÉDIA =================
 function openMediaModal(){ document.getElementById('media-modal').classList.remove('hidden'); }
 function closeMediaModal(){ document.getElementById('media-modal').classList.add('hidden'); }
 
@@ -348,14 +540,8 @@ function saveMedia(e){
   if(fileInput.files && fileInput.files[0]){
     const reader = new FileReader();
     reader.onload = function(ev){
-      mediaData.unshift({
-        id: Date.now(), type, title, desc,
-        url: ev.target.result,
-        date: new Date().toISOString().slice(0,10)
-      });
-      saveMediaStorage();
-      closeMediaModal();
-      renderMedia('ALL');
+      mediaData.unshift({ id: Date.now(), type, title, desc, url: ev.target.result, date: new Date().toISOString().slice(0,10) });
+      saveMediaStorage(); closeMediaModal(); renderMedia('ALL');
     };
     reader.readAsDataURL(fileInput.files[0]);
   }
@@ -374,36 +560,19 @@ function filterMedia(type){
 function renderMedia(filter){
   const grid = document.getElementById('media-grid');
   const filtered = filter === 'ALL' ? mediaData : mediaData.filter(m => m.type === filter);
-
-  if(filtered.length === 0){
-    grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-xs">Aucun contenu disponible.</div>`;
-    return;
-  }
+  if(filtered.length === 0){ grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-xs">Aucun contenu.</div>`; return; }
 
   grid.innerHTML = filtered.map(m => {
-    let preview = '';
-    if(m.type === 'photo'){
-      preview = `<img src="${m.url}" alt="" class="w-full h-48 object-cover rounded-t-2xl">`;
-    } else if(m.type === 'pdf'){
-      preview = `<div class="w-full h-36 bg-rose-50 text-rose-600 flex flex-col items-center justify-center rounded-t-2xl gap-2"><i class="fa-solid fa-file-pdf text-4xl"></i><span class="text-xs font-bold">Document PDF</span></div>`;
-    } else {
-      preview = `<video src="${m.url}" controls class="w-full h-48 object-cover rounded-t-2xl bg-black"></video>`;
-    }
-
+    let preview = m.type==='photo' ? `<img src="${m.url}" class="w-full h-48 object-cover rounded-t-2xl">` :
+                  m.type==='pdf' ? `<div class="w-full h-36 bg-rose-50 text-rose-600 flex flex-col items-center justify-center rounded-t-2xl gap-2"><i class="fa-solid fa-file-pdf text-4xl"></i><span class="text-xs font-bold">Document PDF</span></div>` :
+                  `<video src="${m.url}" controls class="w-full h-48 object-cover rounded-t-2xl bg-black"></video>`;
     return `
       <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between">
-        <div>
-          ${preview}
-          <div class="p-4 space-y-2">
-            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-las-100 text-las-800">${m.type}</span>
-            <h3 class="font-bold text-slate-900 text-sm">${m.title}</h3>
-            <p class="text-xs text-slate-600">${m.desc || ''}</p>
-          </div>
-        </div>
+        <div>${preview}<div class="p-4 space-y-2"><span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-las-100 text-las-800">${m.type}</span><h3 class="font-bold text-slate-900 text-sm">${escapeHTML(m.title)}</h3><p class="text-xs text-slate-600">${escapeHTML(m.desc||'')}</p></div></div>
         <div class="p-4 pt-0 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 mt-2">
           <span>${m.date}</span>
           <div class="flex gap-2">
-            ${m.type === 'pdf' ? `<a href="${m.url}" download="Document_LAS.pdf" class="text-las-700 font-bold hover:underline"><i class="fa-solid fa-download"></i> Télécharger</a>` : ''}
+            ${m.type==='pdf'?`<a href="${m.url}" download="Document.pdf" class="text-las-700 font-bold hover:underline"><i class="fa-solid fa-download"></i> Télécharger</a>`:''}
             <button onclick="deleteMedia(${m.id})" class="text-rose-500 hover:underline"><i class="fa-solid fa-trash"></i></button>
           </div>
         </div>
@@ -412,38 +581,17 @@ function renderMedia(filter){
 }
 
 function deleteMedia(id){
-  if(confirm("Supprimer cette publication ?")){
-    mediaData = mediaData.filter(m => m.id !== id);
-    saveMediaStorage();
-    renderMedia('ALL');
-  }
+  if(confirm("Supprimer cette publication ?")){ mediaData = mediaData.filter(m=>m.id!==id); saveMediaStorage(); renderMedia('ALL'); }
 }
 
-function openMemberModal(){ document.getElementById('member-modal').classList.remove('hidden'); }
-function closeMemberModal(){ document.getElementById('member-modal').classList.add('hidden'); }
-
-function saveMember(e){
-  e.preventDefault();
-  const name = document.getElementById('input-name').value.trim();
-  const phone = document.getElementById('input-phone').value.trim();
-  const poste = document.getElementById('input-poste').value.trim();
-  const asbl = document.getElementById('input-asbl').value;
-  const reunion = document.getElementById('input-reunion').value;
-  const nextId = membersData.length ? Math.max(...membersData.map(m=>m.id))+1 : 1;
-  membersData.unshift({ id: nextId, name, phone, poste, asbl, reunion, payments:{} });
-  saveMembers(); closeMemberModal(); renderStats(); renderMembers();
-}
-
-function deleteMember(id){
-  if(confirm("Supprimer ce membre ?")){
-    membersData = membersData.filter(m=>m.id!==id);
-    saveMembers(); renderStats(); renderMembers();
-  }
-}
-
-function logout(){
-  localStorage.removeItem('las_session_v1');
-  window.location.href = 'login.html';
+function logout(){ localStorage.removeItem('las_session_v1'); window.location.href='login.html'; }
+function exportCSV(){
+  const headers=["N°","Nom","Téléphone","Poste","Actif ASBL","Réunion"];
+  const rows=membersData.map(m=>[m.id,`"${m.name}"`,`"${m.phone}"`,`"${m.poste||''}"`,m.asbl,m.reunion]);
+  const csv="\uFEFF"+[headers.join(";"),...rows.map(r=>r.join(";"))].join("\n");
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=url; a.download="Membres_LAS.csv"; a.click();
 }
 
 document.getElementById('search-input').addEventListener('input', renderMembers);
