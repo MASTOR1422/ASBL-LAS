@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
+    <!-- Liaison du module externe de gestion des identifiants et des rôles -->
+    <script src="auth.js"></script>
+
     <script>
         tailwind.config = {
             theme: { extend: {
@@ -37,7 +40,6 @@
         }
         .print-only { display:none; }
 
-        /* ===== Effets visuels anniversaire ===== */
         @keyframes bdayPulse { 0%,100%{box-shadow:0 0 0 0 rgba(234,179,8,.45)} 50%{box-shadow:0 0 0 6px rgba(234,179,8,0)} }
         @keyframes bdayShine { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
         @keyframes bdayFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
@@ -59,7 +61,7 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
-    <!-- ===================== BARRE DE NAVIGATION PRINCIPALE ===================== -->
+    <!-- BARRE DE NAVIGATION PRINCIPALE -->
     <header class="bg-slate-900 text-white shadow-lg border-b border-las-700/40 sticky top-0 z-40 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
@@ -94,7 +96,7 @@
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
-                    <!-- Badge utilisateur connecté -->
+                    <!-- Badge profil utilisateur -->
                     <button onclick="openLoginModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition cursor-pointer text-left" title="Changer d'utilisateur ou de rôle">
                         <i class="fa-solid fa-user-shield text-las-400"></i>
                         <div>
@@ -105,7 +107,7 @@
                         <i class="fa-solid fa-arrows-rotate text-[10px] text-gold-400 ml-1"></i>
                     </button>
 
-                    <!-- Actions Membres -->
+                    <!-- Actions Administrateurs (Masqués pour les membres simples) -->
                     <div id="header-member-actions" class="flex items-center gap-2">
                         <button onclick="openMemberModal()" id="btn-add" class="px-3.5 py-2 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-md shadow-las-900/20 active:scale-95">
                             <i class="fa-solid fa-user-plus text-gold-400"></i><span>Nouveau Membre</span>
@@ -121,7 +123,7 @@
                         </button>
                     </div>
 
-                    <!-- Actions Blog -->
+                    <!-- Actions Blog Administrateur -->
                     <div id="header-blog-actions" class="hidden flex items-center gap-2">
                         <button onclick="openBlogModal()" id="btn-add-blog" class="px-3.5 py-2 bg-gold-500 hover:bg-gold-400 text-slate-900 font-black rounded-xl text-xs transition flex items-center gap-2 shadow-lg active:scale-95">
                             <i class="fa-solid fa-cloud-arrow-up"></i><span>Publier Un Document / Média</span>
@@ -135,7 +137,6 @@
             </div>
         </div>
 
-        <!-- BARRE D'ONGLETS PRINCIPAUX -->
         <div class="bg-slate-950/90 border-t border-slate-800/80 no-print">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center sm:justify-start gap-3 py-2 overflow-x-auto">
                 <button id="nav-btn-members" onclick="switchMainTab('members')" class="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 bg-las-600 text-white shadow-lg ring-2 ring-las-400/30">
@@ -148,7 +149,7 @@
         </div>
     </header>
 
-    <!-- ===================== EN-TÊTE D'IMPRESSION ===================== -->
+    <!-- EN-TÊTE D'IMPRESSION -->
     <div class="print-only mb-4 border-b-2 border-slate-900 pb-3">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
@@ -176,9 +177,7 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex-grow w-full">
 
-        <!-- ========================================================================= -->
-        <!-- SECTION 1 : RÉPERTOIRE DES MEMBRES & COTISATIONS                         -->
-        <!-- ========================================================================= -->
+        <!-- SECTION 1 : RÉPERTOIRE DES MEMBRES & COTISATIONS -->
         <section id="sec-members" class="space-y-6">
 
             <!-- CARTES STATISTIQUES MEMBRES -->
@@ -194,13 +193,13 @@
             <!-- BANNIÈRE ANNIVERSAIRES -->
             <div id="birthday-banner" class="hidden no-print"></div>
 
-            <!-- BANNIÈRE ACCÈS MEMBRE PRIVÉ -->
+            <!-- INFOS CONSULTATION DU MEMBRE -->
             <div id="member-personal-notice" class="hidden bg-emerald-900 text-white p-4 rounded-2xl shadow-md border border-emerald-700/60 flex items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-800 flex items-center justify-center text-gold-400 font-bold text-lg"><i class="fa-solid fa-lock"></i></div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-800 flex items-center justify-center text-gold-400 font-bold text-lg"><i class="fa-solid fa-eye"></i></div>
                     <div>
-                        <h3 class="font-extrabold text-sm text-gold-400">Espace Membre Individuel &amp; Sécurisé</h3>
-                        <p class="text-xs text-emerald-100">Accès restreint à votre propre suivi de cotisations et à la médiathèque officielle.</p>
+                        <h3 class="font-extrabold text-sm text-gold-400">Mode Consultation Membre</h3>
+                        <p class="text-xs text-emerald-100" id="member-notice-text">Vous pouvez consulter le répertoire complet, la médiathèque et l'état des cotisations de tous les membres.</p>
                     </div>
                 </div>
             </div>
@@ -268,19 +267,16 @@
         </section>
 
 
-        <!-- ========================================================================= -->
-        <!-- SECTION 2 : BLOG, PHOTOTHÈQUE, COMPTES RENDUS & MÉDIATHÈQUE            -->
-        <!-- ========================================================================= -->
+        <!-- SECTION 2 : BLOG, PHOTOTHÈQUE & MÉDIATHÈQUE -->
         <section id="sec-blog" class="hidden space-y-6">
 
-            <!-- ENTÊTE DE LA SECTION BLOG -->
             <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-las-900 rounded-3xl p-6 text-white shadow-xl border border-slate-700/60 no-print">
                 <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div>
                         <span class="text-gold-400 text-xs font-extrabold uppercase tracking-widest bg-gold-500/20 px-3 py-1 rounded-full border border-gold-500/30">Médiathèque Officielle</span>
                         <h2 class="text-xl sm:text-2xl font-black mt-2">Blog, Photothèque &amp; Documents Assemblés</h2>
                         <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-2xl">
-                            Consultez les Procès-Verbaux (PV au format PDF), les photos HD et vidéos officielles de l'ASBL LAS. Téléchargez ou lisez les fichiers directement avec lecteur intégré.
+                            Consultez les Procès-Verbaux (PV au format PDF), les photos HD et vidéos officielles de l'ASBL LAS.
                         </p>
                     </div>
                     <button onclick="openBlogModal()" id="btn-add-blog-sec" class="px-5 py-3 bg-gold-500 hover:bg-gold-400 text-slate-900 font-black rounded-2xl text-xs shadow-lg transition flex items-center gap-2 shrink-0 active:scale-95">
@@ -289,7 +285,7 @@
                 </div>
             </div>
 
-            <!-- STATISTIQUES DU BLOG -->
+            <!-- STATISTIQUES BLOG -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 no-print">
                 <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex items-center gap-3">
                     <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-file-pdf"></i></div>
@@ -309,7 +305,7 @@
                 </div>
             </div>
 
-            <!-- BARRE DE RECHERCHE DÉDIÉE DU BLOG -->
+            <!-- BARRE DE RECHERCHE BLOG -->
             <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm no-print space-y-3">
                 <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
                     <div class="relative w-full lg:w-96">
@@ -350,14 +346,14 @@
                 </div>
             </div>
 
-            <!-- GRILLE DE CONTENU DU BLOG -->
+            <!-- GRILLE DU BLOG -->
             <div id="blog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
         </section>
 
     </main>
 
-    <!-- ===================== PIED D'IMPRESSION ===================== -->
+    <!-- PIED D'IMPRESSION -->
     <footer class="print-only mt-8 pt-4 border-t-2 border-slate-900">
         <div class="grid grid-cols-3 gap-4 text-center text-xs">
             <div><p class="font-bold text-slate-900">Le Secrétariat Général</p><div class="h-14"></div><p class="text-[8pt] text-slate-500">Nom &amp; Signature</p></div>
@@ -367,7 +363,7 @@
         <p class="text-center text-[7.5pt] text-slate-400 mt-6">ASBL LES AMIS DE LA SEMENCE (LAS) — Registre officiel d'administration — Imprimé depuis la plateforme</p>
     </footer>
 
-    <!-- ===================== PIED WEB ===================== -->
+    <!-- PIED WEB -->
     <footer class="no-print bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-auto">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <p class="font-medium text-slate-600"><strong>ASBL LES AMIS DE LA SEMENCE (LAS)</strong> &copy; <span id="current-year">2026</span> — Tous droits réservés.</p>
@@ -375,7 +371,7 @@
         </div>
     </footer>
 
-    <!-- ===================== MODALE DE CONNEXION SÉCURISÉE (ID & PIN) ===================== -->
+    <!-- MODALE DE CONNEXION -->
     <div id="login-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 no-print">
         <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50">
@@ -383,30 +379,25 @@
                 <button onclick="closeLoginModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4">
-                <p class="text-xs text-slate-600 leading-relaxed">
-                    Connectez-vous avec vos identifiants d'accès. Les membres individuels accèdent uniquement à leur propre dossier de cotisations.
-                </p>
-
                 <div class="space-y-2">
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Type d'accès :</label>
                     <select id="login-role-select" onchange="toggleLoginMemberSelect()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
-                        <option value="admin">Administrateur / Bureau Direction (Accès Total)</option>
-                        <option value="secretaire">Secrétaire Général (Gestion Membres &amp; PV)</option>
-                        <option value="tresorier">Trésorier (Gestion Cotisations)</option>
-                        <option value="membre">Membre Individuel (Accès Restreint)</option>
+                        <option value="membre">Membre Individuel / Administrateur</option>
+                        <option value="root">Root Principal (Super-Admin System)</option>
                     </select>
                 </div>
 
-                <div id="login-member-group" class="space-y-3 hidden">
+                <div id="login-member-group" class="space-y-3">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Sélectionnez votre Membre ID :</label>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Sélectionnez votre Nom / Membre ID :</label>
                         <select id="login-member-select" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></select>
                     </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Code PIN Secret :</label>
-                        <input type="password" id="login-pin-input" placeholder="Par défaut ex: 1001, 1002..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
-                        <span class="text-[10px] text-slate-400 mt-1 block">Le code PIN par défaut d'un membre est : <b>1000 + son N° ID</b>.</span>
-                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Code PIN Secret :</label>
+                    <input type="password" id="login-pin-input" placeholder="Par défaut ex: 1001, 1002..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-las-500">
+                    <span class="text-[10px] text-slate-400 mt-1 block">Le code PIN par défaut d'un membre est : <b>1000 + son N° ID</b>.</span>
                 </div>
 
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
@@ -417,7 +408,7 @@
         </div>
     </div>
 
-    <!-- ===================== MODALE AJOUT / ÉDITION MEMBRE ===================== -->
+    <!-- MODALE AJOUT / ÉDITION MEMBRE -->
     <div id="member-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
         <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50 sticky top-0">
@@ -494,7 +485,7 @@
         </div>
     </div>
 
-    <!-- ===================== MODALE FICHE MEMBRE ===================== -->
+    <!-- MODALE FICHE MEMBRE -->
     <div id="detail-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-start sm:items-center justify-center p-3 sm:p-4 no-print overflow-y-auto">
         <div class="bg-slate-50 rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden my-4">
             <div class="bg-slate-900 px-5 sm:px-6 py-4 flex items-center justify-between text-white">
@@ -508,7 +499,7 @@
         </div>
     </div>
 
-    <!-- ===================== MODALE PUBLICATION BLOG / MÉDIA / PV ===================== -->
+    <!-- MODALE PUBLICATION BLOG -->
     <div id="blog-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
         <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-gold-500/30 sticky top-0">
@@ -562,11 +553,10 @@
                     <textarea id="blog-input-desc" rows="3" placeholder="Saisissez un bref résumé des résolutions, de la réunion ou de la photo..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-gold-500 focus:bg-white transition"></textarea>
                 </div>
 
-                <!-- Joindre un fichier avec restriction automatique -->
                 <div class="p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1" id="blog-file-input-label">Joindre un fichier (PDF uniquement pour les documents)</label>
                     <input type="file" id="blog-input-file" accept=".pdf,application/pdf" onchange="handleBlogFileUpload(event)" class="block w-full text-[11px] text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gold-500 file:text-slate-900 hover:file:bg-gold-400 cursor-pointer">
-                    <span class="text-[10px] text-slate-500 mt-1 block" id="blog-file-format-hint">Formats : PDF uniquement pour PV/Documents · Images (JPG, PNG, WEBP) · Vidéos (MP4, WEBM).</span>
+                    <span class="text-[10px] text-slate-500 mt-1 block">Formats : PDF uniquement pour PV/Documents · Images (JPG, PNG, WEBP) · Vidéos (MP4, WEBM).</span>
                     
                     <div id="blog-file-preview-info" class="hidden mt-3 text-xs font-mono text-las-800 font-bold flex items-center justify-between bg-las-100 p-2.5 rounded-xl border border-las-300">
                         <span id="blog-file-name-display"><i class="fa-solid fa-paperclip mr-1"></i> Fichier chargé</span>
@@ -582,7 +572,7 @@
         </div>
     </div>
 
-    <!-- ===================== MODALE APERÇU / LECTEUR SÉCURISÉ DES MÉDIAS & PDF ===================== -->
+    <!-- MODALE APERÇU / LECTEUR DYNAMIQUE DES MÉDIAS & PDF -->
     <div id="blog-view-modal" class="hidden fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 no-print overflow-y-auto">
         <div class="bg-white rounded-2xl max-w-4xl w-full shadow-2xl border border-slate-200 overflow-hidden my-4 max-h-[92vh] flex flex-col">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white shrink-0">
@@ -595,8 +585,9 @@
 
 <script>
 // ============================================================
-//  PROTECTION ET NETTOYAGE CONTRE LES FAILLES XSS
+//  LOGIQUE PRINCIPALE & BASE DE DONNÉES DE L'APPLICATION
 // ============================================================
+
 function escapeHTML(str) {
   if (!str) return '';
   return String(str)
@@ -607,7 +598,6 @@ function escapeHTML(str) {
     .replace(/'/g, "&#039;");
 }
 
-// Convertit un DataURL Base64 en Blob binaire strict pour garantir l'ouverture parfaite des téléchargements
 function dataURLtoBlob(dataurl) {
   if (!dataurl || !dataurl.includes(',')) return null;
   try {
@@ -627,40 +617,6 @@ function dataURLtoBlob(dataurl) {
   }
 }
 
-// ============================================================
-//  GARDE DE SESSION ET ACCÈS SÉCURISÉ PAR ID MEMBRE
-// ============================================================
-const SESSION_KEY = "las_session_v1";
-function getSession(){
-  try { return JSON.parse(localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY) || "null"); }
-  catch(e){ return null; }
-}
-
-let SESSION = getSession();
-if (!SESSION || !SESSION.user){
-  SESSION = { user: "Ananias KASANDA", role: "secretaire", memberId: 2, label: "Secrétaire" };
-  try { localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION)); } catch(e){}
-}
-
-function logout(){
-  if (confirm("Voulez-vous vous déconnecter ?")){
-    localStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SESSION_KEY);
-    window.location.reload();
-  }
-}
-
-let ROLE = (SESSION && SESSION.role) || "secretaire";
-let MEMBER_ID = (SESSION && SESSION.memberId) || null;
-
-function isMembreRole(){ return ROLE === "membre"; }
-function canEdit(){ return ROLE === "admin" || ROLE === "secretaire"; }
-function canPay(){ return ROLE === "admin" || ROLE === "tresorier"; }
-function canDelete(){ return ROLE === "admin"; }
-
-// ============================================================
-//  PARAMÈTRES ET CLÉS DE STOCKAGE
-// ============================================================
 const COTISATION_MENSUELLE = 10;
 const MOIS = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 const ANNEE_COURANTE = new Date().getFullYear();
@@ -711,7 +667,7 @@ function getFileFromIDB(id){
 }
 
 // ============================================================
-//  DONNÉES OFFICIELLES ET CODES PIN DES MEMBRES
+//  DONNÉES OFFICIELLES ET CODES PIN DES 37 MEMBRES
 // ============================================================
 const DEFAULT_MEMBERS = [
   { id:1, pin:"1001", name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
@@ -729,7 +685,7 @@ const DEFAULT_MEMBERS = [
   { id:14, pin:"1014", name:"Freddy KIMPIATTU",phone:"243 826 065 275",forum:"OUI",asbl:"OUI",reunion:"OUI" },
   { id:15, pin:"1015", name:"Frederick Kifiya",phone:"243 899 694 673",forum:"OUI",asbl:"OUI",reunion:"OUI" },
   { id:16, pin:"1016", name:"Fils Kimenga",phone:"243 843 218 094",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:17, pin:"1017", name:"Kita serge",phone:"243 854 797 085",forum:"OUI",asbl:"OUI",reunion:"OUI" },
+  { id:17, pin:"1017", name:"Kita serge",phone:"243 854 797 085",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire Général / Trésorier" },
   { id:18, pin:"1018", name:"Lolo Nzeza",phone:"243 900 532 333",forum:"OCCASIONEL",asbl:"NON",reunion:"NON" },
   { id:19, pin:"1019", name:"Lombi",phone:"+242 05 761 5731",forum:"SOUVENT",asbl:"NON",reunion:"NON" },
   { id:20, pin:"1020", name:"Lovy Sala",phone:"243 814 941 425",forum:"NON",asbl:"NON",reunion:"NON" },
@@ -793,7 +749,7 @@ const DEFAULT_BLOG = [
     type: "pv",
     category: "Assemblée Générale",
     date: "2026-02-15",
-    author: "Ananias KASANDA (SG)",
+    author: "Ananias KASANDA (Coordonnateur)",
     desc: "Adoption du rapport financier annuel, approbation des bilans et validation du programme d'activités.",
     fileData: "",
     fileName: "PV_AG_2026_LAS.pdf",
@@ -805,7 +761,7 @@ const DEFAULT_BLOG = [
     type: "compte_rendu",
     category: "Réunion Mensuelle",
     date: "2026-04-05",
-    author: "Secrétariat Général",
+    author: "Serge KITA (Secrétaire Général)",
     desc: "Synthèse des échanges, état des cotisations mensuelles et planification de l'entraide sociale.",
     fileData: "",
     fileName: "CR_Reunion_Avril_2026.pdf",
@@ -846,9 +802,6 @@ function saveBlogData(){
   } catch(e){ console.warn("Erreur sauvegarde blog", e); }
 }
 
-// ============================================================
-//  GESTION DES ONGLETS & RESTRICTION DES VUES
-// ============================================================
 function switchMainTab(tab){
   const secMembers = document.getElementById('sec-members');
   const secBlog = document.getElementById('sec-blog');
@@ -877,18 +830,15 @@ function switchMainTab(tab){
     btnMembers.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 bg-las-600 text-white shadow-lg ring-2 ring-las-400/30";
     btnBlog.className = "px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition flex items-center gap-2 text-slate-300 hover:text-white hover:bg-slate-800";
 
-    hdrMemberActions.classList.remove('hidden');
+    if(canEdit()){
+      hdrMemberActions.classList.remove('hidden');
+    }
     hdrBlogActions.classList.add('hidden');
 
-    if(isMembreRole() && MEMBER_ID){
-      openDetail(MEMBER_ID);
-    } else {
-      renderData();
-    }
+    renderData();
   }
 }
 
-// ---------- Calculs Cotisations ----------
 function yearPaid(m, year){
   const arr = (m.payments && m.payments[year]) || [];
   return arr.filter(Boolean).length;
@@ -905,7 +855,6 @@ function isAJour(m, year){
   return soldeDu(m, year) === 0;
 }
 
-// ---------- Anniversaires ----------
 function daysUntilBirthday(m){
   if(!m.birthdate) return null;
   const d = new Date(m.birthdate);
@@ -941,9 +890,6 @@ function fmtDate(str){
   return d.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
 }
 
-// ============================================================
-//  BADGES ET AVATARS
-// ============================================================
 function badge(value, type){
   const v = (value||'').toUpperCase().trim();
   const base = 'badge-print inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border';
@@ -968,9 +914,6 @@ function avatar(m, size){
   return `<div class="rounded-lg bg-las-100 text-las-800 flex items-center justify-center font-extrabold border border-las-200" style="width:${s}px;height:${s}px;font-size:${Math.round(s*0.36)}px">${initials(m.name)}</div>`;
 }
 
-// ============================================================
-//  STATISTIQUES
-// ============================================================
 function calculateStats(){
   const total = membersData.length;
   const actifs = membersData.filter(m=>m.asbl==='OUI').length;
@@ -991,10 +934,8 @@ function calculateStats(){
 }
 function set(id,val){ const el=document.getElementById(id); if(el) el.textContent=val; }
 
-// ---------- Anniversaires ----------
 function renderBirthdays(){
   const banner = document.getElementById('birthday-banner');
-  if(isMembreRole()){ banner.classList.add('hidden'); banner.innerHTML=''; return; }
 
   const soon = membersData
     .map(m => ({ m, d: daysUntilBirthday(m) }))
@@ -1041,14 +982,8 @@ function renderBirthdays(){
   banner.classList.remove('hidden');
 }
 
-// ============================================================
-//  RENDU AVEC ISOLATION DES DONNÉES PAR MEMBRE
-// ============================================================
+// CONSULTATION GLOBALE POUR TOUS LES MEMBRES
 function getFiltered(){
-  if(isMembreRole() && MEMBER_ID){
-    return membersData.filter(m => m.id === MEMBER_ID);
-  }
-
   const q = document.getElementById('search-input').value.toLowerCase().trim();
   const fAsbl = document.getElementById('filter-asbl').value;
   const fCot = document.getElementById('filter-cotis').value;
@@ -1080,7 +1015,7 @@ function renderData(){
   const filtered = getFiltered();
   set('filter-count', filtered.length);
 
-  // ---- TABLEAU ----
+  // TABLEAU
   const tbody = document.getElementById('table-body');
   if (filtered.length===0){
     tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10 text-slate-400 font-medium"><i class="fa-solid fa-folder-open text-3xl mb-2 block text-slate-300"></i>Aucun membre ne correspond aux critères.</td></tr>`;
@@ -1114,7 +1049,7 @@ function renderData(){
     }).join('');
   }
 
-  // ---- CARTES ----
+  // CARTES
   const cards = document.getElementById('view-cards');
   if (filtered.length===0){
     cards.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-medium">Aucun membre trouvé.</div>`;
@@ -1149,9 +1084,7 @@ function renderData(){
   }
 }
 
-// ============================================================
-//  BLOG, PHOTOTHÈQUE, LECTEUR PDF & APERÇUS DYNAMIQUES
-// ============================================================
+// BLOG & MÉDIATHÈQUE
 let currentBlogFile = null;
 
 function updateBlogFileAccept(){
@@ -1289,7 +1222,7 @@ function renderBlog(){
 }
 
 function openBlogModal(){
-  if(!canEdit()){ alert("Votre rôle ne permet pas de publier des fichiers."); return; }
+  if(!canEdit()){ alert("Seuls les Administrateurs autorisés peuvent publier des fichiers."); return; }
   document.getElementById('blog-form').reset();
   currentBlogFile = null;
   document.getElementById('blog-file-preview-info').classList.add('hidden');
@@ -1308,7 +1241,6 @@ function handleBlogFileUpload(e){
 
   const type = document.getElementById('blog-input-type').value;
 
-  // Validation stricte du PDF pour les documents
   if((type === 'pv' || type === 'compte_rendu' || type === 'document') && !file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf'){
     alert("Format refusé : Les procès-verbaux et documents officiels doivent STRICTEMENT être au format PDF.");
     e.target.value = '';
@@ -1349,7 +1281,7 @@ async function saveBlogEntry(e){
   const type = document.getElementById('blog-input-type').value;
   const category = document.getElementById('blog-input-category').value;
   const date = document.getElementById('blog-input-date').value;
-  const author = document.getElementById('blog-input-author').value.trim() || 'Secrétariat Général';
+  const author = document.getElementById('blog-input-author').value.trim() || SESSION.user;
   const desc = document.getElementById('blog-input-desc').value.trim();
 
   const newEntry = {
@@ -1389,601 +1321,4 @@ async function viewBlogItem(id){
   if(!item) return;
 
   const idbRecord = await getFileFromIDB(id);
-  const fileData = (idbRecord && idbRecord.fileData) ? idbRecord.fileData : item.fileData;
-  const fileType = (idbRecord && idbRecord.fileType) ? idbRecord.fileType : item.fileType;
-
-  document.getElementById('blog-view-title').innerHTML = `<i class="fa-solid fa-file-contract text-gold-400"></i> ${escapeHTML(item.title)}`;
-
-  let mediaDisplay = '';
-
-  if(fileData) {
-    if(fileType.startsWith('image/') || item.type === 'phototheque') {
-      mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 max-h-[500px] bg-slate-900 flex items-center justify-center">
-        <img src="${fileData}" class="max-h-[500px] w-auto object-contain">
-      </div>`;
-    } else if(fileType.startsWith('video/') || item.type === 'video') {
-      mediaDisplay = `<div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900">
-        <video src="${fileData}" controls class="w-full max-h-[500px]"></video>
-      </div>`;
-    } else if(fileType === 'application/pdf' || item.fileName.endsWith('.pdf') || item.type === 'pv' || item.type === 'compte_rendu') {
-      mediaDisplay = `<div class="space-y-2">
-        <div class="flex items-center justify-between text-xs font-bold text-slate-700 bg-slate-100 p-2 rounded-lg border border-slate-200">
-          <span><i class="fa-solid fa-file-pdf text-rose-600 mr-1.5"></i> Aperçu dynamique du document PDF</span>
-          <a href="${fileData}" target="_blank" class="text-las-700 hover:underline flex items-center gap-1"><i class="fa-solid fa-up-right-from-square"></i> Plein écran</a>
-        </div>
-        <iframe src="${fileData}#toolbar=0" class="w-full h-[500px] rounded-xl border border-slate-300 bg-slate-100"></iframe>
-      </div>`;
-    }
-  } else if(item.type === 'pv' || item.type === 'compte_rendu' || item.type === 'document') {
-    mediaDisplay = `<div class="p-8 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-3">
-      <i class="fa-solid fa-file-pdf text-5xl text-rose-600"></i>
-      <h4 class="font-extrabold text-slate-800 text-sm">Document PDF Officiel de l'ASBL LAS</h4>
-      <p class="text-xs text-slate-500 max-w-md mx-auto">Ce document est disponible au téléchargement binaire direct via le bouton ci-dessous.</p>
-    </div>`;
-  }
-
-  document.getElementById('blog-view-content').innerHTML = `
-    <div class="space-y-4">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="bg-gold-100 text-gold-900 border border-gold-300 px-3 py-1 rounded-full text-xs font-black uppercase">${escapeHTML(item.type.replace('_',' '))}</span>
-        <span class="bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-xs font-bold">${escapeHTML(item.category)}</span>
-        <span class="text-xs text-slate-500 font-medium ml-auto"><i class="fa-solid fa-calendar mr-1"></i> ${fmtDate(item.date)}</span>
-      </div>
-
-      <h2 class="text-lg font-black text-slate-900">${escapeHTML(item.title)}</h2>
-
-      ${mediaDisplay}
-
-      <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed space-y-2">
-        <h4 class="font-extrabold text-slate-900 uppercase tracking-wider text-[10px]">Description &amp; Résumé :</h4>
-        <p class="whitespace-pre-line">${escapeHTML(item.desc) || 'Aucun détail supplémentaire rédigé.'}</p>
-      </div>
-
-      <div class="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
-        <span>Auteur / Origine : <strong>${escapeHTML(item.author) || 'ASBL LAS'}</strong></span>
-        ${item.fileName ? `<button onclick="downloadBlogFile(${item.id})" class="px-5 py-2.5 bg-las-700 hover:bg-las-600 text-white font-extrabold rounded-xl transition flex items-center gap-2 shadow-md"><i class="fa-solid fa-download"></i> Télécharger (${escapeHTML(item.fileName)})</button>` : ''}
-      </div>
-    </div>`;
-
-  document.getElementById('blog-view-modal').classList.remove('hidden');
-}
-
-function closeBlogViewModal(){
-  document.getElementById('blog-view-modal').classList.add('hidden');
-}
-
-async function downloadBlogFile(id){
-  const item = blogData.find(x => x.id === id);
-  if(!item) return;
-
-  let fileData = item.fileData;
-  let fileName = item.fileName || (item.title + ".pdf");
-
-  const idbRecord = await getFileFromIDB(id);
-  if(idbRecord && idbRecord.fileData){
-    fileData = idbRecord.fileData;
-    fileName = idbRecord.fileName || fileName;
-  }
-
-  // Si le fichier de démo n'a pas de data binaire, on génère un document PDF textuel de secours
-  let downloadUrl = "";
-  if(fileData && fileData.startsWith('data:')){
-    const blob = dataURLtoBlob(fileData);
-    if(blob){
-      downloadUrl = URL.createObjectURL(blob);
-    } else {
-      downloadUrl = fileData;
-    }
-  } else {
-    const content = `ASBL LES AMIS DE LA SEMENCE (LAS)\n----------------------------------------\n` +
-                    `DOCUMENT OFFICIEL : ${item.title}\n` +
-                    `CATÉGORIE : ${item.category}\n` +
-                    `DATE : ${item.date}\n` +
-                    `AUTEUR : ${item.author}\n\n` +
-                    `RÉSUMÉ ET DÉTAILS :\n${item.desc}\n\n` +
-                    `Document officiel généré depuis la plateforme ASBL LAS.`;
-    const blob = new Blob([content], { type: 'application/pdf;charset=utf-8' });
-    downloadUrl = URL.createObjectURL(blob);
-  }
-
-  const a = document.createElement('a');
-  a.href = downloadUrl;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-function clearBlogSearch(){
-  document.getElementById('blog-search-input').value = '';
-  renderBlog();
-}
-
-function resetBlogFilters(){
-  document.getElementById('blog-search-input').value = '';
-  document.getElementById('blog-filter-type').value = 'ALL';
-  document.getElementById('blog-filter-category').value = 'ALL';
-  document.getElementById('blog-sort-by').value = 'recent';
-  renderBlog();
-}
-
-// ============================================================
-//  FICHE INDIVIDUELLE MEMBRE ET COTISATIONS
-// ============================================================
-let detailId = null;
-function openDetail(id){
-  const m = membersData.find(x=>x.id===id); if(!m) return;
-
-  if(isMembreRole() && MEMBER_ID && id !== MEMBER_ID){
-    id = MEMBER_ID;
-  }
-
-  detailId = id;
-  const targetMem = membersData.find(x=>x.id===id);
-  const year = ANNEE_COURANTE;
-  renderDetail(targetMem, year);
-  document.getElementById('detail-modal').classList.remove('hidden');
-}
-
-function closeDetail(){
-  if(isMembreRole()){
-    switchMainTab('blog');
-  } else {
-    document.getElementById('detail-modal').classList.add('hidden');
-    detailId=null;
-  }
-}
-
-function renderDetail(m, year){
-  const paidArr = (m.payments[year]||Array(12).fill(false));
-  const paid = paidArr.filter(Boolean).length;
-  const due = monthsDue(m, year);
-  const solde = soldeDu(m, year);
-  const pct = Math.round(paid/12*100);
-
-  const grid = MOIS.map((mo,i)=>{
-    const on = !!paidArr[i];
-    const isFuture = (year===ANNEE_COURANTE && i >= due);
-    const cls = on ? 'bg-emerald-500 text-white border-emerald-600'
-                   : isFuture ? 'bg-slate-50 text-slate-300 border-slate-200'
-                   : 'bg-rose-50 text-rose-500 border-rose-200';
-    const click = canPay() ? `onclick="togglePay(${m.id},${year},${i})"` : '';
-    const cursor = canPay() ? 'cursor-pointer hover:ring-2 hover:ring-las-400' : 'cursor-default opacity-95';
-    return `<button type="button" ${click} class="${cls} ${cursor} rounded-lg border py-2 text-[11px] font-bold transition flex flex-col items-center gap-0.5">
-              <span>${mo}</span><i class="fa-solid ${on?'fa-check':(isFuture?'fa-minus':'fa-xmark')} text-[10px]"></i>
-            </button>`;
-  }).join('');
-
-  const yearsSelect = (()=> {
-    const ys=[ANNEE_COURANTE+1,ANNEE_COURANTE,ANNEE_COURANTE-1,ANNEE_COURANTE-2];
-    return ys.map(y=>`<option value="${y}" ${y===year?'selected':''}>${y}</option>`).join('');
-  })();
-
-  const bday = birthdaySoon(m);
-  const aYears = age(m);
-  document.getElementById('detail-content').innerHTML = `
-    ${bday ? `
-    <div class="bday-banner relative overflow-hidden rounded-xl p-3.5 shadow ring-1 ring-gold-400/40 flex items-center gap-3">
-      <div class="w-10 h-10 rounded-lg bg-white/90 text-las-700 flex items-center justify-center text-xl bday-pulse shrink-0">🎂</div>
-      <div class="relative">
-        <p class="text-white font-extrabold text-sm leading-tight">Joyeux anniversaire ${birthdayLabel(m).toLowerCase()} !</p>
-        <p class="text-white/85 text-[11px]">${escapeHTML(m.name)}${aYears!==null?` fête ses ${aYears + (daysUntilBirthday(m)===0?0:1)} ans`:''}.</p>
-      </div>
-    </div>` : ''}
-    <!-- Carte identité -->
-    <div class="bg-white rounded-xl border ${bday?'border-gold-300 ring-1 ring-gold-200':'border-slate-200'} p-4 sm:p-5 flex flex-col sm:flex-row items-center sm:items-start gap-4">
-      <div class="shrink-0 ${bday?'bday-ring':''}">${avatar(m,96)}</div>
-      <div class="flex-1 text-center sm:text-left w-full">
-        <div class="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-          <h2 class="text-lg font-black text-slate-900">${escapeHTML(m.name)}</h2>
-          <span class="text-[10px] font-extrabold font-mono px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">N° ${m.id}</span>
-          ${m.poste?`<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-las-100 text-las-800 border border-las-200">${escapeHTML(m.poste)}</span>`:''}
-        </div>
-        ${m.note?`<p class="text-xs text-las-700 font-semibold mt-0.5">${escapeHTML(m.note)}</p>`:''}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 mt-3 text-xs text-left">
-          <div class="flex items-center gap-2"><i class="fa-solid fa-phone text-slate-400 w-4"></i><span class="font-mono font-semibold text-slate-800">${escapeHTML(m.phone)}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-envelope text-slate-400 w-4"></i><span class="text-slate-700 break-all">${escapeHTML(m.email)||'—'}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-briefcase text-slate-400 w-4"></i><span class="text-slate-700">${escapeHTML(m.profession)||'—'}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-location-dot text-slate-400 w-4"></i><span class="text-slate-700">${escapeHTML(m.address)||'—'}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-cake-candles text-slate-400 w-4"></i><span class="text-slate-700">${fmtDate(m.birthdate)}${aYears!==null?` (${aYears} ans)`:''}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-location-crosshairs text-slate-400 w-4"></i><span class="text-slate-700">Né(e) à ${escapeHTML(m.birthplace)||'—'}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-calendar-plus text-slate-400 w-4"></i><span class="text-slate-700">Intégration : ${fmtDate(m.joined)}</span></div>
-          <div class="flex items-center gap-2"><i class="fa-solid fa-key text-slate-400 w-4"></i><span class="text-slate-700 font-mono">Code PIN : ${escapeHTML(m.pin)}</span></div>
-        </div>
-        <div class="flex items-center justify-center sm:justify-start gap-2 mt-3 flex-wrap">
-          ${badge(m.asbl,'asbl')} <span class="text-[10px] text-slate-400">ASBL</span>
-          ${badge(m.reunion,'reunion')} <span class="text-[10px] text-slate-400">Réunion</span>
-          ${badge(m.forum,'forum')} <span class="text-[10px] text-slate-400">Forum</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Infos complémentaires -->
-    <div class="bg-white rounded-xl border border-slate-200 p-4">
-      <div class="flex items-center justify-between mb-2">
-        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-address-book text-las-600"></i> Informations complémentaires</h4>
-        ${canEdit()?`<button onclick="editMember(${m.id})" class="text-[11px] font-bold text-las-700 hover:underline"><i class="fa-solid fa-pen"></i> Compléter</button>`:''}
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 text-xs">
-        <div><span class="text-slate-500">Sexe :</span> <b class="text-slate-800">${escapeHTML(m.sexe)||'—'}</b></div>
-        <div><span class="text-slate-500">État civil :</span> <b class="text-slate-800">${escapeHTML(m.etatcivil)||'—'}</b></div>
-        <div><span class="text-slate-500">Nationalité :</span> <b class="text-slate-800">${escapeHTML(m.nationalite)||'—'}</b></div>
-        <div><span class="text-slate-500">WhatsApp :</span> <b class="font-mono text-slate-800">${escapeHTML(m.whatsapp||m.phone)||'—'}</b></div>
-        ${canEdit()?`<div><span class="text-slate-500">N° pièce d'identité :</span> <b class="text-slate-800">${escapeHTML(m.idDoc)||'—'}</b></div>`:''}
-        <div class="sm:col-span-2"><span class="text-slate-500">Contact d'urgence :</span> <b class="text-slate-800">${escapeHTML(m.urgenceNom)||'—'}${m.urgenceTel?` · <span class="font-mono">${escapeHTML(m.urgenceTel)}</span>`:''}</b></div>
-      </div>
-    </div>
-
-    <!-- Synthèse cotisations -->
-    <div class="grid grid-cols-3 gap-3">
-      <div class="bg-white rounded-xl border border-slate-200 p-3 text-center"><div class="text-[10px] font-semibold text-slate-500 uppercase">Payé ${year}</div><div class="text-lg font-black text-emerald-600">${paid*COTISATION_MENSUELLE} $</div><div class="text-[10px] text-slate-400">${paid}/12 mois</div></div>
-      <div class="bg-white rounded-xl border border-slate-200 p-3 text-center"><div class="text-[10px] font-semibold text-slate-500 uppercase">Solde dû</div><div class="text-lg font-black ${solde>0?'text-rose-600':'text-emerald-600'}">${solde} $</div><div class="text-[10px] text-slate-400">${Math.max(0,due-paid)} mois</div></div>
-      <div class="bg-white rounded-xl border border-slate-200 p-3 text-center"><div class="text-[10px] font-semibold text-slate-500 uppercase">Attendu/an</div><div class="text-lg font-black text-slate-800">${12*COTISATION_MENSUELLE} $</div><div class="text-[10px] text-slate-400">${COTISATION_MENSUELLE} $/mois</div></div>
-    </div>
-
-    <!-- Progression -->
-    <div>
-      <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 mb-1"><span>Progression ${year}</span><span>${pct}%</span></div>
-      <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-emerald-500 to-las-600 rounded-full transition-all" style="width:${pct}%"></div></div>
-    </div>
-
-    <!-- Grille des mois -->
-    <div class="bg-white rounded-xl border border-slate-200 p-4">
-      <div class="flex items-center justify-between mb-3">
-        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-coins text-gold-500"></i> Cotisations mensuelles</h4>
-        <select onchange="changeYear(${m.id}, this.value)" class="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:ring-2 focus:ring-las-500">${yearsSelect}</select>
-      </div>
-      <div class="grid grid-cols-4 sm:grid-cols-6 gap-2">${grid}</div>
-      ${canPay()
-        ? `<div class="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-             <p class="text-[10px] text-slate-400">Cliquez un mois pour enregistrer un paiement.</p>
-             <div class="flex gap-2">
-               <button onclick="markAll(${m.id},${year},true)" class="text-[11px] font-bold text-emerald-700 hover:underline">Tout payer</button>
-               <button onclick="markAll(${m.id},${year},false)" class="text-[11px] font-bold text-rose-600 hover:underline">Tout effacer</button>
-             </div>
-           </div>`
-        : `<p class="text-[10px] text-slate-400 mt-3 pt-3 border-t border-slate-100 italic">Lecture seule — seul le trésorier ou l'administrateur valide les règlements.</p>`}
-    </div>
-
-    <!-- Actions -->
-    <div class="flex items-center justify-end gap-2">
-      ${canEdit()?`<button onclick="editMember(${m.id})" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-pen-to-square"></i> Modifier la fiche</button>`:''}
-      <button onclick="printMemberCard()" class="px-4 py-2 bg-las-700 hover:bg-las-600 text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fa-solid fa-print"></i> Imprimer la Fiche</button>
-    </div>
-  `;
-}
-
-function changeYear(id, year){ const m=membersData.find(x=>x.id===id); if(m) renderDetail(m, parseInt(year)); }
-function togglePay(id, year, monthIdx){
-  if(!canPay()) return;
-  const m = membersData.find(x=>x.id===id); if(!m) return;
-  if(!m.payments[year]) m.payments[year]=Array(12).fill(false);
-  m.payments[year][monthIdx] = !m.payments[year][monthIdx];
-  saveData(); renderDetail(m, year); calculateStats(); renderData();
-}
-function markAll(id, year, val){
-  if(!canPay()) return;
-  const m = membersData.find(x=>x.id===id); if(!m) return;
-  m.payments[year] = Array(12).fill(val);
-  saveData(); renderDetail(m, year); calculateStats(); renderData();
-}
-
-// ============================================================
-//  AJOUT ET MODIFICATION DES MEMBRES
-// ============================================================
-const EXTRA_FIELDS=['sexe','etatcivil','nationalite','whatsapp','idDoc','urgenceNom','urgenceTel'];
-let tempPhoto = "";
-function openMemberModal(member=null){
-  if(!canEdit()){ alert("Votre rôle ne permet pas de modifier les membres."); return; }
-  const modal=document.getElementById('member-modal');
-  const title=document.getElementById('modal-title');
-  document.getElementById('member-form').reset();
-  tempPhoto = member ? (member.photo||"") : "";
-  updatePhotoPreview();
-  if(member){
-    title.innerHTML = `<i class="fa-solid fa-user-pen text-gold-400"></i><span>Modifier — N° ${member.id}</span>`;
-    document.getElementById('member-id').value=member.id;
-    document.getElementById('input-name').value=member.name;
-    document.getElementById('input-phone').value=member.phone;
-    document.getElementById('input-email').value=member.email||"";
-    document.getElementById('input-address').value=member.address||"";
-    document.getElementById('input-joined').value=member.joined||"";
-    document.getElementById('input-note').value=member.note||"";
-    document.getElementById('input-birthdate').value=member.birthdate||"";
-    document.getElementById('input-birthplace').value=member.birthplace||"";
-    document.getElementById('input-profession').value=member.profession||"";
-    document.getElementById('input-poste').value=member.poste||"";
-    document.getElementById('input-asbl').value=member.asbl;
-    document.getElementById('input-forum').value=member.forum;
-    document.getElementById('input-reunion').value=member.reunion;
-    EXTRA_FIELDS.forEach(f=>document.getElementById('input-'+f).value=member[f]||'');
-  } else {
-    title.innerHTML = `<i class="fa-solid fa-user-plus text-gold-400"></i><span>Ajouter un Membre</span>`;
-    document.getElementById('member-id').value='';
-  }
-  modal.classList.remove('hidden');
-}
-function closeMemberModal(){ document.getElementById('member-modal').classList.add('hidden'); tempPhoto=""; }
-
-function handlePhoto(e){
-  const file=e.target.files[0]; if(!file) return;
-  if(file.size > 3*1024*1024){ alert("Image trop lourde (max 3 Mo)."); e.target.value=''; return; }
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{
-      const max=400, scale=Math.min(1, max/Math.max(img.width,img.height));
-      const c=document.createElement('canvas');
-      c.width=img.width*scale; c.height=img.height*scale;
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      tempPhoto=c.toDataURL('image/jpeg',0.82);
-      updatePhotoPreview();
-    };
-    img.src=ev.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-function updatePhotoPreview(){
-  const prev=document.getElementById('photo-preview');
-  const ph=document.getElementById('photo-placeholder');
-  const rm=document.getElementById('btn-remove-photo');
-  if(tempPhoto){ prev.src=tempPhoto; prev.classList.remove('hidden'); ph.classList.add('hidden'); rm.classList.remove('hidden'); }
-  else { prev.classList.add('hidden'); ph.classList.remove('hidden'); rm.classList.add('hidden'); }
-}
-function removePhoto(){ tempPhoto=""; document.getElementById('input-photo').value=''; updatePhotoPreview(); }
-
-function editMember(id){
-  closeDetail();
-  const m=membersData.find(x=>x.id===id); if(m) openMemberModal(m);
-}
-function deleteMember(id){
-  if(!canDelete()){ alert("Seul l'administrateur peut supprimer un membre."); return; }
-  const m=membersData.find(x=>x.id===id); if(!m) return;
-  if(confirm(`Supprimer définitivement le membre "${m.name}" ?`)){
-    membersData=membersData.filter(x=>x.id!==id);
-    saveData(); calculateStats(); renderBirthdays(); renderData();
-  }
-}
-function saveMember(e){
-  e.preventDefault();
-  if(!canEdit()) return;
-  const idVal=document.getElementById('member-id').value;
-  const data={
-    name:document.getElementById('input-name').value.trim(),
-    phone:document.getElementById('input-phone').value.trim(),
-    email:document.getElementById('input-email').value.trim(),
-    address:document.getElementById('input-address').value.trim(),
-    joined:document.getElementById('input-joined').value,
-    note:document.getElementById('input-note').value.trim(),
-    birthdate:document.getElementById('input-birthdate').value,
-    birthplace:document.getElementById('input-birthplace').value.trim(),
-    profession:document.getElementById('input-profession').value.trim(),
-    poste:document.getElementById('input-poste').value.trim(),
-    asbl:document.getElementById('input-asbl').value,
-    forum:document.getElementById('input-forum').value,
-    reunion:document.getElementById('input-reunion').value,
-    photo:tempPhoto,
-    updatedAt:new Date().toISOString(), updatedBy:(SESSION&&SESSION.user)||''
-  };
-  EXTRA_FIELDS.forEach(f=>data[f]=document.getElementById('input-'+f).value.trim());
-  if(idVal){
-    const i=membersData.findIndex(m=>m.id===parseInt(idVal));
-    if(i!==-1) membersData[i]=normalize(Object.assign({}, membersData[i], data, {id:parseInt(idVal)}));
-  } else {
-    const nextId=membersData.length?Math.max(...membersData.map(m=>m.id))+1:1;
-    membersData.unshift(normalize(Object.assign({id:nextId, pin:(1000+nextId).toString()}, data)));
-  }
-  saveData(); calculateStats(); renderBirthdays(); renderData(); closeMemberModal();
-}
-
-// ============================================================
-//  IMPRESSION D'UNE FICHE MEMBRE
-// ============================================================
-function printMemberCard(){
-  const m=membersData.find(x=>x.id===detailId); if(!m) return;
-  const year=ANNEE_COURANTE;
-  const paidArr=(m.payments[year]||Array(12).fill(false));
-  const paid=paidArr.filter(Boolean).length, solde=soldeDu(m,year);
-  const rows=MOIS.map((mo,i)=>`<td style="border:1px solid #cbd5e1;padding:4px 6px;text-align:center;font-size:10px">${mo}<br><b style="color:${paidArr[i]?'#16a34a':'#e11d48'}">${paidArr[i]?'Payé':'—'}</b></td>`).join('');
-  const w=window.open('','_blank');
-  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Fiche — ${escapeHTML(m.name)}</title>
-    <style>body{font-family:Arial,Helvetica,sans-serif;color:#0f172a;padding:24px;max-width:720px;margin:auto}
-    h1{font-size:18px;margin:0}.muted{color:#64748b;font-size:12px}
-    table{border-collapse:collapse;width:100%;margin-top:8px}.hdr{display:flex;gap:16px;align-items:center;border-bottom:2px solid #0f172a;padding-bottom:12px}
-    .ph{width:90px;height:90px;border-radius:10px;object-fit:cover;border:1px solid #cbd5e1}
-    .ini{width:90px;height:90px;border-radius:10px;background:#dcfce7;color:#166534;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;border:1px solid #bbf7d0}
-    .row{font-size:13px;margin:3px 0}.lbl{color:#64748b}</style></head><body>
-    <div class="hdr">
-      ${m.photo?`<img class="ph" src="${m.photo}">`:`<div class="ini">${initials(m.name)}</div>`}
-      <div><h1>${escapeHTML(m.name)}</h1><div class="muted">N° ${m.id} — ASBL LES AMIS DE LA SEMENCE (LAS)</div>
-      ${m.note?`<div class="muted">${escapeHTML(m.note)}</div>`:''}</div>
-    </div>
-    <div style="margin-top:12px">
-      <div class="row"><span class="lbl">Poste dans l'ASBL :</span> ${escapeHTML(m.poste)||'Membre'}</div>
-      <div class="row"><span class="lbl">Téléphone :</span> ${escapeHTML(m.phone)} &nbsp;|&nbsp; <span class="lbl">Email :</span> ${escapeHTML(m.email)||'—'}</div>
-      <div class="row"><span class="lbl">Profession :</span> ${escapeHTML(m.profession)||'—'}</div>
-      <div class="row"><span class="lbl">Date de naissance :</span> ${fmtDate(m.birthdate)} ${age(m)!==null?`(${age(m)} ans)`:''} &nbsp;|&nbsp; <span class="lbl">Lieu :</span> ${escapeHTML(m.birthplace)||'—'}</div>
-      <div class="row"><span class="lbl">Adresse / Commune :</span> ${escapeHTML(m.address)||'—'}</div>
-      <div class="row"><span class="lbl">Date d'intégration :</span> ${fmtDate(m.joined)}</div>
-      <div class="row"><span class="lbl">Actif ASBL :</span> ${m.asbl} &nbsp;|&nbsp; <span class="lbl">Réunion :</span> ${m.reunion} &nbsp;|&nbsp; <span class="lbl">Forum :</span> ${m.forum}</div>
-    </div>
-    <h3 style="margin-top:16px;font-size:14px">Cotisations ${year} — ${COTISATION_MENSUELLE} $/mois</h3>
-    <table><tr>${rows}</tr></table>
-    <div class="row" style="margin-top:10px"><b>Total payé :</b> ${paid*COTISATION_MENSUELLE} $ (${paid}/12) &nbsp;&nbsp; <b>Solde dû :</b> <span style="color:${solde>0?'#e11d48':'#16a34a'}">${solde} $</span></div>
-    <p class="muted" style="margin-top:28px">Fiche générée le ${new Date().toLocaleDateString('fr-FR')} — Document interne LAS.</p>
-    <script>window.onload=()=>window.print()<\/script></body></html>`);
-  w.document.close();
-}
-
-// ============================================================
-//  CONNEXION ET AUTHENTIFICATION PAR ID / PIN MEMBRE
-// ============================================================
-function openLoginModal(){
-  const selMember = document.getElementById('login-member-select');
-  selMember.innerHTML = membersData.map(m => `<option value="${m.id}">N° ${m.id} — ${escapeHTML(m.name)}</option>`).join('');
-
-  document.getElementById('login-role-select').value = ROLE;
-  if(ROLE === 'membre' && MEMBER_ID){
-    selMember.value = MEMBER_ID;
-  }
-  toggleLoginMemberSelect();
-  document.getElementById('login-modal').classList.remove('hidden');
-}
-
-function closeLoginModal(){
-  document.getElementById('login-modal').classList.add('hidden');
-}
-
-function toggleLoginMemberSelect(){
-  const role = document.getElementById('login-role-select').value;
-  const grp = document.getElementById('login-member-group');
-  if(role === 'membre'){ grp.classList.remove('hidden'); }
-  else { grp.classList.add('hidden'); }
-}
-
-function applyUserLogin(){
-  const role = document.getElementById('login-role-select').value;
-
-  if(role === 'membre'){
-    const memId = parseInt(document.getElementById('login-member-select').value);
-    const pin = document.getElementById('login-pin-input').value.trim();
-    const m = membersData.find(x => x.id === memId);
-
-    if(!m){ alert("Membre introuvable."); return; }
-
-    const expectedPin = m.pin || (1000 + m.id).toString();
-    if(pin !== expectedPin){
-      alert(`Code PIN incorrect. (Astuce : par défaut pour N°${m.id}, le PIN est ${expectedPin})`);
-      return;
-    }
-
-    SESSION = { user: m.name, role: "membre", memberId: m.id, label: "Membre" };
-  } else if(role === 'admin'){
-    SESSION = { user: "Administrateur", role: "admin", memberId: null, label: "Admin" };
-  } else if(role === 'tresorier'){
-    SESSION = { user: "Baudry Landu", role: "tresorier", memberId: 3, label: "Trésorier" };
-  } else {
-    SESSION = { user: "Ananias KASANDA", role: "secretaire", memberId: 2, label: "Secrétaire" };
-  }
-
-  try { localStorage.setItem(SESSION_KEY, JSON.stringify(SESSION)); } catch(e){}
-  window.location.reload();
-}
-
-// ============================================================
-//  OUTILS & EXPORTATIONS
-// ============================================================
-function setView(view){
-  currentView=view;
-  const vt=document.getElementById('view-table'), vc=document.getElementById('view-cards');
-  const bt=document.getElementById('btn-view-table'), bc=document.getElementById('btn-view-cards');
-  const active="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white text-slate-900 shadow-sm";
-  const idle="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition flex items-center gap-1.5";
-  if(view==='table'){ vt.classList.remove('hidden'); vc.classList.add('hidden'); bt.className=active; bc.className=idle; }
-  else { vt.classList.add('hidden'); vc.classList.remove('hidden'); bc.className=active; bt.className=idle; }
-}
-function clearSearch(){ document.getElementById('search-input').value=''; renderData(); }
-function resetFilters(){
-  document.getElementById('search-input').value='';
-  ['filter-asbl','filter-cotis','filter-reunion','filter-forum'].forEach(id=>document.getElementById(id).value='ALL');
-  document.getElementById('sort-by').value='id';
-  renderData();
-}
-
-function exportCSV(){
-  const headers=["N°","Nom & Prénom","Poste","Téléphone","Email","Profession","Date naissance","Lieu naissance","Adresse","Date intégration","Actif ASBL","Forum","Réunion",`Mois payés ${ANNEE_COURANTE}`,`Payé ${ANNEE_COURANTE} (USD)`,"Solde dû (USD)"];
-  const rows=getFiltered().map(m=>{
-    const paid=yearPaid(m,ANNEE_COURANTE);
-    return [m.id,`"${m.name.replace(/"/g,'""')}"`,`"${m.poste||''}"`,`"${m.phone}"`,`"${m.email||''}"`,`"${m.profession||''}"`,`"${m.birthdate||''}"`,`"${m.birthplace||''}"`,`"${m.address||''}"`,`"${m.joined||''}"`,m.asbl,m.forum,m.reunion,paid,paid*COTISATION_MENSUELLE,soldeDu(m,ANNEE_COURANTE)];
-  });
-  const csv="\uFEFF"+[headers.join(";"),...rows.map(r=>r.join(";"))].join("\n");
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob), a=document.createElement("a");
-  a.href=url; a.download=`ASBL_LAS_Membres_${new Date().toISOString().slice(0,10)}.csv`;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-}
-
-function exportJSON(){
-  const ts=+localStorage.getItem(DB_KEY+"_ts")||Date.now();
-  const blob=new Blob([JSON.stringify({updatedAt:ts,members:membersData},null,1)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='membres.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-}
-
-function importJSON(e){
-  if(!canEdit()) return;
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=()=>{ try{
-    const j=JSON.parse(r.result); const arr=Array.isArray(j)?j:j.members;
-    if(!Array.isArray(arr)) throw 0;
-    if(!confirm(`Remplacer les données actuelles par ${arr.length} membres ?`)) return;
-    membersData=arr.map(normalize); saveData(); calculateStats(); renderBirthdays(); renderData();
-  }catch(_){ alert("Fichier JSON invalide."); } e.target.value=''; };
-  r.readAsText(f);
-}
-
-async function syncFromRepo(){
-  try{
-    const r=await fetch('membres.json',{cache:'no-store'}); if(!r.ok) return;
-    const j=await r.json(); const remote=+j.updatedAt||0, local=+localStorage.getItem(DB_KEY+"_ts")||0;
-    if(Array.isArray(j.members) && remote>local){
-      membersData=j.members.map(normalize);
-      localStorage.setItem(DB_KEY,JSON.stringify(membersData)); localStorage.setItem(DB_KEY+"_ts",remote);
-      calculateStats(); renderBirthdays(); renderData();
-    }
-  }catch(e){}
-}
-
-// ============================================================
-//  INITIALISATION DE L'APPLICATION
-// ============================================================
-function applyRoleUI(){
-  set('current-user', SESSION.user);
-  set('current-role', SESSION.label || ROLE);
-  set('current-id-tag', MEMBER_ID ? MEMBER_ID : 'ALL');
-
-  if(isMembreRole()){
-    ['btn-add','btn-json','btn-import','btn-add-blog','btn-add-blog-sec','members-stats-container','members-filter-bar'].forEach(id => {
-      const el = document.getElementById(id);
-      if(el) el.classList.add('hidden');
-    });
-
-    set('tab-members-title', '1. MON DOSSIER & MES COTISATIONS');
-    document.getElementById('member-personal-notice').classList.remove('hidden');
-  } else if(!canEdit()){
-    ['btn-add','btn-json','btn-import','btn-add-blog','btn-add-blog-sec'].forEach(i=>{
-      const b=document.getElementById(i); if(b) b.classList.add('hidden');
-    });
-  }
-}
-
-// Écouteurs de la recherche
-['search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderData));
-['filter-asbl','filter-cotis','filter-reunion','filter-forum','sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderData));
-
-['blog-search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderBlog));
-['blog-filter-type','blog-filter-category','blog-sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderBlog));
-
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    closeMemberModal();
-    closeDetail();
-    closeBlogModal();
-    closeBlogViewModal();
-    closeLoginModal();
-  }
-});
-
-// Lancement global
-initIDB().then(() => {
-  applyRoleUI();
-  calculateStats();
-  renderBirthdays();
-  renderData();
-  renderBlog();
-  syncFromRepo();
-});
-</script>
-</body>
-</html>
+  const fileData = (idbRecord && idbRecord.fileData) ? idb
