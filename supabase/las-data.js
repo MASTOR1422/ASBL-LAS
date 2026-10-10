@@ -56,8 +56,10 @@ window.LASData = (() => {
       const id=Number(data.id);
       m.photoPath=uploadedPath;
       if(uploadedPath){
-        const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(uploadedPath,300);
-        m.photo=!signError&&signed?.signedUrl?signed.signedUrl:"";
+        try {
+          const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(uploadedPath,300);
+          m.photo=!signError&&signed?.signedUrl?signed.signedUrl:"";
+        } catch (_) { m.photo=""; }
       } else if(typeof m.photo==="string"&&m.photo.startsWith("data:")) {
         m.photo="";
       }
@@ -110,8 +112,10 @@ window.LASData = (() => {
     }
     for(const item of photoUpdates) {
       item.member.photoPath=item.path;
-      const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(item.path,300);
-      item.member.photo=!signError&&signed?.signedUrl?signed.signedUrl:"";
+      try {
+        const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(item.path,300);
+        item.member.photo=!signError&&signed?.signedUrl?signed.signedUrl:"";
+      } catch (_) { item.member.photo=""; }
       if(item.oldPath) {
         const {error:cleanupError}=await client().storage.from("las-private-media").remove([item.oldPath]);
         if(cleanupError) console.warn("L’ancienne photo n’a pas pu être supprimée.",cleanupError);
