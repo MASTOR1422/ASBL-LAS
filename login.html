@@ -27,8 +27,8 @@
 <body class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-las-950 font-sans">
     <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
         <div class="bg-slate-900 p-8 text-center border-b border-las-700/50">
-            <div class="w-16 h-16 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg mb-4 p-1">
-                <i class="fa-solid fa-seedling text-3xl text-las-600"></i>
+            <div class="w-20 h-20 mx-auto bg-white rounded-2xl flex items-center justify-center shadow-lg mb-4 p-2">
+                <img src="logo LAS_2.jpg" alt="Logo officiel ASBL LAS" class="w-full h-full object-contain" onerror="this.onerror=null;this.src='logo LAS.jpg'">
             </div>
             <h1 class="text-xl font-extrabold text-white tracking-tight flex items-center justify-center gap-2">
                 ASBL LES AMIS DE LA SEMENCE <span class="text-gold-400 text-xs px-2 py-0.5 rounded-full bg-gold-500/20 border border-gold-500/40">LAS</span>
@@ -41,14 +41,7 @@
                 Identifiants ou mot de passe incorrects.
             </div>
 
-            <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Rôle d'accès</label>
-                <select id="role" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
-                    <option value="admin">Administrateur / Coordonnateur</option>
-                    <option value="tresorier">Trésorier(e)</option>
-                    <option value="secretaire">Secrétaire Général(e)</option>
-                </select>
-            </div>
+            <div><p class="text-xs text-slate-500">Votre rôle est chargé depuis votre compte autorisé. Il ne peut pas être choisi ou modifié depuis cette page.</p></div>
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Identifiant</label>
@@ -87,26 +80,34 @@
             }
         }
 
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
-            const role = document.getElementById('role').value;
+            const form = document.getElementById('login-form');
+            const button = form.querySelector('button[type="submit"]');
+            const errorBox = document.getElementById('error-msg');
             const user = document.getElementById('username').value.trim();
-            const pass = document.getElementById('password').value.trim();
-
-            if (verifyPassword(user, pass)) {
-                const sessionData = { 
-                    user: user || "Ananias KASANDA", 
-                    role: role, 
-                    memberId: role === 'admin' ? 2 : 3, 
-                    label: role.toUpperCase() 
-                };
-                localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-                sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
-                window.location.href = 'index.html';
-            } else {
-                document.getElementById('error-msg').classList.remove('hidden');
-            }
+            const pass = document.getElementById('password').value;
+            errorBox.classList.remove('hidden');
+            errorBox.textContent = "Vérification du compte…";
+            errorBox.className = "bg-blue-50 text-blue-700 text-xs font-bold p-3.5 rounded-xl text-center border border-blue-200";
+            button.disabled = true;
+            try {
+                const result = await signIn(user, pass);
+                if (result.success) { window.location.replace('index.html'); return; }
+                errorBox.textContent = result.message || "Connexion refusée.";
+                errorBox.className = "bg-rose-50 text-rose-600 text-xs font-bold p-3.5 rounded-xl text-center border border-rose-200";
+            } catch (_) {
+                errorBox.textContent = "Service temporairement indisponible. Réessayez plus tard.";
+                errorBox.className = "bg-rose-50 text-rose-600 text-xs font-bold p-3.5 rounded-xl text-center border border-rose-200";
+            } finally { button.disabled = false; }
         }
+        document.addEventListener("DOMContentLoaded", () => {
+            if (!lasIsConfigured()) {
+                const box = document.getElementById("error-msg");
+                box.textContent = "Configuration requise : renseignez l’URL et la clé publique Supabase dans supabase-config.js, puis appliquez supabase/schema.sql. Aucun accès de secours n’est activé.";
+                box.classList.remove("hidden");
+            }
+        });
     </script>
 </body>
 </html>
