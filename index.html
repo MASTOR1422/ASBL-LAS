@@ -232,10 +232,10 @@
                     <h2 class="text-base font-black text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-photo-film text-las-600"></i> Blog, Photothèque &amp; Espace Documentaire LAS
                     </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Partagez et consultez les publications, photos d'événements, rapports PDF et vidéos.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Le blog communautaire est actif. L’ajout de photos et documents est temporairement désactivé jusqu’à la mise en place du stockage privé Supabase.</p>
                 </div>
-                <button onclick="openMediaModal()" class="px-4 py-2.5 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-md shadow-las-800/20 active:scale-95">
-                    <i class="fa-solid fa-upload text-gold-400"></i><span>Ajouter un Média / Article</span>
+                <button type="button" disabled title="Réactivé après intégration du stockage privé Supabase" class="px-4 py-2.5 bg-slate-300 text-slate-600 font-bold rounded-xl text-xs cursor-not-allowed flex items-center gap-2">
+                    <i class="fa-solid fa-lock"></i><span>Photothèque : migration en cours</span>
                 </button>
             </div>
 
@@ -1066,12 +1066,13 @@ function printMemberCard(){
 // ============================================================
 //  LOGIQUE DU BLOG / PHOTOTHÈQUE / DOCUMENTS
 // ============================================================
-function openMediaModal(){ if (!SESSION) { alert("Connexion requise."); return; } document.getElementById('media-modal').classList.remove('hidden'); }
+function openMediaModal(){ alert("L’ajout de médias est temporairement désactivé pendant la migration vers le stockage privé Supabase."); }
 function closeMediaModal(){ document.getElementById('media-modal').classList.add('hidden'); }
 
 function saveMedia(e){
   e.preventDefault();
-  if (!SESSION) { alert("Connexion requise."); return; }
+  alert("L’ajout de médias est temporairement désactivé pendant la migration vers le stockage privé Supabase.");
+  return;
   const type = document.getElementById('media-type').value;
   const title = document.getElementById('media-title').value.trim();
   const desc = document.getElementById('media-desc').value.trim();
