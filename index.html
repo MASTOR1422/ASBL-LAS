@@ -460,7 +460,8 @@ let mediaData = []; // Le stockage des médias sera migré vers Supabase Storage
 
 let currentView = 'table';
 
-function loadData(){ return []; // Les fiches réelles sont chargées depuis Supabase après validation de la session. }
+function loadData(){ return []; }
+// Les fiches réelles sont chargées depuis Supabase après validation de la session.
 
 async function saveData(){
   await LASData.saveMembers(membersData);
