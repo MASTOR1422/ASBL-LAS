@@ -9,10 +9,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4.3.1/dist/tus.min.js"></script>
     <script src="supabase-client.js"></script>
     <script src="Auth.js"></script>
     <script src="supabase/las-data.js"></script>
+    <script src="supabase/las-media.js"></script>
     <script src="las-blog.js"></script>
 
     <script>
@@ -58,6 +59,27 @@
         ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
         /* Garde d’authentification indépendante de Tailwind/CDN : masquée par défaut. */
         .las-auth-gated { display:none !important; }
+        .las-toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:.5rem; }
+        .las-toolbar > button { min-height:40px; white-space:nowrap; }
+        .las-nav-tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; }
+        .las-nav-tabs > button { min-width:0; justify-content:center; min-height:42px; }
+        .las-nav-tabs > button span { overflow-wrap:anywhere; }
+        @media (min-width:641px) { .las-nav-tabs { display:flex; align-items:center; } }
+        .las-upload-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; }
+        .las-upload-actions button { min-height:44px; justify-content:center; }
+        .las-member-form-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:.75rem; }
+        @media (min-width:640px) { .las-member-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        .las-modal-panel { max-height:calc(100dvh - 2rem); overflow-y:auto; overscroll-behavior:contain; }
+        @media (max-width:640px) {
+          .las-toolbar { justify-content:stretch; }
+          .las-toolbar > button { flex:1 1 auto; justify-content:center; }
+          .las-nav-tabs > button { padding:.65rem .45rem; font-size:10px; }
+          .las-upload-actions { grid-template-columns:1fr; }
+          #media-grid { grid-template-columns:minmax(0,1fr); }
+          #member-modal, #media-modal, #detail-modal, #password-modal { padding:.5rem; align-items:flex-end; }
+          #member-modal > div, #media-modal > div, #detail-modal > div, #password-modal > div { max-height:calc(100dvh - 1rem); border-bottom-left-radius:.5rem; border-bottom-right-radius:.5rem; }
+        }
+        @media (min-width:641px) and (max-width:1023px) { .las-toolbar { justify-content:flex-start; } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
@@ -65,26 +87,26 @@
     <!-- ===================== BARRE DE NAVIGATION ===================== -->
     <header class="las-auth-gated bg-slate-900 text-white shadow-lg border-b border-las-700/40 sticky top-0 z-40 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-3.5 w-full lg:w-auto">
+            <div class="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
+                <div class="flex items-center gap-3.5 w-full xl:w-auto min-w-0">
                     <div class="relative shrink-0">
                         <img src="logo LAS_2.jpg" alt="Logo ASBL LAS"
                              class="w-14 h-14 object-contain bg-white rounded-xl p-1 shadow-md border border-las-500/30 ring-2 ring-las-500/20"
-                             onerror="this.onerror=null;this.src='logo LAS.jpg';this.onerror=function(){this.replaceWith(document.getElementById('svg-logo-fallback').cloneNode(true));};">
+                             onerror="this.onerror=null;this.replaceWith(document.getElementById('svg-logo-fallback').cloneNode(true));">
                         <div id="svg-logo-fallback" class="hidden w-14 h-14 rounded-xl bg-white p-0.5 shadow-md border border-las-500/30 flex items-center justify-center">
                             <i class="fa-solid fa-seedling text-2xl text-las-600"></i>
                         </div>
                     </div>
                     <div>
-                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                        <h1 class="text-sm sm:text-lg xl:text-xl font-extrabold tracking-tight text-white flex items-center gap-2 flex-wrap">
                             ASBL LES AMIS DE LA SEMENCE <span class="text-gold-400 font-bold text-xs px-2.5 py-0.5 rounded-full bg-gold-500/20 border border-gold-500/40">LAS</span>
                         </h1>
                         <p class="text-xs text-slate-300 font-medium">Répertoire officiel, Cotisations &amp; Espace Média / Blog</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
-                    <img src="logo LAS_2.jpg" alt="Logo officiel ASBL LAS" class="w-10 h-10 object-contain bg-white rounded-lg p-1 border border-las-500/30" onerror="this.onerror=null;this.src='logo LAS.jpg'">
+                <div class="las-toolbar w-full xl:w-auto">
+                    <img src="logo LAS_2.jpg" alt="Logo officiel ASBL LAS" class="hidden xl:block w-10 h-10 object-contain bg-white rounded-lg p-1 border border-las-500/30">
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700">
                         <i class="fa-solid fa-user-shield text-las-400 text-xs"></i>
                         <span class="text-xs font-bold" id="current-user">—</span>
@@ -112,7 +134,7 @@
             </div>
 
             <!-- ONGLETS DE NAVIGATION PRINCIPAUX -->
-            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-800">
+            <div class="las-nav-tabs mt-3 pt-3 border-t border-slate-800 sm:flex sm:flex-wrap">
                 <button onclick="switchTab('members')" id="tab-btn-members" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-las-700 text-white flex items-center gap-2 shadow">
                     <i class="fa-solid fa-users"></i><span>Membres &amp; Cotisations</span>
                 </button>
@@ -128,7 +150,7 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <img src="logo LAS_2.jpg" alt="Logo ASBL LAS" class="w-16 h-16 object-contain rounded-lg border border-slate-300 p-0.5"
-                     onerror="this.onerror=null;this.src='logo LAS.jpg';this.onerror=function(){this.replaceWith(document.getElementById('svg-logo-fallback').cloneNode(true));};">
+                     onerror="this.onerror=null;this.replaceWith(document.getElementById('svg-logo-fallback').cloneNode(true));">
                 <div>
                     <h1 class="text-lg font-black text-slate-900 uppercase tracking-tight">ASBL LES AMIS DE LA SEMENCE (LAS)</h1>
                     <p class="text-xs font-bold text-las-800">RÉPERTOIRE OFFICIEL ET ÉTAT DES COTISATIONS ET PRÉSENCES</p>
@@ -234,11 +256,9 @@
                     <h2 class="text-base font-black text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-photo-film text-las-600"></i> Blog, Photothèque &amp; Espace Documentaire LAS
                     </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Le blog communautaire est actif. L’ajout de photos et documents est temporairement désactivé jusqu’à la mise en place du stockage privé Supabase.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Déposez vos photos, vidéos et documents, puis consultez ou ouvrez les fichiers enregistrés dans l’espace privé LAS.</p>
                 </div>
-                <button type="button" disabled title="Réactivé après intégration du stockage privé Supabase" class="px-4 py-2.5 bg-slate-300 text-slate-600 font-bold rounded-xl text-xs cursor-not-allowed flex items-center gap-2">
-                    <i class="fa-solid fa-lock"></i><span>Photothèque : migration en cours</span>
-                </button>
+                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold"><i class="fa-solid fa-lock"></i> Stockage privé sécurisé</span>
             </div>
 
             <!-- BLOG COMMUNAUTAIRE : accès réservé aux membres connectés et actifs -->
@@ -259,16 +279,23 @@
                 <div id="community-blog-list" class="space-y-3" aria-live="polite"><p class="text-xs text-slate-500">Chargement des échanges…</p></div>
             </section>
 
-            <!-- FILTRES DE MÉDIAS -->
+            <!-- ACTIONS D’UPLOAD : le choix du type ouvre directement le formulaire adapté -->
+            <div class="las-upload-actions pb-2 las-media-upload-toolbar">
+                <button id="btn-upload-photo" type="button" onclick="openMediaModal('photo')" class="las-media-upload-action hidden px-3 py-2 rounded-xl text-xs font-bold bg-green-700 text-white hover:bg-green-600 transition flex items-center gap-2"><i class="fa-solid fa-image"></i><span>Ajouter une photo</span></button>
+                <button id="btn-upload-video" type="button" onclick="openMediaModal('video')" class="las-media-upload-action hidden px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-2"><i class="fa-solid fa-video"></i><span>Ajouter une vidéo</span></button>
+                <button id="btn-upload-pdf" type="button" onclick="openMediaModal('pdf')" class="las-media-upload-action hidden px-3 py-2 rounded-xl text-xs font-bold bg-rose-700 text-white hover:bg-rose-600 transition flex items-center gap-2"><i class="fa-solid fa-file-pdf"></i><span>Ajouter un document</span></button>
+            </div>
+
+            <!-- FILTRES DE CONSULTATION DES FICHIERS -->
             <div class="flex items-center gap-2 overflow-x-auto pb-2">
-                <button onclick="filterMedia('ALL')" id="filter-media-ALL" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Tous</button>
-                <button onclick="filterMedia('photo')" id="filter-media-photo" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Photothèque (Photos)</button>
-                <button onclick="filterMedia('pdf')" id="filter-media-pdf" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Documents PDF / Rapports</button>
+                <button onclick="filterMedia('ALL')" id="filter-media-ALL" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Tous les fichiers</button>
+                <button onclick="filterMedia('photo')" id="filter-media-photo" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Photos</button>
+                <button onclick="filterMedia('pdf')" id="filter-media-pdf" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Documents PDF</button>
                 <button onclick="filterMedia('video')" id="filter-media-video" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Vidéos</button>
             </div>
 
             <!-- GRILLE DES MÉDIAS -->
-            <div id="media-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5"></div>
+            <div id="media-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
     </main>
@@ -322,7 +349,7 @@
 
     <!-- ===================== MODALE AJOUT / ÉDITION MEMBRE ===================== -->
     <div id="member-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
+        <div class="las-modal-panel bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-100 overflow-hidden">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50 sticky top-0">
                 <h3 class="font-bold text-base flex items-center gap-2" id="modal-title"><i class="fa-solid fa-user-plus text-gold-400"></i><span>Ajouter un Membre</span></h3>
                 <button onclick="closeMemberModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -341,37 +368,37 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nom &amp; Prénom *</label>
                     <input type="text" id="input-name" required placeholder="Ex: Baudry Landu" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-white transition"></div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Téléphone *</label>
                         <input type="text" id="input-phone" required placeholder="243 895 446 423" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-white transition"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Date d'intégration</label>
                         <input type="date" id="input-joined" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Date de naissance</label>
                         <input type="date" id="input-birthdate" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Lieu de naissance</label>
                         <input type="text" id="input-birthplace" placeholder="Ex: Kinshasa" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email</label>
                         <input type="email" id="input-email" placeholder="exemple@mail.com" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Profession</label>
                         <input type="text" id="input-profession" placeholder="Ex: Enseignant" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Poste dans l'ASBL</label>
                         <input type="text" id="input-poste" placeholder="Ex: Trésorier, Membre" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Adresse / Commune</label>
                         <input type="text" id="input-address" placeholder="Ex: Ngaliema" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Actif ASBL</label>
                         <select id="input-asbl" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"><option value="OUI">OUI</option><option value="NON">NON</option></select></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Actif Forum</label>
                         <select id="input-forum" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"><option>OUI</option><option>NON</option><option>PARTIEL</option><option>OCCASIONEL</option><option>SOUVENT</option><option>PARFOIS</option></select></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Présence Réunion</label>
                         <select id="input-reunion" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"><option value="OUI">OUI</option><option value="NON">NON</option><option value="EXEMPTER">EXEMPTER</option></select></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Note / Fonction</label>
@@ -401,15 +428,15 @@
 
     <!-- ===================== MODALE AJOUT BLOG / MÉDIA / PDF ===================== -->
     <div id="media-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100">
+        <div class="las-modal-panel bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-100">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50">
                 <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-upload text-gold-400"></i> Publier un Média ou Document</h3>
                 <button onclick="closeMediaModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form onsubmit="saveMedia(event)" class="p-6 space-y-4">
+            <form onsubmit="saveMedia(event)" class="p-4 sm:p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Type de contenu *</label>
-                    <select id="media-type" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800">
+                    <select id="media-type" onchange="updateMediaFileAccept()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800">
                         <option value="photo">Photothèque (Photo / Image)</option>
                         <option value="pdf">Document PDF / Rapport</option>
                         <option value="video">Vidéo</option>
@@ -425,7 +452,10 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Fichier (Photo, PDF, Vidéo) *</label>
-                    <input type="file" id="media-file" required accept="image/*,.pdf,video/*" class="block w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-las-100 file:text-las-800 hover:file:bg-las-200 cursor-pointer">
+                    <input type="file" id="media-file" required accept="image/jpeg,image/png,image/webp" class="block w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-las-100 file:text-las-800 hover:file:bg-las-200 cursor-pointer">
+                    <p class="mt-1 text-[11px] text-slate-500">JPG, PNG, WebP, PDF, MP4 ou WebM. Taille maximale : 50 Mo.</p>
+                    <progress id="media-upload-progress" max="100" value="0" hidden class="mt-2 w-full h-2 accent-green-700"></progress>
+                    <p id="media-upload-status" aria-live="polite" class="mt-1 text-xs text-slate-600"></p>
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="closeMediaModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Annuler</button>
@@ -443,7 +473,6 @@ const COTISATION_MENSUELLE = 10;
 const MOIS = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 const ANNEE_COURANTE = new Date().getFullYear();
 const DB_KEY = "las_members_v2";
-const MEDIA_KEY = "las_media_v1";
 
 const DEFAULT_MEMBERS = [];
 
@@ -458,7 +487,7 @@ function normalize(m){
 }
 
 let membersData = loadData();
-let mediaData = []; // Le stockage des médias sera migré vers Supabase Storage dans une étape dédiée.
+let mediaData = []; // Liste chargée depuis Supabase Storage et public.media_items.
 
 let currentView = 'table';
 
@@ -467,11 +496,6 @@ function loadData(){ return []; }
 
 async function saveData(){
   await LASData.saveMembers(membersData);
-}
-
-function saveMediaStorage(){
-  try { localStorage.setItem(MEDIA_KEY, JSON.stringify(mediaData)); }
-  catch(e){}
 }
 
 function switchTab(tab){
@@ -920,12 +944,14 @@ async function handlePasswordChange(e){
 //  AJOUT / ÉDITION DE MEMBRE & PHOTO DE PROFIL
 // ============================================================
 let tempPhoto = "";
+let tempPhotoRemoved = false;
 function openMemberModal(member=null){
   if (!canEdit()) { alert("Votre rôle ne permet pas de gérer les fiches membres."); return; }
   const modal=document.getElementById('member-modal');
   const title=document.getElementById('modal-title');
   document.getElementById('member-form').reset();
   tempPhoto = member ? (member.photo||"") : "";
+  tempPhotoRemoved = false;
   updatePhotoPreview();
   if(member){
     title.innerHTML = `<i class="fa-solid fa-user-pen text-gold-400"></i><span>Modifier — N° ${member.id}</span>`;
@@ -953,6 +979,7 @@ function closeMemberModal(){ document.getElementById('member-modal').classList.a
 
 function handlePhoto(e){
   const file=e.target.files[0]; if(!file) return;
+  tempPhotoRemoved = false;
   if(file.size > 3*1024*1024){ alert("Image trop lourde (max 3 Mo). Choisissez une photo plus petite."); e.target.value=''; return; }
   const reader=new FileReader();
   reader.onload=ev=>{
@@ -976,7 +1003,10 @@ function updatePhotoPreview(){
   if(tempPhoto){ prev.src=tempPhoto; prev.classList.remove('hidden'); ph.classList.add('hidden'); rm.classList.remove('hidden'); }
   else { prev.classList.add('hidden'); ph.classList.remove('hidden'); rm.classList.add('hidden'); }
 }
-function removePhoto(){ tempPhoto=""; document.getElementById('input-photo').value=''; updatePhotoPreview(); }
+function removePhoto(){
+  const id=document.getElementById('member-id').value;
+  tempPhoto=""; tempPhotoRemoved=!!id; document.getElementById('input-photo').value=''; updatePhotoPreview();
+}
 
 function editMember(id){
   closeDetail();
@@ -1009,7 +1039,8 @@ async function saveMember(e){
     asbl:document.getElementById('input-asbl').value,
     forum:document.getElementById('input-forum').value,
     reunion:document.getElementById('input-reunion').value,
-    photo:tempPhoto
+    photo:tempPhoto,
+    photoRemoved:tempPhotoRemoved
   };
   try {
     if(idVal){
@@ -1024,7 +1055,7 @@ async function saveMember(e){
   } catch(err) {
     console.error(err);
     try { membersData=(await LASData.loadMembers()).map(normalize); calculateStats(); renderBirthdays(); renderData(); } catch(_) {}
-    alert("La fiche n’a pas pu être enregistrée dans Supabase. Vérifiez vos droits et réessayez.");
+    alert("La fiche n’a pas pu être enregistrée : " + (err.message || "vérifiez vos droits et réessayez."));
   }
 }
 
@@ -1068,95 +1099,130 @@ function printMemberCard(){
 }
 
 // ============================================================
-//  LOGIQUE DU BLOG / PHOTOTHÈQUE / DOCUMENTS
+//  LOGIQUE DE LA PHOTOTHÈQUE — Supabase Storage privé
 // ============================================================
-function openMediaModal(){ alert("L’ajout de médias est temporairement désactivé pendant la migration vers le stockage privé Supabase."); }
-function closeMediaModal(){ document.getElementById('media-modal').classList.add('hidden'); }
+function updateMediaFileAccept(){
+  const type=document.getElementById("media-type")?.value;
+  const file=document.getElementById("media-file");
+  if(!file) return;
+  file.value="";
+  file.accept=type==="photo"?"image/jpeg,image/png,image/webp":type==="pdf"?".pdf,application/pdf":"video/mp4,video/webm";
+}
+function openMediaModal(type){
+  if (!["admin","secretaire"].includes(ROLE)) { alert("Votre rôle ne permet pas de publier un média."); return; }
+  const form=document.querySelector("#media-modal form");
+  if(form) form.reset();
+  const select=document.getElementById("media-type");
+  if(select && ["photo","pdf","video"].includes(type)) select.value=type;
+  updateMediaFileAccept();
+  document.getElementById("media-modal").classList.remove("hidden");
+  document.getElementById("media-title")?.focus();
+}
+function safeMediaUrl(value){
+  try {
+    const url = new URL(String(value || ""), window.location.origin);
+    return url.protocol === "https:" ? url.href : "";
+  } catch (_) { return ""; }
+}
 
-function saveMedia(e){
+async function refreshMedia(){
+  const grid = document.getElementById("media-grid");
+  try {
+    mediaData = await LASMedia.load();
+    filterMedia("ALL");
+  } catch (e) {
+    console.error("Chargement de la photothèque LAS impossible:", e);
+    if (grid) grid.innerHTML = '<div class="col-span-full text-center py-10 text-rose-600 text-xs">La photothèque est momentanément indisponible. Vérifiez le stockage privé et les politiques Supabase.</div>';
+  }
+}
+
+async function saveMedia(e){
   e.preventDefault();
-  alert("L’ajout de médias est temporairement désactivé pendant la migration vers le stockage privé Supabase.");
-  return;
-  const type = document.getElementById('media-type').value;
-  const title = document.getElementById('media-title').value.trim();
-  const desc = document.getElementById('media-desc').value.trim();
-  const fileInput = document.getElementById('media-file');
-
-  if(fileInput.files && fileInput.files[0]){
-    const reader = new FileReader();
-    reader.onload = function(ev){
-      mediaData.unshift({
-        id: Date.now(),
-        type: type,
-        title: title,
-        desc: desc,
-        url: ev.target.result,
-        date: new Date().toISOString().slice(0,10)
-      });
-      saveMediaStorage();
-      closeMediaModal();
-      renderMedia('ALL');
-    };
-    reader.readAsDataURL(fileInput.files[0]);
+  if (!["admin","secretaire"].includes(ROLE)) { alert("Votre rôle ne permet pas de publier un média."); return; }
+  const form = e.currentTarget;
+  const submit = form.querySelector('button[type="submit"]');
+  const original = submit ? submit.textContent : "";
+  const file = document.getElementById("media-file").files[0];
+  try {
+    if (submit) { submit.disabled = true; submit.textContent = "Publication…"; }
+    const status = document.getElementById("media-upload-status");
+    const progress = document.getElementById("media-upload-progress");
+    if (status) status.textContent = file && file.size > 6 * 1024 * 1024 ? "Transfert sécurisé en cours…" : "Envoi du fichier…";
+    if (progress) { progress.hidden = !(file && file.size > 6 * 1024 * 1024); progress.value = 0; }
+    await LASMedia.upload(file, {
+      type: document.getElementById("media-type").value,
+      title: document.getElementById("media-title").value,
+      description: document.getElementById("media-desc").value,
+      onProgress: percent => {
+        if (progress) { progress.hidden = false; progress.value = percent; }
+        if (status) status.textContent = "Transfert du fichier : " + percent + " %";
+      }
+    });
+    if (status) status.textContent = "Fichier enregistré. Actualisation de la photothèque…";
+    form.reset();
+    if (progress) { progress.hidden = true; progress.value = 0; }
+    if (status) status.textContent = "";
+    closeMediaModal();
+    await refreshMedia();
+    alert("Fichier publié. Il est maintenant consultable dans l’espace média LAS.");
+  } catch (e) {
+    console.error(e);
+    const status = document.getElementById("media-upload-status");
+    if (status) status.textContent = e.message || "Publication impossible. Vérifiez le fichier, les autorisations et la connexion.";
+    alert(e.message || "Publication impossible. Vérifiez le fichier, les autorisations et la connexion.");
+  } finally {
+    if (submit) { submit.disabled = false; submit.textContent = original || "Publier"; }
   }
 }
 
 function filterMedia(type){
-  ['ALL','photo','pdf','video'].forEach(t => {
-    const btn = document.getElementById(`filter-media-${t}`);
-    if(btn) btn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition";
+  ["ALL","photo","pdf","video"].forEach(t => {
+    const btn = document.getElementById("filter-media-" + t);
+    if (btn) btn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition";
   });
-  const activeBtn = document.getElementById(`filter-media-${type}`);
-  if(activeBtn) activeBtn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition";
+  const activeBtn = document.getElementById("filter-media-" + type);
+  if (activeBtn) activeBtn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition";
   renderMedia(type);
 }
 
 function renderMedia(filter){
-  const grid = document.getElementById('media-grid');
-  const filtered = filter === 'ALL' ? mediaData : mediaData.filter(m => m.type === filter);
-
-  if(filtered.length === 0){
-    grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-xs font-medium">Aucun contenu trouvé.</div>`;
+  const grid = document.getElementById("media-grid");
+  if (!grid) return;
+  const filtered = filter === "ALL" ? mediaData : mediaData.filter(m => m.type === filter);
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 text-xs font-medium">Aucun contenu publié pour le moment.</div>';
     return;
   }
-
   grid.innerHTML = filtered.map(m => {
-    let preview = '';
-    if(m.type === 'photo'){
-      preview = `<img src="${m.url}" alt="" class="w-full h-48 object-cover rounded-t-2xl">`;
-    } else if(m.type === 'pdf'){
-      preview = `<div class="w-full h-36 bg-rose-50 text-rose-600 flex flex-col items-center justify-center rounded-t-2xl gap-2"><i class="fa-solid fa-file-pdf text-4xl"></i><span class="text-xs font-bold">Document PDF</span></div>`;
+    const url = safeMediaUrl(m.url);
+    let preview = "";
+    if (m.type === "photo" && url) {
+      preview = '<img src="' + escapeHTML(url) + '" alt="" loading="lazy" class="w-full h-48 object-cover rounded-t-2xl">';
+    } else if (m.type === "pdf") {
+      preview = '<div class="w-full h-36 bg-rose-50 text-rose-600 flex flex-col items-center justify-center rounded-t-2xl gap-2"><i class="fa-solid fa-file-pdf text-4xl"></i><span class="text-xs font-bold">Document PDF</span></div>';
+    } else if (m.type === "video" && url) {
+      preview = '<video src="' + escapeHTML(url) + '" controls preload="metadata" class="w-full h-48 object-cover rounded-t-2xl bg-black"></video>';
     } else {
-      preview = `<video src="${m.url}" controls class="w-full h-48 object-cover rounded-t-2xl bg-black"></video>`;
+      preview = '<div class="w-full h-36 bg-slate-50 text-slate-500 flex flex-col items-center justify-center rounded-t-2xl gap-2"><i class="fa-solid fa-file-lines text-4xl"></i><span class="text-xs font-bold">Publication LAS</span></div>';
     }
-
-    return `
-      <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between">
-        <div>
-          ${preview}
-          <div class="p-4 space-y-2">
-            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-las-100 text-las-800">${m.type}</span>
-            <h3 class="font-bold text-slate-900 text-sm">${escapeHTML(m.title)}</h3>
-            <p class="text-xs text-slate-600">${escapeHTML(m.desc || '')}</p>
-          </div>
-        </div>
-        <div class="p-4 pt-0 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 mt-2">
-          <span>${m.date}</span>
-          <div class="flex gap-2">
-            ${m.type === 'pdf' ? `<a href="${m.url}" download="Document_LAS.pdf" class="text-las-700 font-bold hover:underline"><i class="fa-solid fa-download"></i> Télécharger</a>` : ''}
-            <button onclick="deleteMedia(${m.id})" class="text-rose-500 hover:underline"><i class="fa-solid fa-trash"></i></button>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
+    const deleteButton = ROLE === "admin" ? '<button type="button" onclick="deleteMedia(\'' + escapeHTML(String(m.id)) + '\')" class="text-rose-500 hover:underline"><i class="fa-solid fa-trash"></i> Supprimer</button>' : "";
+    const downloadLink = url ? '<a href="' + escapeHTML(url) + '" target="_blank" rel="noopener noreferrer" class="text-las-700 font-bold hover:underline" aria-label="Ouvrir le fichier dans un nouvel onglet"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir</a>' : "";
+    return '<article class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between"><div>' + preview +
+      '<div class="p-4 space-y-2"><span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-las-100 text-las-800">' + escapeHTML(m.type) + '</span>' +
+      '<h3 class="font-bold text-slate-900 text-sm">' + escapeHTML(m.title) + '</h3><p class="text-xs text-slate-600">' + escapeHTML(m.desc || "") + '</p></div></div>' +
+      '<div class="p-4 pt-0 flex items-center justify-between gap-2 text-[11px] text-slate-400 border-t border-slate-100 mt-2"><span>' + escapeHTML(m.date || "") + '</span><div class="flex gap-2">' + downloadLink + deleteButton + '</div></div></article>';
+  }).join("");
 }
 
-function deleteMedia(id){
-  if (!isAdmin()) { alert("Seul l’administrateur peut supprimer un média."); return; }
-  if(confirm("Supprimer cette publication ?")){
-    mediaData = mediaData.filter(m => m.id !== id);
-    saveMediaStorage();
-    renderMedia('ALL');
+async function deleteMedia(id){
+  if (ROLE !== "admin") { alert("Seul l’administrateur peut supprimer un média."); return; }
+  if (!confirm("Supprimer définitivement ce média du catalogue LAS ?")) return;
+  try {
+    await LASMedia.remove(id);
+    await refreshMedia();
+  } catch (e) {
+    console.error(e);
+    alert(e.message || "Suppression impossible. Vérifiez les droits et réessayez.");
   }
 }
 
@@ -1206,6 +1272,7 @@ function applyRoleUI(){
     document.getElementById('tab-btn-media')?.classList.remove('hidden');
     document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.add('hidden'));
   }
+  document.querySelectorAll(".las-media-upload-action").forEach(button => button.classList.toggle("hidden", !["admin","secretaire"].includes(ROLE)));
   const passwordButton = document.querySelector('button[onclick="openPasswordModal()"]');
   if (passwordButton) passwordButton.classList.toggle('hidden', !SESSION.email);
   document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.toggle('hidden', ROLE === 'membre'));
@@ -1246,6 +1313,7 @@ async function bootstrapLAS(){
       document.getElementById("section-members")?.classList.add("hidden");
     }
     applyRoleUI();
+    await refreshMedia();
     if (header) header.classList.remove("las-auth-gated");
     if (main) main.classList.remove("las-auth-gated");
     switchTab("media");
