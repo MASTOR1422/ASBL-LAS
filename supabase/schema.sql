@@ -246,14 +246,14 @@ create policy media_read_active on public.media_items for select to authenticate
 using (public.is_las_active() and (status='published' or author_id=auth.uid() or public.current_las_role()='admin'));
 drop policy if exists media_insert_active on public.media_items;
 create policy media_insert_active on public.media_items for insert to authenticated
-with check (author_id=auth.uid() and public.is_las_active());
+with check (author_id=auth.uid() and public.current_las_role() in ('admin','secretaire'));
 drop policy if exists media_update_author_admin on public.media_items;
 create policy media_update_author_admin on public.media_items for update to authenticated
-using (author_id=auth.uid() or public.current_las_role()='admin')
-with check (author_id=auth.uid() or public.current_las_role()='admin');
+using (public.current_las_role() in ('admin','secretaire'))
+with check (public.current_las_role() in ('admin','secretaire'));
 drop policy if exists media_delete_author_admin on public.media_items;
 create policy media_delete_author_admin on public.media_items for delete to authenticated
-using (author_id=auth.uid() or public.current_las_role()='admin');
+using (public.current_las_role()='admin');
 
 grant usage on schema public to authenticated;
 grant select on public.profiles, public.members, public.member_payments, public.posts, public.post_comments, public.media_items to authenticated;
@@ -263,19 +263,50 @@ grant insert, update, delete on public.member_payments, public.posts, public.pos
 
 -- Stockage privé pour photos/PDF/vidéos. Aucun fichier ne doit être rendu public.
 insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types)
-values ('las-private-media','las-private-media',false,10485760,
+values ('las-private-media','las-private-media',false,52428800,
   array['image/jpeg','image/png','image/webp','application/pdf','video/mp4','video/webm'])
-on conflict (id) do update set public=false, file_size_limit=10485760,
+on conflict (id) do update set public=false, file_size_limit=52428800,
 allowed_mime_types=excluded.allowed_mime_types;
 
 drop policy if exists las_media_select_active on storage.objects;
 create policy las_media_select_active on storage.objects for select to authenticated
-using (bucket_id='las-private-media' and public.is_las_active());
+using (
+  bucket_id='las-private-media'
+  and (
+    (name like 'media/%' and public.is_las_active())
+    or (name like 'members/%' and public.current_las_role() in ('admin','secretaire','tresorier'))
+  )
+);
 drop policy if exists las_media_insert_active on storage.objects;
 create policy las_media_insert_active on storage.objects for insert to authenticated
-with check (bucket_id='las-private-media' and public.is_las_active());
+with check (
+  bucket_id='las-private-media'
+  and (name like 'media/%' or name like 'members/%')
+  and public.current_las_role() in ('admin','secretaire')
+);
+drop policy if exists las_media_update_active on storage.objects;
+create policy las_media_update_active on storage.objects for update to authenticated
+using (
+  bucket_id='las-private-media'
+  and (name like 'media/%' or name like 'members/%')
+  and public.current_las_role() in ('admin','secretaire')
+)
+with check (
+  bucket_id='las-private-media'
+  and (name like 'media/%' or name like 'members/%')
+  and public.current_las_role() in ('admin','secretaire')
+);
 drop policy if exists las_media_delete_admin on storage.objects;
 create policy las_media_delete_admin on storage.objects for delete to authenticated
-using (bucket_id='las-private-media' and public.current_las_role()='admin');
+using (
+  bucket_id='las-private-media'
+  and (
+    (name like 'media/%' and (
+      public.current_las_role()='admin'
+      or (public.current_las_role()='secretaire' and name like ('media/' || auth.uid()::text || '/%'))
+    ))
+    or (name like 'members/%' and public.current_las_role() in ('admin','secretaire'))
+  )
+);
 
 -- Après application, créez les profils depuis le Dashboard Supabase, jamais depuis le navigateur public.
