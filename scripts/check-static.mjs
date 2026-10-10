@@ -52,8 +52,8 @@ for (const required of [
   "drop policy if exists media_insert_staff",
   "drop policy if exists media_update_staff",
   "on conflict (id) do update set public=false",
-  "private.has_role",
-  "private.is_las_active"
+  "private.las_current_role",
+  "private.las_is_active"
 ]) {
   if (!mediaMigration.includes(required)) {
     failed = true;
@@ -65,8 +65,8 @@ for (const required of [
   "drop policy if exists posts_insert_active",
   "drop policy if exists posts_update_author_admin",
   "drop policy if exists comments_update_author_admin",
-  "private.has_role('admin')",
-  "private.is_las_active()"
+  "private.las_current_role()='admin'",
+  "private.las_is_active()"
 ]) {
   if (!blogMigration.includes(required)) {
     failed = true;
