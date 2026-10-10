@@ -19,46 +19,77 @@ function canPay() { return isAdmin() || ROLE === "tresorier"; }
 function canDelete() { return isAdmin(); }
 
 async function initAuth() {
-  try { await window.LAS_SUPABASE_READY; } catch (e) {
-    return { success: false, reason: "not-configured", message: "La configuration Supabase n’est pas disponible. Contactez l’administrateur." };
-  }
-  try {
-    localStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(SESSION_KEY);
-  } catch (_) {}
-  if (!lasIsConfigured()) {
-    return { success: false, reason: "not-configured", message: "La connexion sécurisée n’est pas encore configurée. Consultez SECURITY_SETUP.md." };
-  }
-  const { data: { session }, error } = await window.lasSupabase.auth.getSession();
-  if (error || !session || !session.user) {
+  const clearAuthState = () => {
     SESSION = null; ROLE = null; MEMBER_ID = null; LAS_AUTH_READY = false;
-    return { success: false, reason: "not-authenticated" };
-  }
-  const { data: profile, error: profileError } = await window.lasSupabase
-    .from("profiles")
-    .select("role, member_id, display_name, active")
-    .eq("id", session.user.id)
-    .single();
-  if (profileError || !profile || profile.active !== true) {
-    await window.lasSupabase.auth.signOut();
-    SESSION = null; ROLE = null; MEMBER_ID = null; LAS_AUTH_READY = false;
-    return { success: false, reason: "profile-unavailable", message: "Compte non activé ou profil d’accès indisponible. Contactez l’administrateur LAS." };
-  }
-  if (!["admin", "tresorier", "secretaire", "membre"].includes(profile.role)) {
-    await window.lasSupabase.auth.signOut();
-    return { success: false, reason: "invalid-role" };
-  }
-  ROLE = profile.role;
-  MEMBER_ID = profile.member_id || null;
-  SESSION = {
-    user: profile.display_name || session.user.email || "Membre LAS",
-    role: profile.role,
-    memberId: MEMBER_ID,
-    label: ({admin:"Coordonnateur (Admin)",tresorier:"Trésorier",secretaire:"Secrétaire",membre:"Membre"})[profile.role],
-    email: session.user.email || ""
   };
-  LAS_AUTH_READY = true;
-  return { success: true, session: SESSION };
+  try {
+    try { await window.LAS_SUPABASE_READY; } catch (e) {
+      clearAuthState();
+      return { success: false, reason: "not-configured", message: "La configuration Supabase n’est pas disponible. Contactez l’administrateur." };
+    }
+    try {
+      localStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
+    } catch (_) {}
+    if (!lasIsConfigured() || !window.lasSupabase?.auth) {
+      clearAuthState();
+      return { success: false, reason: "not-configured", message: "La connexion sécurisée n’est pas encore configurée. Consultez SECURITY_SETUP.md." };
+    }
+
+    let authResult;
+    try {
+      authResult = await window.lasSupabase.auth.getSession();
+    } catch (e) {
+      clearAuthState();
+      return { success: false, reason: "session-check-failed", message: "La vérification de la session a échoué. Reconnectez-vous." };
+    }
+    const session = authResult?.data?.session;
+    if (authResult?.error || !session || !session.user) {
+      clearAuthState();
+      return { success: false, reason: "not-authenticated" };
+    }
+
+    let profileResult;
+    try {
+      profileResult = await window.lasSupabase
+        .from("profiles")
+        .select("role, member_id, display_name, active")
+        .eq("id", session.user.id)
+        .single();
+    } catch (e) {
+      try { await window.lasSupabase.auth.signOut(); } catch (_) {}
+      clearAuthState();
+      return { success: false, reason: "profile-unavailable", message: "Impossible de vérifier votre profil d’accès. Contactez l’administrateur LAS." };
+    }
+    const profile = profileResult?.data;
+    if (profileResult?.error || !profile || profile.active !== true) {
+      try { await window.lasSupabase.auth.signOut(); } catch (_) {}
+      clearAuthState();
+      return { success: false, reason: "profile-unavailable", message: "Compte non activé ou profil d’accès indisponible. Contactez l’administrateur LAS." };
+    }
+    if (!["admin", "tresorier", "secretaire", "membre"].includes(profile.role)) {
+      try { await window.lasSupabase.auth.signOut(); } catch (_) {}
+      clearAuthState();
+      return { success: false, reason: "invalid-role", message: "Rôle non autorisé. Contactez l’administrateur LAS." };
+    }
+
+    ROLE = profile.role;
+    MEMBER_ID = profile.member_id || null;
+    SESSION = {
+      user: profile.display_name || session.user.email || "Membre LAS",
+      role: profile.role,
+      memberId: MEMBER_ID,
+      label: ({admin:"Coordonnateur (Admin)",tresorier:"Trésorier",secretaire:"Secrétaire",membre:"Membre"})[profile.role],
+      email: session.user.email || ""
+    };
+    LAS_AUTH_READY = true;
+    return { success: true, session: SESSION };
+  } catch (e) {
+    try { if (window.lasSupabase?.auth) await window.lasSupabase.auth.signOut(); } catch (_) {}
+    clearAuthState();
+    console.error("Erreur pendant la vérification d’authentification LAS:", e);
+    return { success: false, reason: "auth-error", message: "Vérification de connexion impossible. Veuillez vous reconnecter." };
+  }
 }
 
 async function signIn(usernameOrEmail, password) {
