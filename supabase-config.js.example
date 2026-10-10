@@ -1,7 +1,0 @@
-// Copiez ce fichier sous le nom supabase-config.js et remplacez les valeurs.
-// URL et publishable key sont destinées au client navigateur.
-// N'insérez JAMAIS une clé Supabase secret/service_role ici.
-window.LAS_SUPABASE_CONFIG = {
-  url: "https://VOTRE-PROJET.supabase.co",
-  publishableKey: "sb_publishable_REMPLACER_PAR_VOTRE_CLE"
-};
