@@ -26,6 +26,19 @@ window.LASData = (() => {
     }
     return [...map.values()];
   }
+  async function createMember(m) {
+    if (!["admin","secretaire"].includes(ROLE)) throw new Error("Droits insuffisants pour créer une fiche membre.");
+    const row={
+      name:String(m.name||"").trim(),phone:m.phone||null,email:m.email||null,
+      address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,
+      birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,
+      joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,
+      meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active"
+    };
+    const {data,error}=await client().from("members").insert(row).select("id").single();
+    if(error) throw error;
+    return Number(data.id);
+  }
   async function saveMembers(members) {
     if(!["admin","secretaire"].includes(ROLE)) throw new Error("Droits insuffisants pour modifier les fiches membres.");
     const rows=members.map(m=>({
@@ -58,5 +71,5 @@ window.LASData = (() => {
     const {error}=await client().from("member_payments").upsert(rows,{onConflict:"member_id,payment_year,payment_month"});
     if(error) throw error;
   }
-  return {loadMembers,saveMembers,saveMemberPayments,deleteMember};
+  return {loadMembers,createMember,saveMembers,saveMemberPayments,deleteMember};
 })();
