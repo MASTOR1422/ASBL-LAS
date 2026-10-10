@@ -58,21 +58,21 @@ for (const required of [
 ]) {
   if (!mediaMigration.includes(required)) {
     failed = true;
-    process.stderr.write("Missing media migration safeguard: " + required + "\\n");
+    process.stderr.write("Missing media migration safeguard: " + required + "\n");
   }
 }
-if (/as\\s+\\$(?:\\s|\\n)/.test(mediaMigration)) {
+if (/as\s+\$(?:\s|\n)/.test(mediaMigration)) {
   failed = true;
-  process.stderr.write("Invalid/untagged SQL function delimiter in media migration.\\n");
+  process.stderr.write("Invalid/untagged SQL function delimiter in media migration.\n");
 }
-const functionTagCount = (mediaMigration.match(/\\$func\\$/g) || []).length;
+const functionTagCount = (mediaMigration.match(/\$func\$/g) || []).length;
 if (functionTagCount === 0 || functionTagCount % 2 !== 0) {
   failed = true;
-  process.stderr.write("Unbalanced $func$ delimiters in media migration.\\n");
+  process.stderr.write("Unbalanced $func$ delimiters in media migration.\n");
 }
 
 const mediaClient = readFileSync("supabase/las-media.js", "utf8");
 if (!mediaClient.includes("validLegacyId")) {
   failed = true;
-  process.stderr.write("Media client must support legacy bigint IDs.\\n");
+  process.stderr.write("Media client must support legacy bigint IDs.\n");
 }
