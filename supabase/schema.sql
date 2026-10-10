@@ -43,6 +43,7 @@ begin
   end if;
 end $$;
 
+alter table public.members add column if not exists name text;
 alter table public.members add column if not exists phone text;
 alter table public.members add column if not exists email text;
 alter table public.members add column if not exists address text;
