@@ -5,10 +5,24 @@ function json(res, status, body) {
   res.status(status).json(body);
 }
 function sameOrigin(req) {
-  const base = process.env.APP_BASE_URL;
-  if (!base) return false;
-  try { return !!req.headers.origin && new URL(req.headers.origin).origin === new URL(base).origin; }
-  catch (_) { return false; }
+  // Allow only explicitly configured site/deployment origins. Vercel preview URLs
+  // differ from APP_BASE_URL, so include Vercel's exact deployment aliases when present.
+  const configured = [
+    process.env.APP_BASE_URL,
+    process.env.VERCEL_URL,
+    process.env.VERCEL_BRANCH_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+  ].filter(Boolean);
+  const allowedOrigins = new Set();
+  for (const value of configured) {
+    try {
+      const normalized = /^https?:\/\//i.test(value) ? value : "https://" + value;
+      allowedOrigins.add(new URL(normalized).origin);
+    } catch (_) {}
+  }
+  try {
+    return !!req.headers.origin && allowedOrigins.has(new URL(req.headers.origin).origin);
+  } catch (_) { return false; }
 }
 export default async function handler(req, res) {
   if (req.method !== "POST") return json(res, 405, { message: "Méthode non autorisée." });
