@@ -16,7 +16,7 @@ Configurer directement dans Vercel → Project Settings → Environment Variable
 - `SUPABASE_URL`
 - `SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY` — serveur uniquement.
-- `APP_BASE_URL` — origine HTTPS exacte correspondant au site déployé.
+- `APP_BASE_URL` — origine HTTPS canonique du site. Les origines Preview sont validées à partir des variables Vercel; le lien de récupération utilise l’origine de la requête validée afin de rester sur le même déploiement.
 
 Ne jamais placer la clé service-role/secret dans GitHub, HTML, un fichier de configuration côté navigateur ou une variable `NEXT_PUBLIC_*`. Ne collez jamais de valeur secrète dans une conversation.
 
