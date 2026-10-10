@@ -63,6 +63,7 @@
         .las-nav-tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; }
         .las-nav-tabs > button { min-width:0; justify-content:center; min-height:42px; }
         .las-nav-tabs > button span { overflow-wrap:anywhere; }
+        @media (min-width:641px) { .las-nav-tabs { display:flex; align-items:center; } }
         .las-upload-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; }
         .las-upload-actions button { min-height:44px; justify-content:center; }
         .las-member-form-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:.75rem; }
