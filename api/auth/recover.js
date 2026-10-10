@@ -30,8 +30,10 @@ export default async function handler(req, res) {
   const url = process.env.SUPABASE_URL;
   const publicKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const base = process.env.APP_BASE_URL;
-  if (!url || !publicKey || !secretKey || !base) return json(res, 503, { message: "Service de récupération non configuré." });
+  // sameOrigin() a déjà validé cette origine contre la liste autorisée.
+  // Utiliser l’origine de la requête évite de renvoyer les tests Preview vers Production.
+  const base = new URL(req.headers.origin).origin;
+  if (!url || !publicKey || !secretKey) return json(res, 503, { message: "Service de récupération non configuré." });
   const username = String(req.body?.username || "").trim().toLowerCase();
   if (!/^[a-z0-9._-]{3,80}$/.test(username)) return json(res, 200, { ok: true });
   try {
