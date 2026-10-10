@@ -57,7 +57,7 @@ Configurer dans les paramètres du projet Vercel, sans les committer dans Git :
 - `SUPABASE_URL` : URL du projet.
 - `SUPABASE_PUBLISHABLE_KEY` : clé publishable/anon destinée au navigateur.
 - `SUPABASE_SERVICE_ROLE_KEY` : clé serveur uniquement pour les endpoints d’authentification; ne jamais l’exposer dans le HTML ou une variable `NEXT_PUBLIC_*`.
-- `APP_BASE_URL` : origine HTTPS exacte du déploiement utilisé par la récupération de mot de passe.
+- `APP_BASE_URL` : origine HTTPS canonique autorisée. La récupération utilise l’origine de la requête validée pour rester sur la Preview ou le site courant.
 
 L’endpoint `/api/supabase-config` ne renvoie jamais la clé service-role. Les origines des endpoints d’authentification sont vérifiées explicitement.
 
