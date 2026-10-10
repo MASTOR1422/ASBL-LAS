@@ -25,7 +25,7 @@ window.LASData = (() => {
       m.payments[y][Number(p.payment_month)-1]=!!p.paid;
     }
     await Promise.all(mr.data.filter(r=>r.photo_path).map(async r=>{
-      const {data,error}=await db.storage.from("las-private-media").createSignedUrl(r.photo_path,300);
+      const {data,error}=await db.storage.from("las-private-media").createSignedUrl(r.photo_path,3600);
       if(!error&&data?.signedUrl&&map.has(Number(r.id))) map.get(Number(r.id)).photo=data.signedUrl;
     }));
     return [...map.values()];
@@ -57,7 +57,7 @@ window.LASData = (() => {
       m.photoPath=uploadedPath;
       if(uploadedPath){
         try {
-          const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(uploadedPath,300);
+          const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(uploadedPath,3600);
           m.photo=!signError&&signed?.signedUrl?signed.signedUrl:"";
         } catch (_) { m.photo=""; }
       } else if(typeof m.photo==="string"&&m.photo.startsWith("data:")) {
