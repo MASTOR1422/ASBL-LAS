@@ -19,7 +19,7 @@ Le portail a été raccordé à Supabase; ce document remplace l’ancien plan d
 
 ## Schéma et migrations
 
-Pour un nouveau projet, exécuter `supabase/schema.sql` puis les migrations versionnées dans `supabase/migrations/`. Pour le projet LAS déjà configuré, les migrations `username_auth`, `las_schema_alignment`, `las_private_rls_helpers`, `las_member_privacy` et `las_storage_path_access` sont enregistrées dans Supabase; ne pas les réexécuter.
+Pour un nouveau projet, exécuter `supabase/schema.sql` puis les migrations versionnées dans `supabase/migrations/`. Pour le projet LAS déjà configuré, les migrations `username_auth`, `las_schema_alignment`, `las_private_rls_helpers`, `las_member_privacy`, `las_storage_path_access` et `las_legacy_policy_cleanup` sont enregistrées dans Supabase; ne pas les réexécuter.
 
 ## Contrôles restants
 
