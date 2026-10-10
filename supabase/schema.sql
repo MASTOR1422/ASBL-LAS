@@ -317,4 +317,17 @@ using (
   )
 );
 
+-- Activer les événements du blog pour les mises à jour en direct.
+do $realtime$
+begin
+  if exists (select 1 from pg_publication where pubname='supabase_realtime') then
+    if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='posts') then
+      execute 'alter publication supabase_realtime add table public.posts';
+    end if;
+    if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='post_comments') then
+      execute 'alter publication supabase_realtime add table public.post_comments';
+    end if;
+  end if;
+end $realtime$;
+
 -- Après application, créez les profils depuis le Dashboard Supabase, jamais depuis le navigateur public.
