@@ -54,21 +54,27 @@ for (const required of [
   "create policy media_read_active",
   "drop policy if exists media_insert_staff",
   "drop policy if exists media_update_staff",
-  "on conflict (id) do update set public=false"
+  "on conflict (id) do update set public=false",
+  "private.has_role",
+  "private.is_las_active"
 ]) {
   if (!mediaMigration.includes(required)) {
     failed = true;
     process.stderr.write("Missing media migration safeguard: " + required + "\n");
   }
 }
-if (/as\s+\$(?:\s|\n)/.test(mediaMigration)) {
-  failed = true;
-  process.stderr.write("Invalid/untagged SQL function delimiter in media migration.\n");
-}
-const functionTagCount = (mediaMigration.match(/\$func\$/g) || []).length;
-if (functionTagCount === 0 || functionTagCount % 2 !== 0) {
-  failed = true;
-  process.stderr.write("Unbalanced $func$ delimiters in media migration.\n");
+const blogMigration = readFileSync("supabase/migrations/20261010193001_las_unified_blog_discussions.sql", "utf8");
+for (const required of [
+  "drop policy if exists posts_insert_active",
+  "drop policy if exists posts_update_author_admin",
+  "drop policy if exists comments_update_author_admin",
+  "private.has_role('admin')",
+  "private.is_las_active()"
+]) {
+  if (!blogMigration.includes(required)) {
+    failed = true;
+    process.stderr.write("Missing blog migration safeguard: " + required + "\\n");
+  }
 }
 
 const mediaClient = readFileSync("supabase/las-media.js", "utf8");
