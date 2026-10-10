@@ -910,7 +910,7 @@ function closePasswordModal(){
   document.getElementById('password-modal').classList.add('hidden');
 }
 
-function handlePasswordChange(e){
+async function handlePasswordChange(e){
   e.preventDefault();
   const oldP = document.getElementById('old-pass').value;
   const newP = document.getElementById('new-pass').value;
@@ -924,7 +924,7 @@ function handlePasswordChange(e){
     return;
   }
 
-  const res = changeUserPassword(SESSION.user, oldP, newP);
+  const res = await changeUserPassword(SESSION.user, oldP, newP);
   if(res.success){
     msgEl.className = "text-xs font-bold p-3 rounded-xl text-center bg-emerald-50 text-emerald-600 border border-emerald-200";
     msgEl.textContent = res.message;
