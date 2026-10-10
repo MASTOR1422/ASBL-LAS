@@ -49,7 +49,20 @@ async function migrate(){
  migrateBtn.disabled=true;document.getElementById("backup").disabled=true;logEl.textContent="";
  try{
   const {data:{user}}=await lasSupabase.auth.getUser();if(!user)throw new Error("Session expirée.");
-  const rows=members.map(m=>({id:Number(m.id),name:String(m.name||"Membre sans nom").trim(),phone:m.phone||null,email:m.email||null,address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active"}));
+  const rows=[];
+  for(const m of members){
+   const row={id:Number(m.id),name:String(m.name||"Membre sans nom").trim(),phone:m.phone||null,email:m.email||null,address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active"};
+   if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
+    const blob=await (await fetch(m.photo)).blob();
+    if(blob.size<=10*1024*1024){
+     const ext=(blob.type.split("/")[1]||"jpg").replace(/[^a-z0-9]/gi,"").slice(0,8)||"jpg";
+     const path="members/"+Number(m.id)+"/"+crypto.randomUUID()+"."+ext;
+     const {error:photoError}=await lasSupabase.storage.from("las-private-media").upload(path,blob,{contentType:blob.type,upsert:false});
+     if(photoError)throw photoError;row.photo_path=path;
+    }else log("Photo trop volumineuse, non importée : "+String(m.name||m.id));
+   }
+   rows.push(row);
+  }
   if(rows.length){const {error}=await lasSupabase.from("members").upsert(rows,{onConflict:"id"});if(error)throw error;const {error:seqError}=await lasSupabase.rpc("sync_las_member_identity");if(seqError)throw seqError;log("Fiches membres importées : "+rows.length);}
   const pays=[];
   for(const m of members)for(const [year,months] of Object.entries(m.payments||{}))for(let i=0;i<(months||[]).length;i++)pays.push({member_id:Number(m.id),payment_year:Number(year),payment_month:i+1,paid:!!months[i],updated_by:user.id});
