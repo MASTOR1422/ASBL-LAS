@@ -1,109 +1,82 @@
-# LAS — Kit de préparation à la production (Supabase + Vercel)
+# ASBL LAS — Portail administratif sécurisé
 
-Ce kit est un **squelette de configuration**, pas une version finale de `index.html`.
-Il fournit une migration SQL initiale, une page de connexion d'exemple et les points de configuration.
-L'interface LAS doit encore être raccordée à ces fonctions Supabase avant d'utiliser de vraies données.
+Le dépôt contient l’application web de l’ASBL Les Amis de la Semence, publiée comme site HTML statique et fonctions API Node sur Vercel, avec Supabase pour l’authentification, la base de données et les fichiers privés.
 
-## 1. Avant toute chose
+## Fonctionnalités
 
-- Ne publiez pas le `index.html` actuel tel quel : il contient `DEFAULT_MEMBERS` et des données personnelles d'exemple.
-- L'ancien fichier `Auth.js` n'a pas été fourni. N'assumez pas qu'il protège correctement l'application.
-- Les fonctions `loadData()`, `saveData()` et `saveMediaStorage()` utilisent `localStorage`. Elles doivent être remplacées par des opérations Supabase asynchrones.
-- Ne migrez pas automatiquement les données du navigateur. Exportez-les, vérifiez-les, puis importez-les dans un environnement de test.
-- Vérifiez les règles de cotisation avant de convertir les booléens `payments[année][mois]` en paiements enregistrés.
+- Connexion par nom d’utilisateur et mot de passe; la correspondance identifiant/e-mail reste côté serveur.
+- Vérification du profil actif et du rôle avant d’afficher le tableau de bord.
+- Répertoire des membres et suivi mensuel des cotisations.
+- Blog communautaire, commentaires et rappels d’anniversaire.
+- Photothèque/documents dans un bucket Supabase privé avec URL signées temporaires.
+- Journal d’audit et politiques RLS sur les tables exposées.
+- Import historique facultatif via `admin-migration.html`; la source locale n’est jamais supprimée automatiquement.
 
-## 2. Créer le projet Supabase
+## Organisation du dépôt
 
-1. Créez un projet Supabase et conservez les identifiants d'administration hors du dépôt.
-2. Dans **SQL Editor**, exécutez `supabase/migrations/202610090001_las_init.sql`.
-3. Dans **Authentication > Providers**, activez Email/Password.
-4. Désactivez l'inscription publique si seuls les responsables doivent créer les comptes.
-5. Créez les utilisateurs dans **Authentication > Users**.
-6. Après création, attribuez un profil à chaque utilisateur via SQL Editor, par exemple :
+- `index.html` : tableau de bord.
+- `login.html`, `reset-password.html`, `Auth.js` : authentification.
+- `api/auth/` : endpoints serveur pour connexion par identifiant et récupération.
+- `api/supabase-config.js` : expose uniquement l’URL Supabase et la clé publishable.
+- `supabase/las-data.js`, `supabase/las-media.js`, `las-blog.js` : accès aux données.
+- `supabase/schema.sql` : socle des tables pour un nouveau projet uniquement.
+- `supabase/migrations/` : migrations versionnées; leurs versions correspondent à l’historique Supabase du projet connecté.
+- `SECURITY_SETUP.md` : configuration et contrôles de sécurité.
 
-```sql
-insert into public.profiles (id, full_name, role)
-select id, 'Administrateur LAS', 'admin'
-from auth.users
-where email = 'EMAIL_ADMIN_A_REMPLACER'
-on conflict (id) do update
-set full_name = excluded.full_name, role = excluded.role;
-```
+## Base de données Supabase
 
-Répétez avec le bon rôle pour chaque compte :
-- `admin` : administration complète
-- `secretariat` : gestion des fiches membres et médias
-- `treasurer` : gestion des cotisations
-- `reader` : consultation uniquement
+### Nouveau projet
 
-Ne donnez jamais aux utilisateurs le droit de modifier leur propre rôle depuis le navigateur.
+1. Créez le projet Supabase et activez le fournisseur Auth Email/Password.
+2. Dans SQL Editor, exécutez une seule fois `supabase/schema.sql`.
+3. Exécutez ensuite, dans l’ordre chronologique, les migrations du dossier `supabase/migrations/`.
+4. Vérifiez les politiques RLS et les fonctions dans les Security Advisors.
+5. Créez les comptes Auth puis leurs profils actifs; ne permettez pas aux utilisateurs de changer eux-mêmes leur rôle.
 
-## 3. Configurer le client web
+### Projet LAS déjà configuré
 
-1. Copiez `supabase-config.js.example` vers `supabase-config.js`.
-2. Remplacez les valeurs d'exemple par le **Project URL** et la **publishable key** du projet Supabase.
-3. Ces deux valeurs sont publiques dans une application navigateur. La sécurité dépend des politiques RLS. N'ajoutez jamais de clé `secret` ou `service_role` dans le navigateur.
-4. Le dépôt doit inclure `supabase-config.js` si le site statique en dépend. Ce fichier ne doit contenir que l'URL et la clé publishable.
+Ne réexécutez pas le socle `schema.sql`. La base connectée a déjà les migrations `username_auth`, `las_schema_alignment`, `las_private_rls_helpers`, `las_member_privacy`, `las_storage_path_access`, `las_legacy_policy_cleanup` et `las_storage_cleanup_permissions`. Conservez les données et appliquez seulement les nouvelles migrations non présentes dans l’historique.
 
-## 4. Adapter index.html
+Le schéma conserve `monthly_contributions` (montants et devises) pour les écritures financières historiques. L’interface des cases mensuelles utilise `member_payments`. Les écritures historiques sont conservées; la migration d’alignement ne supprime aucune table.
 
-L'ordre de chargement doit être :
+## Rôles
 
-```html
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<script src="supabase-client.js"></script>
-```
+| Rôle | Autorisations principales |
+| --- | --- |
+| `admin` | Administration, gestion des membres, cotisations, médias et modération |
+| `secretaire` | Création/modification des fiches et publication de médias |
+| `tresorier` | Consultation et mise à jour des cotisations |
+| `membre` | Consultation des contenus publiés, sans accès à l’administration |
 
-- Ajoutez `auth-guard.js` sur la page protégée après le client Supabase.
-- Ajoutez une page `login.html` comme point d'entrée non protégé.
-- Remplacez les appels à l'ancien `Auth.js`, `SESSION`, `changeUserPassword()` et `logout()` par Supabase Auth.
-- Ne lancez pas le rendu principal avant l'événement `las:ready` émis par `auth-guard.js`.
-- Remplacez les lectures/écritures `localStorage` par `supabase.from(...)`.
-- Adaptez la forme des données : les cotisations sont dans `monthly_contributions`, pas dans un tableau `payments` stocké sur la fiche.
-- Remplacez le stockage Base64 des photos par un bucket Supabase Storage privé `las-media`; enregistrez seulement le chemin de stockage dans la base.
-- Traitez les erreurs réseau et de permission explicitement. Ne montrez pas un message « enregistré » avant confirmation de Supabase.
+Les vérifications dans le navigateur améliorent l’interface, mais la véritable autorisation est imposée par Supabase RLS.
 
-Le script CDN est pratique pour un prototype statique. Pour la production, épinglez une version précise testée de `@supabase/supabase-js` et surveillez les mises à jour.
+## Variables Vercel
 
-## 5. Déploiement Vercel
+Configurer dans les paramètres du projet Vercel, sans les committer dans Git :
 
-1. Placez les fichiers web dans la racine du dépôt GitHub.
-2. Ajoutez les logos et ressources nécessaires (vérifiez les noms exacts `logo LAS_2.jpg` et `logo LAS.jpg`).
-3. Importez le dépôt dans Vercel, Framework Preset : **Other**, Root Directory : `./`.
-4. Pas de commande de build nécessaire pour un site HTML statique.
-5. Déployez d'abord en Preview et testez l'authentification et les autorisations.
-6. Déployez en Production seulement après les tests. L'adresse sera un sous-domaine `*.vercel.app`.
-7. Dans Supabase Authentication > URL Configuration, ajoutez l'URL Vercel finale aux URL de site/redirection autorisées.
-8. Vérifiez que l'inscription publique est désactivée et que les utilisateurs sans profil ne peuvent accéder aux données.
+- `SUPABASE_URL` : URL du projet.
+- `SUPABASE_PUBLISHABLE_KEY` : clé publishable/anon destinée au navigateur.
+- `SUPABASE_SERVICE_ROLE_KEY` : clé serveur uniquement pour les endpoints d’authentification; ne jamais l’exposer dans le HTML ou une variable `NEXT_PUBLIC_*`.
+- `APP_BASE_URL` : origine HTTPS exacte du déploiement utilisé par la récupération de mot de passe.
 
-La migration crée aussi le bucket privé `las-media` et ses politiques d'accès. Les téléchargements doivent utiliser une session authentifiée et, si nécessaire, des URL signées à durée limitée. Le `vercel.json` fourni ajoute des en-têtes de sécurité de base. Il ne remplace ni les politiques RLS ni une revue de sécurité.
+L’endpoint `/api/supabase-config` ne renvoie jamais la clé service-role. Les origines des endpoints d’authentification sont vérifiées explicitement.
 
-## 6. Migration des données existantes
+## Déploiement et tests
 
-1. Sauvegardez les données locales dans chaque navigateur qui contient des modifications importantes.
-2. Réconciliez les doublons et vérifiez le nombre réel de membres.
-3. Importez les fiches dans `members` depuis un CSV nettoyé.
-4. Convertissez chaque mois réellement payé en une ligne `monthly_contributions`.
-5. Vérifiez les montants, années, mois et dates d'adhésion.
-6. N'importez pas les photos Base64 dans PostgreSQL : téléversez-les dans le bucket privé.
-7. Conservez une copie de sauvegarde hors du navigateur.
+- Les pushes sur une branche non-production doivent générer une Preview Vercel.
+- Tester la connexion, le lien « Mot de passe oublié ? », la réinitialisation, les droits des quatre rôles, la lecture/écriture des membres, les cotisations, les médias privés et le blog.
+- Vérifier la Preview avant toute promotion vers Production.
+- Configurer Supabase Auth > URL Configuration avec les origines et redirections réellement utilisées.
+- Activer la protection contre les mots de passe compromis dans Supabase Auth.
+- Ne jamais afficher, committer ou demander une clé secrète dans une conversation.
 
-## 7. Tests de réception obligatoires
+## Import des anciennes données
 
-- [ ] Un visiteur non connecté est redirigé vers `login.html`.
-- [ ] Un compte sans ligne `profiles` n'accède pas à l'application.
-- [ ] `reader` peut lire mais ne peut ni ajouter ni modifier ni supprimer.
-- [ ] `secretariat` peut gérer les membres mais ne peut pas modifier les cotisations.
-- [ ] `treasurer` peut enregistrer/corriger les cotisations mais ne peut pas supprimer les membres.
-- [ ] `admin` a les droits d'administration prévus.
-- [ ] Une tentative directe via l'API Supabase sans session ne permet pas de lire les tables.
-- [ ] Les erreurs réseau n'affichent pas de faux succès.
-- [ ] Les données sont identiques sur deux appareils connectés.
-- [ ] Les médias privés ne sont pas accessibles par URL publique permanente.
-- [ ] Les exports CSV et impressions ne révèlent que les informations autorisées.
-- [ ] Une sauvegarde et une restauration ont été testées.
+1. Ouvrir `admin-migration.html` sur l’appareil qui détient encore les données locales, si elles existent.
+2. Télécharger et conserver une sauvegarde JSON dans un emplacement privé.
+3. Importer uniquement après application des migrations et connexion avec un administrateur actif.
+4. Comparer les nombres et quelques fiches dans Supabase; conserver le fichier de sauvegarde jusqu’à validation complète.
 
-## Limite importante
+## État des corrections
 
-Ce kit ne remplace pas l'intégration métier dans le fichier `index.html`. Il faut adapter les handlers existants (création/modification/suppression de membre, paiement mensuel, médias, export et statistiques) puis tester la migration sur un projet Supabase de test avant production.
+Le dépôt est en cours de nettoyage sur une branche de correction. Ne considérez pas le travail comme une mise en production validée tant que la Preview n’a pas passé les tests fonctionnels. Les fichiers supprimés restent récupérables dans l’historique Git.
