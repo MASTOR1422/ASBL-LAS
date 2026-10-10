@@ -30,6 +30,7 @@ Ordre des fichiers actuellement suivis :
 4. `20261010164128_las_member_privacy.sql`
 5. `20261010164452_las_storage_path_access.sql`
 6. `20261010164810_las_legacy_policy_cleanup.sql`
+7. `20261010165117_las_storage_cleanup_permissions.sql`
 
 Pour un projet neuf, exécuter d’abord `supabase/schema.sql`, puis les migrations ci-dessus dans l’ordre. Pour le projet LAS existant, ces trois migrations sont déjà enregistrées dans l’historique Supabase : ne pas les réexécuter manuellement.
 
