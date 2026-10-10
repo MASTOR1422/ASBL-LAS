@@ -7,7 +7,7 @@ window.LASData = (() => {
       note:r.note||"", birthdate:r.birthdate||"", birthplace:r.birthplace||"",
       profession:r.profession||"", poste:r.position||"", joined:r.joined_on||"",
       asbl:r.asbl_status||"OUI", forum:r.forum_status||"NON", reunion:r.meeting_status||"NON",
-      photo:"", photoPath:r.photo_path||null, payments:{}
+      photo:"", photoPath:r.photo_path||null, birthdayVisible:r.birthday_visible!==false, payments:{}
     };
   }
   async function loadMembers() {
@@ -37,7 +37,7 @@ window.LASData = (() => {
       address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,
       birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,
       joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,
-      meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active"
+      meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active",birthday_visible:m.birthdayVisible!==false
     };
     const {data,error}=await client().from("members").insert(row).select("id").single();
     if(error) throw error;
@@ -64,7 +64,7 @@ window.LASData = (() => {
         address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,
         birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,
         joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,
-        meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active",photo_path:m.photoPath||null
+        meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active",birthday_visible:m.birthdayVisible!==false,photo_path:m.photoPath||null
       };
       if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
         const blob=await (await fetch(m.photo)).blob();
