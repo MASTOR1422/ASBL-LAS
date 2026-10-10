@@ -5,16 +5,16 @@
 <title>Migration sécurisée LAS</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script><script src="supabase-client.js"></script><script src="Auth.js"></script>
+<script src="supabase-client.js"></script><script src="Auth.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen">
 <main class="max-w-3xl mx-auto p-4 sm:p-8">
 <header class="bg-slate-900 text-white rounded-2xl p-5 flex items-center gap-4">
-<img src="logo LAS_2.jpg" alt="Logo LAS" class="w-14 h-14 object-contain bg-white rounded-xl p-1" onerror="this.onerror=null;this.src='logo LAS.jpg'">
+<img src="logo LAS_2.jpg" alt="Logo LAS" class="w-14 h-14 object-contain bg-white rounded-xl p-1">
 <div><h1 class="font-black text-xl">Migration des données LAS</h1><p class="text-sm text-slate-300">Membres, cotisations et médias hérités</p></div>
 </header>
 <section class="mt-5 bg-white border rounded-2xl p-5 space-y-4">
-<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900"><strong>Précautions :</strong> cette page ne supprime aucune donnée du navigateur. Elle doit être ouverte sur l’appareil et le navigateur qui contiennent les données historiques. Téléchargez d’abord une sauvegarde JSON. Exécutez le SQL de <code>supabase/schema.sql</code> dans votre projet Supabase avant l’import.</div>
+<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900"><strong>Précautions :</strong> cette page ne supprime aucune donnée du navigateur. Elle doit être ouverte sur l’appareil et le navigateur qui contiennent les données historiques. Téléchargez d’abord une sauvegarde JSON. Sur un projet Supabase neuf, exécutez d’abord <code>supabase/schema.sql</code>, puis toutes les migrations de <code>supabase/migrations/</code> dans l’ordre. Sur le projet LAS existant, n’exécutez pas le socle une seconde fois : vérifiez l’historique des migrations avant toute action.</div>
 <div id="status" class="text-sm text-slate-600" aria-live="polite">Vérification de la session…</div>
 <div id="counts" class="grid grid-cols-2 gap-3"></div>
 <button id="backup" class="w-full border border-slate-300 rounded-xl py-3 font-bold text-sm">1. Télécharger une sauvegarde JSON du navigateur actuel</button>
@@ -77,7 +77,7 @@ async function migrate(){
     const response=await fetch(m.url);const blob=await response.blob();
     if(blob.size>10*1024*1024){skippedMedia++;log("Média ignoré (>10 Mo) : "+String(m.title||m.id));continue;}
     const ext=(blob.type.split("/")[1]||"bin").replace(/[^a-z0-9]/gi,"").slice(0,8)||"bin";
-    storage_path=user.id+"/legacy-"+String(m.id||Date.now())+"-"+crypto.randomUUID()+"."+ext;
+    storage_path="media/legacy/"+user.id+"/legacy-"+String(m.id||Date.now())+"-"+crypto.randomUUID()+"."+ext;
     const {error}=await lasSupabase.storage.from("las-private-media").upload(storage_path,blob,{contentType:blob.type,upsert:false});
     if(error)throw error;
    }else if(typeof m.url==="string"&&/^https:\/\//i.test(m.url)){external_url=m.url;}
@@ -108,7 +108,7 @@ document.getElementById("backup-file").addEventListener("change",async e=>{
 migrateBtn.addEventListener("click",()=>migrate());
 (async()=>{try{
  await window.LAS_SUPABASE_READY;
- if(!lasIsConfigured())throw new Error("Configuration Supabase absente. Renseignez supabase-config.js avec l’URL du projet et la clé publique.");
+ if(!lasIsConfigured())throw new Error("Configuration Supabase absente. Vérifiez les variables Vercel et l’endpoint /api/supabase-config.");
  const result=await initAuth();if(!result.success)throw new Error("Connectez-vous d’abord via login.html avec un compte Supabase actif.");
  if(!isAdmin())throw new Error("Accès réservé à un profil dont le rôle Supabase est admin.");
  const src=readLegacy();if(!src.hasSource)statusEl.textContent="Session administrateur valide, mais aucune donnée historique n’est enregistrée dans ce navigateur. Ouvrez cette page sur le navigateur source.";
