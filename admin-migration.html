@@ -17,7 +17,9 @@
 <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900"><strong>Précautions :</strong> cette page ne supprime aucune donnée du navigateur. Elle doit être ouverte sur l’appareil et le navigateur qui contiennent les données historiques. Téléchargez d’abord une sauvegarde JSON. Exécutez le SQL de <code>supabase/schema.sql</code> dans votre projet Supabase avant l’import.</div>
 <div id="status" class="text-sm text-slate-600" aria-live="polite">Vérification de la session…</div>
 <div id="counts" class="grid grid-cols-2 gap-3"></div>
-<button id="backup" class="w-full border border-slate-300 rounded-xl py-3 font-bold text-sm">1. Télécharger une sauvegarde JSON</button>
+<button id="backup" class="w-full border border-slate-300 rounded-xl py-3 font-bold text-sm">1. Télécharger une sauvegarde JSON du navigateur actuel</button>
+<label class="block text-sm font-bold">Ou charger une sauvegarde exportée depuis l’ancien site
+<input id="backup-file" type="file" accept=".json,application/json" class="block mt-2 w-full text-xs font-normal"></label>
 <button id="migrate" disabled class="w-full bg-las-700 bg-green-700 disabled:bg-slate-300 text-white rounded-xl py-3 font-bold text-sm">2. Importer dans Supabase</button>
 <div id="log" class="text-xs text-slate-600 whitespace-pre-wrap break-words"></div>
 </section>
@@ -25,7 +27,7 @@
 </main>
 <script>
 const statusEl=document.getElementById("status"),countsEl=document.getElementById("counts"),logEl=document.getElementById("log"),migrateBtn=document.getElementById("migrate");
-let members=[],media=[],ready=false;
+let members=[],media=[],ready=false,sourceBackup=null;
 function readLegacy(){
  const rawMembers=localStorage.getItem("las_members_v2"),rawMedia=localStorage.getItem("las_media_v1");
  try{members=rawMembers?JSON.parse(rawMembers):[]}catch(e){throw new Error("Le stockage des membres est illisible; aucune donnée n’a été modifiée.");}
@@ -35,7 +37,7 @@ function readLegacy(){
  return {members,media,hasSource:!!rawMembers||!!rawMedia};
 }
 function downloadBackup(){
- const data={createdAt:new Date().toISOString(),members:localStorage.getItem("las_members_v2"),media:localStorage.getItem("las_media_v1")};
+ const data=sourceBackup?{createdAt:new Date().toISOString(),members:members,media:media}:{createdAt:new Date().toISOString(),members:localStorage.getItem("las_members_v2"),media:localStorage.getItem("las_media_v1")};
  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
  const a=document.createElement("a");a.href=url;a.download="las-backup-local-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url);
  logEl.textContent="Sauvegarde générée. Conservez ce fichier dans un emplacement privé.";
@@ -74,6 +76,20 @@ async function migrate(){
  finally{migrateBtn.disabled=false;document.getElementById("backup").disabled=false;}
 }
 document.getElementById("backup").addEventListener("click",downloadBackup);
+document.getElementById("backup-file").addEventListener("change",async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+  const obj=JSON.parse(await file.text());
+  const m=typeof obj.members==="string"?(obj.members?JSON.parse(obj.members):[]):obj.members;
+  const md=typeof obj.media==="string"?(obj.media?JSON.parse(obj.media):[]):obj.media;
+  if(!Array.isArray(m)||!Array.isArray(md))throw new Error("Le fichier doit contenir des tableaux members et media.");
+  members=m;media=md;sourceBackup=obj;
+  countsEl.innerHTML='<div class="rounded-xl bg-slate-50 p-4"><span class="block text-2xl font-black">'+members.length+'</span><span class="text-xs text-slate-500">Fiches membres dans la sauvegarde</span></div><div class="rounded-xl bg-slate-50 p-4"><span class="block text-2xl font-black">'+media.length+'</span><span class="text-xs text-slate-500">Médias dans la sauvegarde</span></div>';
+  statusEl.textContent="Sauvegarde chargée. Vérifiez les volumes et téléchargez-la à nouveau si nécessaire.";
+  ready=!!(window.LAS_SUPABASE_CONFIG&&window.lasSupabase&&isAdmin());
+  migrateBtn.disabled=!(ready&&(members.length||media.length));
+ }catch(err){statusEl.textContent="Fichier de sauvegarde invalide : "+(err.message||String(err));migrateBtn.disabled=true;}
+});
 migrateBtn.addEventListener("click",()=>migrate());
 (async()=>{try{
  await window.LAS_SUPABASE_READY;
@@ -82,7 +98,7 @@ migrateBtn.addEventListener("click",()=>migrate());
  if(!isAdmin())throw new Error("Accès réservé à un profil dont le rôle Supabase est admin.");
  const src=readLegacy();if(!src.hasSource)statusEl.textContent="Session administrateur valide, mais aucune donnée historique n’est enregistrée dans ce navigateur. Ouvrez cette page sur le navigateur source.";
  else statusEl.textContent="Session administrateur valide. Vérifiez les volumes, téléchargez une sauvegarde, puis lancez l’import.";
- ready=true;migrateBtn.disabled=!src.hasSource;
+ ready=true;migrateBtn.disabled=!(src.hasSource&&(members.length||media.length));
  }catch(e){statusEl.textContent=e.message||String(e);migrateBtn.disabled=true;}})();
 </script>
 </body></html>
