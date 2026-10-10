@@ -50,7 +50,7 @@ async function migrate(){
  try{
   const {data:{user}}=await lasSupabase.auth.getUser();if(!user)throw new Error("Session expirée.");
   const rows=members.map(m=>({id:Number(m.id),name:String(m.name||"Membre sans nom").trim(),phone:m.phone||null,email:m.email||null,address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active"}));
-  if(rows.length){const {error}=await lasSupabase.from("members").upsert(rows,{onConflict:"id"});if(error)throw error;log("Fiches membres importées : "+rows.length);}
+  if(rows.length){const {error}=await lasSupabase.from("members").upsert(rows,{onConflict:"id"});if(error)throw error;const {error:seqError}=await lasSupabase.rpc("sync_las_member_identity");if(seqError)throw seqError;log("Fiches membres importées : "+rows.length);}
   const pays=[];
   for(const m of members)for(const [year,months] of Object.entries(m.payments||{}))for(let i=0;i<(months||[]).length;i++)pays.push({member_id:Number(m.id),payment_year:Number(year),payment_month:i+1,paid:!!months[i],updated_by:user.id});
   if(pays.length){const {error}=await lasSupabase.from("member_payments").upsert(pays,{onConflict:"member_id,payment_year,payment_month"});if(error)throw error;log("Écritures mensuelles de cotisations importées : "+pays.length);}
