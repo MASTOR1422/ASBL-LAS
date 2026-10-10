@@ -37,6 +37,7 @@ for (const required of [
   'id="community-blog"',
   'id="media-grid"',
   'LASBlog.load()',
+  'LASBlog.startRealtime()',
   'refreshMedia()'
 ]) {
   if (!index.includes(required)) {
