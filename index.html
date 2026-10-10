@@ -644,7 +644,7 @@ function renderBirthdays(){
             🎉 ${when}${a!==null ? ` · ${a+ (d===0?0:1)} ans` : ''}
           </span>
         </span>
-      </button>`;
+      </button><button type="button" onclick="shareBirthdayWish(${m.id})" class="text-[10px] font-bold px-2 py-1 rounded-lg bg-white text-las-800 hover:bg-amber-100 transition" aria-label="Envoyer les vœux d’anniversaire à ${escapeHTML(m.name)}">Envoyer les vœux</button>`;
   }).join('');
 
   banner.innerHTML = `
@@ -664,6 +664,17 @@ function renderBirthdays(){
   banner.classList.remove('hidden');
 }
 
+function shareBirthdayWish(id){
+  const m = membersData.find(x => x.id === Number(id));
+  if (!m || !m.birthdate || daysUntilBirthday(m) !== 0) {
+    alert("Les vœux sont disponibles le jour de l’anniversaire. Vérifiez la date de naissance.");
+    return;
+  }
+  const message = "Joyeux anniversaire, " + m.name + " ! 🎂🎉 Toute la famille de l’ASBL Les Amis de la Semence te souhaite santé, paix, bonheur et réussite dans tes projets. Que cette nouvelle année soit riche en fraternité, en solidarité et en belles réalisations. Avec toute notre affection, la famille LAS. 🌱";
+  const phone = String(m.phone || "").replace(/\\D/g, "");
+  if (!phone) { alert(message); return; }
+  window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
+}
 function getFiltered(){
   const q = document.getElementById('search-input').value.toLowerCase().trim();
   const fAsbl = document.getElementById('filter-asbl').value;
