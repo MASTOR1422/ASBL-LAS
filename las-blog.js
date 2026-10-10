@@ -3,6 +3,8 @@ window.LASBlog = (() => {
   const db=()=>window.lasSupabase;
   const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
   const birthdayCache=new Map();
+  let realtimeChannel=null;
+  let refreshTimer=null;
   async function loadBirthdays(){
     const host=document.getElementById("community-birthdays");if(!host)return;
     const {data,error}=await db().rpc("las_birthday_feed");
@@ -86,5 +88,22 @@ window.LASBlog = (() => {
     if(error){alert("Modération refusée par les droits de sécurité.");return;}
     await loadComments(postId);
   }
-  return {load,loadBirthdays,wishBirthday,publish,comment,removePost,hidePost,removeComment,hideComment};
+  function refresh(){ return Promise.all([load(),loadBirthdays()]); }
+  function queueRefresh(){
+    if(refreshTimer) clearTimeout(refreshTimer);
+    refreshTimer=setTimeout(()=>{ refreshTimer=null; load().catch(e=>console.warn("Actualisation du blog impossible.",e)); },300);
+  }
+  function startRealtime(){
+    if(realtimeChannel || !db() || typeof db().channel!=="function") return;
+    realtimeChannel=db().channel("las-community-live")
+      .on("postgres_changes",{event:"*",schema:"public",table:"posts"},queueRefresh)
+      .on("postgres_changes",{event:"*",schema:"public",table:"post_comments"},queueRefresh)
+      .subscribe(status=>{
+        if(status==="CHANNEL_ERROR" || status==="TIMED_OUT"){
+          console.warn("Le temps réel du blog n’est pas disponible; utilisez Actualiser.");
+          realtimeChannel=null;
+        }
+      });
+  }
+  return {load,loadBirthdays,refresh,startRealtime,wishBirthday,publish,comment,removePost,hidePost,removeComment,hideComment};
 })();
