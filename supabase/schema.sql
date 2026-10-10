@@ -242,6 +242,8 @@ create policy comments_delete_author_admin on public.post_comments for delete to
 using (author_id=auth.uid() or public.current_las_role()='admin');
 
 drop policy if exists media_read_authenticated on public.media_items;
+drop policy if exists media_insert_staff on public.media_items;
+drop policy if exists media_update_staff on public.media_items;
 drop policy if exists media_insert_secretariat_admin on public.media_items;
 drop policy if exists media_update_secretariat_admin on public.media_items;
 drop policy if exists media_delete_admin on public.media_items;
