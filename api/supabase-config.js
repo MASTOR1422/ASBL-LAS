@@ -11,6 +11,19 @@ export default function handler(req, res) {
     res.status(503).json({ error: "Supabase public configuration is missing." });
     return;
   }
+  // Refuse to expose a Supabase secret/service-role key through this public endpoint.
+  let serviceRoleKey = publishableKey.startsWith("sb_secret_");
+  try {
+    const payload = publishableKey.split(".")[1];
+    if (payload) {
+      const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+      serviceRoleKey = serviceRoleKey || claims.role === "service_role";
+    }
+  } catch (_) {}
+  if (serviceRoleKey) {
+    res.status(503).json({ error: "A secret/service-role key cannot be used as browser configuration." });
+    return;
+  }
   try {
     const parsed = new URL(url);
     if (parsed.protocol !== "https:" || !parsed.hostname) throw new Error("Invalid Supabase URL");
