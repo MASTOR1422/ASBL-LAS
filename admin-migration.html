@@ -49,9 +49,11 @@ async function migrate(){
  migrateBtn.disabled=true;document.getElementById("backup").disabled=true;logEl.textContent="";
  try{
   const {data:{user}}=await lasSupabase.auth.getUser();if(!user)throw new Error("Session expirée.");
+  const {data:existingMembers,error:existingError}=await lasSupabase.from("members").select("id,photo_path");if(existingError)throw existingError;
+  const existingPhotoById=Object.fromEntries((existingMembers||[]).map(r=>[String(r.id),r.photo_path]));
   const rows=[];
   for(const m of members){
-   const row={id:Number(m.id),name:String(m.name||"Membre sans nom").trim(),phone:m.phone||null,email:m.email||null,address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active"};
+   const row={id:Number(m.id),name:String(m.name||"Membre sans nom").trim(),phone:m.phone||null,email:m.email||null,address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active",photo_path:existingPhotoById[String(m.id)]||null};
    if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
     const blob=await (await fetch(m.photo)).blob();
     if(blob.size<=10*1024*1024){
