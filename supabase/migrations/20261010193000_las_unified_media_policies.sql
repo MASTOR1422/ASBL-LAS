@@ -7,17 +7,17 @@ create or replace function public.current_las_role()
 returns text
 language sql stable security definer
 set search_path = public, auth
-as $
+as $func$
   select role from public.profiles
   where id = auth.uid() and active = true
   limit 1
-$;
+$func$;
 
 create or replace function public.is_las_active()
 returns boolean
 language sql stable security definer
 set search_path = public, auth
-as $
+as $func$
   select exists (
     select 1 from public.profiles
     where id = auth.uid() and active = true
