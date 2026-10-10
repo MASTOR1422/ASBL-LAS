@@ -21,9 +21,9 @@ window.LASBlog = (() => {
   function wishBirthday(id){
     const m=birthdayCache.get(String(id));if(!m)return;
     const form=document.querySelector("#community-blog form");if(!form)return;
-    form.title.value="Joyeux anniversaire à "+m.name+" 🎂";
-    form.category.value="entraide";
-    form.body.value="Joyeux anniversaire, "+m.name+" ! 🎉 Toute la famille de l’ASBL Les Amis de la Semence te souhaite santé, paix, bonheur et réussite dans tes projets. Que cette nouvelle année de vie soit riche en fraternité, solidarité et belles réalisations. Avec toute notre affection, la famille LAS. 🌱";
+    form.elements.namedItem("title").value="Joyeux anniversaire à "+m.name+" 🎂";
+    form.elements.namedItem("category").value="entraide";
+    form.elements.namedItem("body").value="Joyeux anniversaire, "+m.name+" ! 🎉 Toute la famille de l’ASBL Les Amis de la Semence te souhaite santé, paix, bonheur et réussite dans tes projets. Que cette nouvelle année de vie soit riche en fraternité, solidarité et belles réalisations. Avec toute notre affection, la famille LAS. 🌱";
     document.getElementById("blog-message").textContent="Message de vœux préparé. Relisez-le puis publiez-le pour le partager avec les membres.";
     form.body.focus();
   }
@@ -46,7 +46,7 @@ window.LASBlog = (() => {
   }
   async function publish(e){
     e.preventDefault(); const form=e.currentTarget, msg=document.getElementById("blog-message");
-    const title=form.title.value.trim(), body=form.body.value.trim(), category=form.category.value;
+    const title=form.elements.namedItem("title").value.trim(), body=form.elements.namedItem("body").value.trim(), category=form.elements.namedItem("category").value;
     const {data:{user}}=await db().auth.getUser();
     if(!user){msg.textContent="Reconnectez-vous pour publier.";return;}
     const {error}=await db().from("posts").insert({author_id:user.id,title,body,category});
@@ -56,6 +56,8 @@ window.LASBlog = (() => {
   async function comment(e,postId){
     e.preventDefault();const form=e.currentTarget, body=form.body.value.trim();
     const {data:{user}}=await db().auth.getUser();if(!user)return;
+    const body=form.elements.namedItem("body").value.trim();
+    if(!body)return;
     const {error}=await db().from("post_comments").insert({post_id:postId,author_id:user.id,body});
     if(error){alert("Impossible d’ajouter la réponse. Vérifiez votre compte et les politiques RLS.");return;}
     form.reset();await loadComments(postId);
