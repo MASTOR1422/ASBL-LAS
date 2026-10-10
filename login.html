@@ -19,6 +19,9 @@
             } 
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
     <script src="Auth.js"></script>
 </head>
 <body class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-las-950 font-sans">
@@ -49,14 +52,14 @@
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Identifiant</label>
-                <input type="text" id="username" required placeholder="Saisissez votre nom ou identifiant" 
+                <input type="email" id="username" autocomplete="username" required placeholder="Adresse e-mail du compte autorisé" 
                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
             </div>
 
             <div>
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Mot de passe</label>
                 <div class="relative">
-                    <input type="password" id="password" required placeholder="••••••••" 
+                    <input type="password" id="password" autocomplete="current-password" required placeholder="••••••••" 
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-las-500 focus:outline-none">
                     <button type="button" onclick="togglePassword()" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
                         <i class="fa-solid fa-eye" id="eye-icon"></i>
