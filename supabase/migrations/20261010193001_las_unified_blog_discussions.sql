@@ -34,6 +34,9 @@ drop policy if exists posts_create_active_member on public.posts;
 drop policy if exists posts_update_author_or_admin on public.posts;
 drop policy if exists posts_delete_author_or_admin on public.posts;
 drop policy if exists posts_read_active on public.posts;
+drop policy if exists posts_insert_active on public.posts;
+drop policy if exists posts_update_author_admin on public.posts;
+drop policy if exists posts_delete_author_admin on public.posts;
 create policy posts_read_active on public.posts for select to authenticated
 using (public.is_las_active() and (status='published' or public.current_las_role()='admin'));
 
@@ -51,6 +54,9 @@ create policy posts_delete_author_admin on public.posts for delete to authentica
 using (author_id=auth.uid() or public.current_las_role()='admin');
 
 drop policy if exists comments_read_active on public.post_comments;
+drop policy if exists comments_insert_active on public.post_comments;
+drop policy if exists comments_update_author_admin on public.post_comments;
+drop policy if exists comments_delete_author_admin on public.post_comments;
 create policy comments_read_active on public.post_comments for select to authenticated
 using (public.is_las_active() and (status='published' or author_id=auth.uid() or public.current_las_role()='admin'));
 
