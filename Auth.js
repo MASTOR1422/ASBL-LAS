@@ -19,6 +19,9 @@ function canPay() { return isAdmin() || ROLE === "tresorier"; }
 function canDelete() { return isAdmin(); }
 
 async function initAuth() {
+  try { await window.LAS_SUPABASE_READY; } catch (e) {
+    return { success: false, reason: "not-configured", message: "La configuration Supabase n’est pas disponible. Contactez l’administrateur." };
+  }
   try {
     localStorage.removeItem(SESSION_KEY);
     sessionStorage.removeItem(SESSION_KEY);
@@ -59,6 +62,9 @@ async function initAuth() {
 }
 
 async function signIn(usernameOrEmail, password) {
+  try { await window.LAS_SUPABASE_READY; } catch (_) {
+    return { success: false, message: "La configuration Supabase n’est pas disponible. Contactez l’administrateur." };
+  }
   if (!lasIsConfigured()) {
     return { success: false, message: "Le service de connexion n’est pas configuré. Renseignez supabase-config.js puis appliquez supabase/schema.sql." };
   }
