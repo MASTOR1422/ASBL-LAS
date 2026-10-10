@@ -14,7 +14,7 @@
 <div><h1 class="font-black text-xl">Migration des données LAS</h1><p class="text-sm text-slate-300">Membres, cotisations et médias hérités</p></div>
 </header>
 <section class="mt-5 bg-white border rounded-2xl p-5 space-y-4">
-<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900"><strong>Précautions :</strong> cette page ne supprime aucune donnée du navigateur. Elle doit être ouverte sur l’appareil et le navigateur qui contiennent les données historiques. Téléchargez d’abord une sauvegarde JSON. Exécutez le SQL de <code>supabase/schema.sql</code> dans votre projet Supabase avant l’import.</div>
+<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900"><strong>Précautions :</strong> cette page ne supprime aucune donnée du navigateur. Elle doit être ouverte sur l’appareil et le navigateur qui contiennent les données historiques. Téléchargez d’abord une sauvegarde JSON. Sur un projet Supabase neuf, exécutez d’abord <code>supabase/schema.sql</code>, puis toutes les migrations de <code>supabase/migrations/</code> dans l’ordre. Sur le projet LAS existant, n’exécutez pas le socle une seconde fois : vérifiez l’historique des migrations avant toute action.</div>
 <div id="status" class="text-sm text-slate-600" aria-live="polite">Vérification de la session…</div>
 <div id="counts" class="grid grid-cols-2 gap-3"></div>
 <button id="backup" class="w-full border border-slate-300 rounded-xl py-3 font-bold text-sm">1. Télécharger une sauvegarde JSON du navigateur actuel</button>
