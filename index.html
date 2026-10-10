@@ -462,8 +462,7 @@ let currentView = 'table';
 function loadData(){ return []; // Les fiches réelles sont chargées depuis Supabase après validation de la session. }
 
 async function saveData(){
-  try { await LASData.saveMembers(membersData); }
-  catch(e){ console.error(e); alert("Enregistrement distant impossible. Vérifiez la connexion Supabase et vos droits."); }
+  await LASData.saveMembers(membersData);
 }
 
 function saveMediaStorage(){
@@ -1020,6 +1019,7 @@ async function saveMember(e){
     calculateStats(); renderBirthdays(); renderData(); closeMemberModal();
   } catch(err) {
     console.error(err);
+    try { membersData=(await LASData.loadMembers()).map(normalize); calculateStats(); renderBirthdays(); renderData(); } catch(_) {}
     alert("La fiche n’a pas pu être enregistrée dans Supabase. Vérifiez vos droits et réessayez.");
   }
 }
