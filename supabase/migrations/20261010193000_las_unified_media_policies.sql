@@ -30,6 +30,10 @@ grant execute on function public.current_las_role() to authenticated;
 grant execute on function public.is_las_active() to authenticated;
 
 drop policy if exists media_read_authenticated on public.media_items;
+drop policy if exists media_read_active on public.media_items;
+create policy media_read_active on public.media_items for select to authenticated
+using (public.is_las_active() and (status='published' or author_id=auth.uid() or public.current_las_role()='admin'));
+
 drop policy if exists media_insert_secretariat_admin on public.media_items;
 drop policy if exists media_update_secretariat_admin on public.media_items;
 drop policy if exists media_delete_admin on public.media_items;
@@ -47,18 +51,11 @@ drop policy if exists media_delete_author_admin on public.media_items;
 create policy media_delete_author_admin on public.media_items for delete to authenticated
 using (public.current_las_role()='admin');
 
-do $$
-begin
-  if not exists (select 1 from storage.buckets where id='las-private-media') then
-    raise exception 'Le bucket las-private-media doit être créé avant cette migration.';
-  end if;
-end $$;
-
-update storage.buckets
-set public=false,
-    file_size_limit=52428800,
-    allowed_mime_types=array['image/jpeg','image/png','image/webp','application/pdf','video/mp4','video/webm']
-where id='las-private-media';
+insert into storage.buckets (id,name,public,file_size_limit,allowed_mime_types)
+values ('las-private-media','las-private-media',false,52428800,
+  array['image/jpeg','image/png','image/webp','application/pdf','video/mp4','video/webm'])
+on conflict (id) do update set public=false, file_size_limit=52428800,
+allowed_mime_types=excluded.allowed_mime_types;
 
 drop policy if exists las_media_read_authenticated on storage.objects;
 drop policy if exists las_media_upload_secretariat_admin on storage.objects;
