@@ -27,8 +27,12 @@ window.LASMedia = (() => {
       if (row.storage_path) {
         const { data: signed, error: signedError } = await db().storage
           .from("las-private-media").createSignedUrl(row.storage_path, 300);
-        if (signedError) throw signedError;
-        url = signed.signedUrl;
+        if (signedError) {
+          console.warn("URL signée indisponible pour le média", row.id, signedError);
+          url = "";
+        } else {
+          url = signed.signedUrl;
+        }
       }
       return mapRow(row, url);
     }));
