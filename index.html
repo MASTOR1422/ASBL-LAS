@@ -65,6 +65,8 @@
         .las-nav-tabs > button span { overflow-wrap:anywhere; }
         .las-upload-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; }
         .las-upload-actions button { min-height:44px; justify-content:center; }
+        .las-member-form-grid { display:grid; grid-template-columns:minmax(0,1fr); gap:.75rem; }
+        @media (min-width:640px) { .las-member-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
         .las-modal-panel { max-height:calc(100dvh - 2rem); overflow-y:auto; overscroll-behavior:contain; }
         @media (max-width:640px) {
           .las-toolbar { justify-content:stretch; }
@@ -424,7 +426,7 @@
 
     <!-- ===================== MODALE AJOUT BLOG / MÉDIA / PDF ===================== -->
     <div id="media-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100">
+        <div class="las-modal-panel bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-100">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50">
                 <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-upload text-gold-400"></i> Publier un Média ou Document</h3>
                 <button onclick="closeMediaModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -938,12 +940,14 @@ async function handlePasswordChange(e){
 //  AJOUT / ÉDITION DE MEMBRE & PHOTO DE PROFIL
 // ============================================================
 let tempPhoto = "";
+let tempPhotoRemoved = false;
 function openMemberModal(member=null){
   if (!canEdit()) { alert("Votre rôle ne permet pas de gérer les fiches membres."); return; }
   const modal=document.getElementById('member-modal');
   const title=document.getElementById('modal-title');
   document.getElementById('member-form').reset();
   tempPhoto = member ? (member.photo||"") : "";
+  tempPhotoRemoved = false;
   updatePhotoPreview();
   if(member){
     title.innerHTML = `<i class="fa-solid fa-user-pen text-gold-400"></i><span>Modifier — N° ${member.id}</span>`;
@@ -971,6 +975,7 @@ function closeMemberModal(){ document.getElementById('member-modal').classList.a
 
 function handlePhoto(e){
   const file=e.target.files[0]; if(!file) return;
+  tempPhotoRemoved = false;
   if(file.size > 3*1024*1024){ alert("Image trop lourde (max 3 Mo). Choisissez une photo plus petite."); e.target.value=''; return; }
   const reader=new FileReader();
   reader.onload=ev=>{
@@ -994,7 +999,10 @@ function updatePhotoPreview(){
   if(tempPhoto){ prev.src=tempPhoto; prev.classList.remove('hidden'); ph.classList.add('hidden'); rm.classList.remove('hidden'); }
   else { prev.classList.add('hidden'); ph.classList.remove('hidden'); rm.classList.add('hidden'); }
 }
-function removePhoto(){ tempPhoto=""; document.getElementById('input-photo').value=''; updatePhotoPreview(); }
+function removePhoto(){
+  const id=document.getElementById('member-id').value;
+  tempPhoto=""; tempPhotoRemoved=!!id; document.getElementById('input-photo').value=''; updatePhotoPreview();
+}
 
 function editMember(id){
   closeDetail();
@@ -1027,7 +1035,8 @@ async function saveMember(e){
     asbl:document.getElementById('input-asbl').value,
     forum:document.getElementById('input-forum').value,
     reunion:document.getElementById('input-reunion').value,
-    photo:tempPhoto
+    photo:tempPhoto,
+    photoRemoved:tempPhotoRemoved
   };
   try {
     if(idVal){
@@ -1042,7 +1051,7 @@ async function saveMember(e){
   } catch(err) {
     console.error(err);
     try { membersData=(await LASData.loadMembers()).map(normalize); calculateStats(); renderBirthdays(); renderData(); } catch(_) {}
-    alert("La fiche n’a pas pu être enregistrée dans Supabase. Vérifiez vos droits et réessayez.");
+    alert("La fiche n’a pas pu être enregistrée : " + (err.message || "vérifiez vos droits et réessayez."));
   }
 }
 
@@ -1088,12 +1097,23 @@ function printMemberCard(){
 // ============================================================
 //  LOGIQUE DE LA PHOTOTHÈQUE — Supabase Storage privé
 // ============================================================
-function openMediaModal(){
-  if (!["admin","secretaire"].includes(ROLE)) { alert("Votre rôle ne permet pas de publier un média."); return; }
-  document.getElementById("media-modal").classList.remove("hidden");
+function updateMediaFileAccept(){
+  const type=document.getElementById("media-type")?.value;
+  const file=document.getElementById("media-file");
+  if(!file) return;
+  file.value="";
+  file.accept=type==="photo"?"image/jpeg,image/png,image/webp":type==="pdf"?".pdf,application/pdf":"video/mp4,video/webm";
 }
-function closeMediaModal(){ document.getElementById("media-modal").classList.add("hidden"); }
-
+function openMediaModal(type){
+  if (!["admin","secretaire"].includes(ROLE)) { alert("Votre rôle ne permet pas de publier un média."); return; }
+  const form=document.querySelector("#media-modal form");
+  if(form) form.reset();
+  const select=document.getElementById("media-type");
+  if(select && ["photo","pdf","video"].includes(type)) select.value=type;
+  updateMediaFileAccept();
+  document.getElementById("media-modal").classList.remove("hidden");
+  document.getElementById("media-title")?.focus();
+}
 function safeMediaUrl(value){
   try {
     const url = new URL(String(value || ""), window.location.origin);
@@ -1235,8 +1255,7 @@ function applyRoleUI(){
     document.getElementById('tab-btn-media')?.classList.remove('hidden');
     document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.add('hidden'));
   }
-  const mediaAdd = document.getElementById("btn-add-media");
-  if (mediaAdd) mediaAdd.classList.toggle("hidden", !["admin","secretaire"].includes(ROLE));
+  document.querySelectorAll(".las-media-upload-action").forEach(button => button.classList.toggle("hidden", !["admin","secretaire"].includes(ROLE)));
   const passwordButton = document.querySelector('button[onclick="openPasswordModal()"]');
   if (passwordButton) passwordButton.classList.toggle('hidden', !SESSION.email);
   document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.toggle('hidden', ROLE === 'membre'));
