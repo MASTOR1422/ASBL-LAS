@@ -58,6 +58,24 @@
         ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
         /* Garde d’authentification indépendante de Tailwind/CDN : masquée par défaut. */
         .las-auth-gated { display:none !important; }
+        .las-toolbar { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:.5rem; }
+        .las-toolbar > button { min-height:40px; white-space:nowrap; }
+        .las-nav-tabs { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:.5rem; }
+        .las-nav-tabs > button { min-width:0; justify-content:center; min-height:42px; }
+        .las-nav-tabs > button span { overflow-wrap:anywhere; }
+        .las-upload-actions { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; }
+        .las-upload-actions button { min-height:44px; justify-content:center; }
+        .las-modal-panel { max-height:calc(100dvh - 2rem); overflow-y:auto; overscroll-behavior:contain; }
+        @media (max-width:640px) {
+          .las-toolbar { justify-content:stretch; }
+          .las-toolbar > button { flex:1 1 auto; justify-content:center; }
+          .las-nav-tabs > button { padding:.65rem .45rem; font-size:10px; }
+          .las-upload-actions { grid-template-columns:1fr; }
+          #media-grid { grid-template-columns:minmax(0,1fr); }
+          #member-modal, #media-modal, #detail-modal, #password-modal { padding:.5rem; align-items:flex-end; }
+          #member-modal > div, #media-modal > div, #detail-modal > div, #password-modal > div { max-height:calc(100dvh - 1rem); border-bottom-left-radius:.5rem; border-bottom-right-radius:.5rem; }
+        }
+        @media (min-width:641px) and (max-width:1023px) { .las-toolbar { justify-content:flex-start; } }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
@@ -65,8 +83,8 @@
     <!-- ===================== BARRE DE NAVIGATION ===================== -->
     <header class="las-auth-gated bg-slate-900 text-white shadow-lg border-b border-las-700/40 sticky top-0 z-40 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-3.5 w-full lg:w-auto">
+            <div class="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
+                <div class="flex items-center gap-3.5 w-full xl:w-auto min-w-0">
                     <div class="relative shrink-0">
                         <img src="logo LAS_2.jpg" alt="Logo ASBL LAS"
                              class="w-14 h-14 object-contain bg-white rounded-xl p-1 shadow-md border border-las-500/30 ring-2 ring-las-500/20"
@@ -76,15 +94,15 @@
                         </div>
                     </div>
                     <div>
-                        <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+                        <h1 class="text-sm sm:text-lg xl:text-xl font-extrabold tracking-tight text-white flex items-center gap-2 flex-wrap">
                             ASBL LES AMIS DE LA SEMENCE <span class="text-gold-400 font-bold text-xs px-2.5 py-0.5 rounded-full bg-gold-500/20 border border-gold-500/40">LAS</span>
                         </h1>
                         <p class="text-xs text-slate-300 font-medium">Répertoire officiel, Cotisations &amp; Espace Média / Blog</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
-                    <img src="logo LAS_2.jpg" alt="Logo officiel ASBL LAS" class="w-10 h-10 object-contain bg-white rounded-lg p-1 border border-las-500/30">
+                <div class="las-toolbar w-full xl:w-auto">
+                    <img src="logo LAS_2.jpg" alt="Logo officiel ASBL LAS" class="hidden xl:block w-10 h-10 object-contain bg-white rounded-lg p-1 border border-las-500/30">
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700">
                         <i class="fa-solid fa-user-shield text-las-400 text-xs"></i>
                         <span class="text-xs font-bold" id="current-user">—</span>
@@ -112,7 +130,7 @@
             </div>
 
             <!-- ONGLETS DE NAVIGATION PRINCIPAUX -->
-            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-slate-800">
+            <div class="las-nav-tabs mt-3 pt-3 border-t border-slate-800 sm:flex sm:flex-wrap">
                 <button onclick="switchTab('members')" id="tab-btn-members" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-las-700 text-white flex items-center gap-2 shadow">
                     <i class="fa-solid fa-users"></i><span>Membres &amp; Cotisations</span>
                 </button>
@@ -234,11 +252,9 @@
                     <h2 class="text-base font-black text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-photo-film text-las-600"></i> Blog, Photothèque &amp; Espace Documentaire LAS
                     </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Le blog communautaire est actif. L’ajout de photos et documents est temporairement désactivé jusqu’à la mise en place du stockage privé Supabase.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Déposez vos photos, vidéos et documents, puis consultez ou ouvrez les fichiers enregistrés dans l’espace privé LAS.</p>
                 </div>
-                <button type="button" disabled title="Réactivé après intégration du stockage privé Supabase" class="px-4 py-2.5 bg-slate-300 text-slate-600 font-bold rounded-xl text-xs cursor-not-allowed flex items-center gap-2">
-                    <i class="fa-solid fa-lock"></i><span>Photothèque : migration en cours</span>
-                </button>
+                <span class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold"><i class="fa-solid fa-lock"></i> Stockage privé sécurisé</span>
             </div>
 
             <!-- BLOG COMMUNAUTAIRE : accès réservé aux membres connectés et actifs -->
@@ -259,17 +275,23 @@
                 <div id="community-blog-list" class="space-y-3" aria-live="polite"><p class="text-xs text-slate-500">Chargement des échanges…</p></div>
             </section>
 
-            <!-- FILTRES DE MÉDIAS -->
+            <!-- ACTIONS D’UPLOAD : le choix du type ouvre directement le formulaire adapté -->
+            <div class="las-upload-actions pb-2 las-media-upload-toolbar">
+                <button id="btn-upload-photo" type="button" onclick="openMediaModal('photo')" class="las-media-upload-action hidden px-3 py-2 rounded-xl text-xs font-bold bg-green-700 text-white hover:bg-green-600 transition flex items-center gap-2"><i class="fa-solid fa-image"></i><span>Ajouter une photo</span></button>
+                <button id="btn-upload-video" type="button" onclick="openMediaModal('video')" class="las-media-upload-action hidden px-3 py-2 rounded-xl text-xs font-bold bg-slate-900 text-white hover:bg-slate-800 transition flex items-center gap-2"><i class="fa-solid fa-video"></i><span>Ajouter une vidéo</span></button>
+                <button id="btn-upload-pdf" type="button" onclick="openMediaModal('pdf')" class="las-media-upload-action hidden px-3 py-2 rounded-xl text-xs font-bold bg-rose-700 text-white hover:bg-rose-600 transition flex items-center gap-2"><i class="fa-solid fa-file-pdf"></i><span>Ajouter un document</span></button>
+            </div>
+
+            <!-- FILTRES DE CONSULTATION DES FICHIERS -->
             <div class="flex items-center gap-2 overflow-x-auto pb-2">
-                <button id="btn-add-media" type="button" onclick="openMediaModal()" class="hidden shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-green-700 text-white hover:bg-green-600 transition"><i class="fa-solid fa-upload mr-1"></i> Publier un média</button>
-                <button onclick="filterMedia('ALL')" id="filter-media-ALL" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Tous</button>
-                <button onclick="filterMedia('photo')" id="filter-media-photo" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Photothèque (Photos)</button>
-                <button onclick="filterMedia('pdf')" id="filter-media-pdf" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Documents PDF / Rapports</button>
+                <button onclick="filterMedia('ALL')" id="filter-media-ALL" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Tous les fichiers</button>
+                <button onclick="filterMedia('photo')" id="filter-media-photo" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Photos</button>
+                <button onclick="filterMedia('pdf')" id="filter-media-pdf" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Documents PDF</button>
                 <button onclick="filterMedia('video')" id="filter-media-video" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Vidéos</button>
             </div>
 
             <!-- GRILLE DES MÉDIAS -->
-            <div id="media-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5"></div>
+            <div id="media-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
         </div>
 
     </main>
@@ -323,7 +345,7 @@
 
     <!-- ===================== MODALE AJOUT / ÉDITION MEMBRE ===================== -->
     <div id="member-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 no-print">
-        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden max-h-[92vh] overflow-y-auto">
+        <div class="las-modal-panel bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-slate-100 overflow-hidden">
             <div class="bg-slate-900 px-6 py-4 flex items-center justify-between text-white border-b border-las-700/50 sticky top-0">
                 <h3 class="font-bold text-base flex items-center gap-2" id="modal-title"><i class="fa-solid fa-user-plus text-gold-400"></i><span>Ajouter un Membre</span></h3>
                 <button onclick="closeMemberModal()" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-xmark text-lg"></i></button>
@@ -342,37 +364,37 @@
                 </div>
                 <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nom &amp; Prénom *</label>
                     <input type="text" id="input-name" required placeholder="Ex: Baudry Landu" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-white transition"></div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Téléphone *</label>
                         <input type="text" id="input-phone" required placeholder="243 895 446 423" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-las-500 focus:bg-white transition"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Date d'intégration</label>
                         <input type="date" id="input-joined" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Date de naissance</label>
                         <input type="date" id="input-birthdate" class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Lieu de naissance</label>
                         <input type="text" id="input-birthplace" placeholder="Ex: Kinshasa" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email</label>
                         <input type="email" id="input-email" placeholder="exemple@mail.com" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Profession</label>
                         <input type="text" id="input-profession" placeholder="Ex: Enseignant" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Poste dans l'ASBL</label>
                         <input type="text" id="input-poste" placeholder="Ex: Trésorier, Membre" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Adresse / Commune</label>
                         <input type="text" id="input-address" placeholder="Ex: Ngaliema" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Actif ASBL</label>
                         <select id="input-asbl" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"><option value="OUI">OUI</option><option value="NON">NON</option></select></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Actif Forum</label>
                         <select id="input-forum" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"><option>OUI</option><option>NON</option><option>PARTIEL</option><option>OCCASIONEL</option><option>SOUVENT</option><option>PARFOIS</option></select></div>
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="las-member-form-grid">
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Présence Réunion</label>
                         <select id="input-reunion" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-las-500"><option value="OUI">OUI</option><option value="NON">NON</option><option value="EXEMPTER">EXEMPTER</option></select></div>
                     <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Note / Fonction</label>
@@ -407,10 +429,10 @@
                 <h3 class="font-bold text-sm flex items-center gap-2"><i class="fa-solid fa-upload text-gold-400"></i> Publier un Média ou Document</h3>
                 <button onclick="closeMediaModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
-            <form onsubmit="saveMedia(event)" class="p-6 space-y-4">
+            <form onsubmit="saveMedia(event)" class="p-4 sm:p-6 space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Type de contenu *</label>
-                    <select id="media-type" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800">
+                    <select id="media-type" onchange="updateMediaFileAccept()" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800">
                         <option value="photo">Photothèque (Photo / Image)</option>
                         <option value="pdf">Document PDF / Rapport</option>
                         <option value="video">Vidéo</option>
@@ -426,7 +448,8 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Fichier (Photo, PDF, Vidéo) *</label>
-                    <input type="file" id="media-file" required accept="image/*,.pdf,video/*" class="block w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-las-100 file:text-las-800 hover:file:bg-las-200 cursor-pointer">
+                    <input type="file" id="media-file" required accept="image/jpeg,image/png,image/webp" class="block w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-las-100 file:text-las-800 hover:file:bg-las-200 cursor-pointer">
+                    <p class="mt-1 text-[11px] text-slate-500">JPG, PNG, WebP, PDF, MP4 ou WebM. Taille maximale : 50 Mo.</p>
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="closeMediaModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Annuler</button>
@@ -458,7 +481,7 @@ function normalize(m){
 }
 
 let membersData = loadData();
-let mediaData = []; // Le stockage des médias sera migré vers Supabase Storage dans une étape dédiée.
+let mediaData = []; // Liste chargée depuis Supabase Storage et public.media_items.
 
 let currentView = 'table';
 
