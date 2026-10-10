@@ -22,7 +22,7 @@ as $func$
     select 1 from public.profiles
     where id = auth.uid() and active = true
   )
-$;
+$func$;
 
 revoke all on function public.current_las_role() from public;
 revoke all on function public.is_las_active() from public;
