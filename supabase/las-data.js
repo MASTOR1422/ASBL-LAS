@@ -39,6 +39,11 @@ window.LASData = (() => {
     const {error}=await client().from("members").upsert(rows,{onConflict:"id"});
     if(error) throw error;
   }
+  async function deleteMember(id) {
+    if (ROLE !== "admin") throw new Error("Seul l’administrateur peut supprimer un membre.");
+    const {error}=await client().from("members").delete().eq("id",Number(id));
+    if(error) throw error;
+  }
   async function saveMemberPayments(member) {
     if(!["admin","tresorier"].includes(ROLE)) throw new Error("Droits insuffisants pour modifier les cotisations.");
     const {data:{user}}=await client().auth.getUser();
@@ -53,5 +58,5 @@ window.LASData = (() => {
     const {error}=await client().from("member_payments").upsert(rows,{onConflict:"member_id,payment_year,payment_month"});
     if(error) throw error;
   }
-  return {loadMembers,saveMembers,saveMemberPayments};
+  return {loadMembers,saveMembers,saveMemberPayments,deleteMember};
 })();
