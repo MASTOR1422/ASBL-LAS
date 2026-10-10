@@ -12,6 +12,8 @@
     <script src="supabase-config.js"></script>
     <script src="supabase-client.js"></script>
     <script src="Auth.js"></script>
+    <script src="supabase/las-data.js"></script>
+    <script src="las-blog.js"></script>
 
     <script>
         tailwind.config = {
@@ -237,6 +239,23 @@
                 </button>
             </div>
 
+            <!-- BLOG COMMUNAUTAIRE : accès réservé aux membres connectés et actifs -->
+            <section id="community-blog" class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+                <div>
+                    <h2 class="text-base font-black text-slate-900 flex items-center gap-2"><i class="fa-solid fa-comments text-las-600"></i> Espace d’échange des membres</h2>
+                    <p class="text-xs text-slate-500 mt-1">Publiez une annonce, partagez une idée ou répondez aux autres membres. Les échanges sont réservés aux comptes actifs.</p>
+                </div>
+                <form onsubmit="LASBlog.publish(event)" class="grid grid-cols-1 gap-3">
+                    <input name="title" required maxlength="180" placeholder="Titre de votre publication" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-las-500">
+                    <select name="category" class="w-full sm:w-64 px-3 py-2.5 border border-slate-200 rounded-xl text-sm">
+                        <option value="general">Discussion générale</option><option value="annonce">Annonce LAS</option><option value="entraide">Entraide et solidarité</option><option value="evenement">Événement</option>
+                    </select>
+                    <textarea name="body" required maxlength="10000" rows="3" placeholder="Votre message (10 000 caractères maximum)" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-las-500"></textarea>
+                    <div class="flex items-center justify-between gap-3"><p id="blog-message" aria-live="polite" class="text-xs text-slate-500"></p><button class="px-4 py-2.5 bg-las-700 hover:bg-las-600 text-white rounded-xl text-xs font-bold"><i class="fa-solid fa-paper-plane mr-1"></i> Publier</button></div>
+                </form>
+                <div id="community-blog-list" class="space-y-3" aria-live="polite"><p class="text-xs text-slate-500">Chargement des échanges…</p></div>
+            </section>
+
             <!-- FILTRES DE MÉDIAS -->
             <div class="flex items-center gap-2 overflow-x-auto pb-2">
                 <button onclick="filterMedia('ALL')" id="filter-media-ALL" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Tous</button>
@@ -423,44 +442,7 @@ const ANNEE_COURANTE = new Date().getFullYear();
 const DB_KEY = "las_members_v2";
 const MEDIA_KEY = "las_media_v1";
 
-const DEFAULT_MEMBERS = [
-  { id:1,name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
-  { id:2,name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Coordonnateur",profession:"IT DevSecOps",email:"ananiaskasanda2@gmail.com",birthdate:"1982-07-02",birthplace:"Kinshasa",address:"Ngaliema",joined:"2022-01-15" },
-  { id:3,name:"Baudry Landu",phone:"243 895 446 423",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Trésorier",profession:"Comptable",birthplace:"Kinshasa",joined:"2022-03-10" },
-  { id:4,name:"Junior Loti",phone:"243 898 953 438",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Membre",profession:"Commerçant" },
-  { id:5,name:"Aarly Nsungu",phone:"243 971 855 480",forum:"OUI",asbl:"OUI",reunion:"EXEMPTER" },
-  { id:6,name:"BELINDA NTEMBE",phone:"+33 7 59 27 85 66",forum:"PARTIEL",asbl:"OUI",reunion:"EXEMPTER" },
-  { id:7,name:"Dick mbengu acteur Princi",phone:"244 930 561 955",forum:"PARTIEL",asbl:"NON",reunion:"EXEMPTER" },
-  { id:8,name:"Dijo Mboko",phone:"243 894 481 069",forum:"PARTIEL",asbl:"OUI",reunion:"OUI" },
-  { id:9,name:"Divuandidi",phone:"243 907 258 208",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:10,name:"Elvis",phone:"243 852 105 790",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:11,name:"fanny fatya mbala",phone:"243 896 633 569",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:12,name:"Fils Mbongo",phone:"243 999 459 122",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:14,name:"Freddy KIMPIATTU",phone:"243 826 065 275",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:15,name:"Frederick Kifiya",phone:"243 899 694 673",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:16,name:"Fils Kimenga",phone:"243 843 218 094",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:17,name:"Kita serge",phone:"243 854 797 085",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire Général" },
-  { id:18,name:"Lolo Nzeza",phone:"243 900 532 333",forum:"OCCASIONEL",asbl:"NON",reunion:"NON" },
-  { id:19,name:"Lombi",phone:"+242 05 761 5731",forum:"SOUVENT",asbl:"NON",reunion:"NON" },
-  { id:20,name:"Lovy Sala",phone:"243 814 941 425",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:21,name:"Matuba Pilu",phone:"243 994 141 415",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:22,name:"Me Freddy Lutonto",phone:"243 897 426 649",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
-  { id:23,name:"Nadège MUBANGA",phone:"243 898 273 638",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:24,name:"Nadine Biangolo",phone:"243 904 746 639",forum:"OUI",asbl:"NON",reunion:"NON" },
-  { id:25,name:"Niclette Kitembo",phone:"243 894 200 430",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
-  { id:26,name:"nsamu abi",phone:"244 931 354 839",forum:"NON",asbl:"NON",reunion:"EXEMPTER" },
-  { id:27,name:"Olivier NONGU",phone:"243 816 910 214",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
-  { id:28,name:"Patricia Makudi",phone:"243 815 122 136",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:29,name:"Saint Vuangi",phone:"243 906 655 909",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:30,name:"Teddy Kasongo",phone:"243 901 318 624",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
-  { id:31,name:"Tonton Nkuku",phone:"243 971 958 874",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
-  { id:32,name:"Tuzolana Nathalie",phone:"243 900 569 399",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:33,name:"Gueyi Kikalankala",phone:"243 897 414 242",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
-  { id:34,name:"kungulu kinkela Fidel",phone:"243 896 722 306",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:35,name:"Masuama Pembele",phone:"243 896 350 866",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:36,name:"pico mfumukwansa",phone:"243 840 200 071",forum:"OUI",asbl:"NON",reunion:"EXEMPTER" },
-  { id:37,name:"Rachel Luzolo",phone:"243 894 055 982",forum:"NON",asbl:"OUI",reunion:"NON" }
-];
+const DEFAULT_MEMBERS = [];
 
 function normalize(m){
   return Object.assign({
@@ -473,19 +455,11 @@ function normalize(m){
 }
 
 let membersData = loadData();
-let mediaData = JSON.parse(localStorage.getItem(MEDIA_KEY) || JSON.stringify([
-  { id: 1, type: 'photo', title: 'Rencontre annuelle des membres', desc: 'Photos souvenirs des événements LAS à Kinshasa.', url: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=600&q=80', date: '2026-03-01' }
-]));
+let mediaData = []; // Le stockage des médias sera migré vers Supabase Storage dans une étape dédiée.
 
 let currentView = 'table';
 
-function loadData(){
-  try {
-    const raw = localStorage.getItem(DB_KEY);
-    if (raw){ return JSON.parse(raw).map(normalize); }
-  } catch(e){}
-  return DEFAULT_MEMBERS.map(normalize);
-}
+function loadData(){ return []; // Les fiches réelles sont chargées depuis Supabase après validation de la session. }
 
 function saveData(){
   try { localStorage.setItem(DB_KEY, JSON.stringify(membersData)); }
@@ -887,7 +861,7 @@ function togglePay(id, year, monthIdx){
   const m = membersData.find(x=>x.id===id); if(!m) return;
   if(!m.payments[year]) m.payments[year]=Array(12).fill(false);
   m.payments[year][monthIdx] = !m.payments[year][monthIdx];
-  saveData(); renderDetail(m, year); calculateStats(); renderData();
+  LASData.saveMemberPayments(m).catch(e=>{console.error(e);alert("Enregistrement des cotisations impossible. Vérifiez les droits du trésorier.");}); renderDetail(m, year); calculateStats(); renderData();
 }
 function markAll(id, year, val){
   if (!canPay()) { alert("Votre rôle ne permet pas de modifier les cotisations."); return; }
@@ -1212,6 +1186,12 @@ function applyRoleUI(){
   set('current-role', SESSION.label || ROLE);
   const add = document.getElementById('btn-add');
   if (add) add.classList.toggle('hidden', !canEdit());
+  if (ROLE === 'membre') {
+    document.getElementById('tab-btn-members')?.classList.add('hidden');
+    document.getElementById('section-members')?.classList.add('hidden');
+    document.getElementById('tab-btn-media')?.classList.remove('hidden');
+    document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.add('hidden'));
+  }
   const passwordButton = document.querySelector('button[onclick="openPasswordModal()"]');
   if (passwordButton) passwordButton.classList.toggle('hidden', !SESSION.email);
   document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.toggle('hidden', ROLE === 'membre'));
@@ -1224,15 +1204,25 @@ async function bootstrapLAS(){
   const main = document.querySelector("main");
   if (main) main.classList.add("hidden");
   const result = await initAuth();
-  if (!result.success) {
-    window.location.replace("login.html");
-    return;
+  if (!result.success) { window.location.replace("login.html"); return; }
+  try {
+    if (ROLE !== "membre") {
+      membersData = (await LASData.loadMembers()).map(normalize);
+      calculateStats(); renderBirthdays(); renderData();
+    } else {
+      document.getElementById("tab-btn-members")?.classList.add("hidden");
+      document.getElementById("section-members")?.classList.add("hidden");
+    }
+    applyRoleUI();
+    if (main) main.classList.remove("hidden");
+    switchTab("media");
+    await LASBlog.load();
+    if (ROLE !== "membre") switchTab("members");
+  } catch (e) {
+    console.error(e);
+    if (main) main.classList.remove("hidden");
+    main.innerHTML = '<section class="max-w-2xl mx-auto mt-12 p-6 bg-white border border-rose-200 rounded-2xl"><h2 class="font-black text-rose-700">Connexion aux données LAS impossible</h2><p class="mt-2 text-sm text-slate-600">Aucune donnée locale de secours ne sera utilisée. Vérifiez la configuration Supabase, les tables et les politiques RLS avant de réessayer.</p></section>';
   }
-  if (main) main.classList.remove("hidden");
-  applyRoleUI();
-  calculateStats();
-  renderBirthdays();
-  renderData();
 }
 bootstrapLAS();
 </script>
