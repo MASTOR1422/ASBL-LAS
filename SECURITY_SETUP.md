@@ -28,6 +28,7 @@ Ordre des fichiers actuellement suivis :
 2. `20261010163337_las_schema_alignment.sql`
 3. `20261010163537_las_private_rls_helpers.sql`
 4. `20261010164128_las_member_privacy.sql`
+5. `20261010164452_las_storage_path_access.sql`
 
 Pour un projet neuf, exécuter d’abord `supabase/schema.sql`, puis les migrations ci-dessus dans l’ordre. Pour le projet LAS existant, ces trois migrations sont déjà enregistrées dans l’historique Supabase : ne pas les réexécuter manuellement.
 
