@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tus-js-client@4/dist/tus.min.js"></script>
     <script src="supabase-client.js"></script>
     <script src="Auth.js"></script>
     <script src="supabase/las-data.js"></script>
@@ -453,6 +454,8 @@
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Fichier (Photo, PDF, Vidéo) *</label>
                     <input type="file" id="media-file" required accept="image/jpeg,image/png,image/webp" class="block w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-las-100 file:text-las-800 hover:file:bg-las-200 cursor-pointer">
                     <p class="mt-1 text-[11px] text-slate-500">JPG, PNG, WebP, PDF, MP4 ou WebM. Taille maximale : 50 Mo.</p>
+                    <progress id="media-upload-progress" max="100" value="0" hidden class="mt-2 w-full h-2 accent-green-700"></progress>
+                    <p id="media-upload-status" aria-live="polite" class="mt-1 text-xs text-slate-600"></p>
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="closeMediaModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition">Annuler</button>
@@ -1142,17 +1145,30 @@ async function saveMedia(e){
   const file = document.getElementById("media-file").files[0];
   try {
     if (submit) { submit.disabled = true; submit.textContent = "Publication…"; }
+    const status = document.getElementById("media-upload-status");
+    const progress = document.getElementById("media-upload-progress");
+    if (status) status.textContent = file && file.size > 6 * 1024 * 1024 ? "Transfert sécurisé en cours…" : "Envoi du fichier…";
+    if (progress) { progress.hidden = !(file && file.size > 6 * 1024 * 1024); progress.value = 0; }
     await LASMedia.upload(file, {
       type: document.getElementById("media-type").value,
       title: document.getElementById("media-title").value,
-      description: document.getElementById("media-desc").value
+      description: document.getElementById("media-desc").value,
+      onProgress: percent => {
+        if (progress) { progress.hidden = false; progress.value = percent; }
+        if (status) status.textContent = "Transfert du fichier : " + percent + " %";
+      }
     });
+    if (status) status.textContent = "Fichier enregistré. Actualisation de la photothèque…";
     form.reset();
+    if (progress) { progress.hidden = true; progress.value = 0; }
+    if (status) status.textContent = "";
     closeMediaModal();
     await refreshMedia();
-    alert("Média publié dans le stockage privé LAS.");
+    alert("Fichier publié. Il est maintenant consultable dans l’espace média LAS.");
   } catch (e) {
     console.error(e);
+    const status = document.getElementById("media-upload-status");
+    if (status) status.textContent = e.message || "Publication impossible. Vérifiez le fichier, les autorisations et la connexion.";
     alert(e.message || "Publication impossible. Vérifiez le fichier, les autorisations et la connexion.");
   } finally {
     if (submit) { submit.disabled = false; submit.textContent = original || "Publier"; }
