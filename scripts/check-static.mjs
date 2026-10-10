@@ -25,7 +25,7 @@ for (const file of files) {
 }
 
 const html = readFileSync("index.html", "utf8");
-const inlineScripts = [...html.matchAll(/<script\\b(?![^>]*\\bsrc\\s*=)[^>]*>([\\s\\S]*?)<\\/script>/gi)];
+const inlineScripts = [...html.matchAll(/<script\b(?![^>]*\bsrc\s*=)[^>]*>([\s\S]*?)<\/script>/gi)];
 if (!inlineScripts.length) {
   failed = true;
   process.stderr.write("No inline scripts found in index.html\n");
