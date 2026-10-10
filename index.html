@@ -8,7 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
     <script src="Auth.js"></script>
+    <script src="supabase/las-data.js"></script>
+    <script src="las-blog.js"></script>
 
     <script>
         tailwind.config = {
@@ -51,12 +56,14 @@
         ::-webkit-scrollbar { height:6px; width:6px; }
         ::-webkit-scrollbar-track { background:#f1f5f9; }
         ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
+        /* Garde d’authentification indépendante de Tailwind/CDN : masquée par défaut. */
+        .las-auth-gated { display:none !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
     <!-- ===================== BARRE DE NAVIGATION ===================== -->
-    <header class="bg-slate-900 text-white shadow-lg border-b border-las-700/40 sticky top-0 z-40 no-print">
+    <header class="las-auth-gated bg-slate-900 text-white shadow-lg border-b border-las-700/40 sticky top-0 z-40 no-print">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
                 <div class="flex items-center gap-3.5 w-full lg:w-auto">
@@ -77,6 +84,7 @@
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
+                    <img src="logo LAS_2.jpg" alt="Logo officiel ASBL LAS" class="w-10 h-10 object-contain bg-white rounded-lg p-1 border border-las-500/30" onerror="this.onerror=null;this.src='logo LAS.jpg'">
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700">
                         <i class="fa-solid fa-user-shield text-las-400 text-xs"></i>
                         <span class="text-xs font-bold" id="current-user">—</span>
@@ -141,7 +149,7 @@
         </div>
     </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex-grow w-full">
+    <main class="las-auth-gated max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 flex-grow w-full">
 
         <!-- ===================== SECTION 1 : MEMBRES & COTISATIONS ===================== -->
         <div id="section-members" class="space-y-6">
@@ -226,12 +234,30 @@
                     <h2 class="text-base font-black text-slate-900 flex items-center gap-2">
                         <i class="fa-solid fa-photo-film text-las-600"></i> Blog, Photothèque &amp; Espace Documentaire LAS
                     </h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Partagez et consultez les publications, photos d'événements, rapports PDF et vidéos.</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Le blog communautaire est actif. L’ajout de photos et documents est temporairement désactivé jusqu’à la mise en place du stockage privé Supabase.</p>
                 </div>
-                <button onclick="openMediaModal()" class="px-4 py-2.5 bg-las-700 hover:bg-las-600 text-white font-bold rounded-xl text-xs transition flex items-center gap-2 shadow-md shadow-las-800/20 active:scale-95">
-                    <i class="fa-solid fa-upload text-gold-400"></i><span>Ajouter un Média / Article</span>
+                <button type="button" disabled title="Réactivé après intégration du stockage privé Supabase" class="px-4 py-2.5 bg-slate-300 text-slate-600 font-bold rounded-xl text-xs cursor-not-allowed flex items-center gap-2">
+                    <i class="fa-solid fa-lock"></i><span>Photothèque : migration en cours</span>
                 </button>
             </div>
+
+            <!-- BLOG COMMUNAUTAIRE : accès réservé aux membres connectés et actifs -->
+            <section id="community-blog" class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+                <div>
+                    <h2 class="text-base font-black text-slate-900 flex items-center gap-2"><i class="fa-solid fa-comments text-las-600"></i> Espace d’échange des membres</h2>
+                    <p class="text-xs text-slate-500 mt-1">Publiez une annonce, partagez une idée ou répondez aux autres membres. Les échanges sont réservés aux comptes actifs.</p>
+                    <div id="community-birthdays" class="mt-3 p-3 bg-amber-50/70 rounded-xl border border-amber-100"><p class="text-xs text-slate-500">Chargement des anniversaires…</p></div>
+                </div>
+                <form onsubmit="LASBlog.publish(event)" class="grid grid-cols-1 gap-3">
+                    <input name="title" required maxlength="180" placeholder="Titre de votre publication" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-las-500">
+                    <select name="category" class="w-full sm:w-64 px-3 py-2.5 border border-slate-200 rounded-xl text-sm">
+                        <option value="general">Discussion générale</option><option value="annonce">Annonce LAS</option><option value="entraide">Entraide et solidarité</option><option value="evenement">Événement</option>
+                    </select>
+                    <textarea name="body" required maxlength="10000" rows="3" placeholder="Votre message (10 000 caractères maximum)" class="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-las-500"></textarea>
+                    <div class="flex items-center justify-between gap-3"><p id="blog-message" aria-live="polite" class="text-xs text-slate-500"></p><button class="px-4 py-2.5 bg-las-700 hover:bg-las-600 text-white rounded-xl text-xs font-bold"><i class="fa-solid fa-paper-plane mr-1"></i> Publier</button></div>
+                </form>
+                <div id="community-blog-list" class="space-y-3" aria-live="polite"><p class="text-xs text-slate-500">Chargement des échanges…</p></div>
+            </section>
 
             <!-- FILTRES DE MÉDIAS -->
             <div class="flex items-center gap-2 overflow-x-auto pb-2">
@@ -419,44 +445,7 @@ const ANNEE_COURANTE = new Date().getFullYear();
 const DB_KEY = "las_members_v2";
 const MEDIA_KEY = "las_media_v1";
 
-const DEFAULT_MEMBERS = [
-  { id:1,name:"Ander Malala",phone:"243 894 726 836",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Président",profession:"Agronome",birthplace:"Matadi",joined:"2022-01-15" },
-  { id:2,name:"Ananias KASANDA",phone:"243 819 978 801",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Coordonnateur",profession:"IT DevSecOps",email:"ananiaskasanda2@gmail.com",birthdate:"1982-07-02",birthplace:"Kinshasa",address:"Ngaliema",joined:"2022-01-15" },
-  { id:3,name:"Baudry Landu",phone:"243 895 446 423",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Trésorier",profession:"Comptable",birthplace:"Kinshasa",joined:"2022-03-10" },
-  { id:4,name:"Junior Loti",phone:"243 898 953 438",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Membre",profession:"Commerçant" },
-  { id:5,name:"Aarly Nsungu",phone:"243 971 855 480",forum:"OUI",asbl:"OUI",reunion:"EXEMPTER" },
-  { id:6,name:"BELINDA NTEMBE",phone:"+33 7 59 27 85 66",forum:"PARTIEL",asbl:"OUI",reunion:"EXEMPTER" },
-  { id:7,name:"Dick mbengu acteur Princi",phone:"244 930 561 955",forum:"PARTIEL",asbl:"NON",reunion:"EXEMPTER" },
-  { id:8,name:"Dijo Mboko",phone:"243 894 481 069",forum:"PARTIEL",asbl:"OUI",reunion:"OUI" },
-  { id:9,name:"Divuandidi",phone:"243 907 258 208",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:10,name:"Elvis",phone:"243 852 105 790",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:11,name:"fanny fatya mbala",phone:"243 896 633 569",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:12,name:"Fils Mbongo",phone:"243 999 459 122",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:14,name:"Freddy KIMPIATTU",phone:"243 826 065 275",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:15,name:"Frederick Kifiya",phone:"243 899 694 673",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:16,name:"Fils Kimenga",phone:"243 843 218 094",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:17,name:"Kita serge",phone:"243 854 797 085",forum:"OUI",asbl:"OUI",reunion:"OUI",poste:"Secrétaire Général" },
-  { id:18,name:"Lolo Nzeza",phone:"243 900 532 333",forum:"OCCASIONEL",asbl:"NON",reunion:"NON" },
-  { id:19,name:"Lombi",phone:"+242 05 761 5731",forum:"SOUVENT",asbl:"NON",reunion:"NON" },
-  { id:20,name:"Lovy Sala",phone:"243 814 941 425",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:21,name:"Matuba Pilu",phone:"243 994 141 415",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:22,name:"Me Freddy Lutonto",phone:"243 897 426 649",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
-  { id:23,name:"Nadège MUBANGA",phone:"243 898 273 638",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:24,name:"Nadine Biangolo",phone:"243 904 746 639",forum:"OUI",asbl:"NON",reunion:"NON" },
-  { id:25,name:"Niclette Kitembo",phone:"243 894 200 430",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
-  { id:26,name:"nsamu abi",phone:"244 931 354 839",forum:"NON",asbl:"NON",reunion:"EXEMPTER" },
-  { id:27,name:"Olivier NONGU",phone:"243 816 910 214",forum:"OCCASIONEL",asbl:"OUI",reunion:"OUI" },
-  { id:28,name:"Patricia Makudi",phone:"243 815 122 136",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:29,name:"Saint Vuangi",phone:"243 906 655 909",forum:"OUI",asbl:"OUI",reunion:"OUI" },
-  { id:30,name:"Teddy Kasongo",phone:"243 901 318 624",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
-  { id:31,name:"Tonton Nkuku",phone:"243 971 958 874",forum:"OCCASIONEL",asbl:"OUI",reunion:"NON" },
-  { id:32,name:"Tuzolana Nathalie",phone:"243 900 569 399",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:33,name:"Gueyi Kikalankala",phone:"243 897 414 242",forum:"PARFOIS",asbl:"OUI",reunion:"OUI" },
-  { id:34,name:"kungulu kinkela Fidel",phone:"243 896 722 306",forum:"NON",asbl:"NON",reunion:"NON" },
-  { id:35,name:"Masuama Pembele",phone:"243 896 350 866",forum:"NON",asbl:"OUI",reunion:"NON" },
-  { id:36,name:"pico mfumukwansa",phone:"243 840 200 071",forum:"OUI",asbl:"NON",reunion:"EXEMPTER" },
-  { id:37,name:"Rachel Luzolo",phone:"243 894 055 982",forum:"NON",asbl:"OUI",reunion:"NON" }
-];
+const DEFAULT_MEMBERS = [];
 
 function normalize(m){
   return Object.assign({
@@ -469,23 +458,15 @@ function normalize(m){
 }
 
 let membersData = loadData();
-let mediaData = JSON.parse(localStorage.getItem(MEDIA_KEY) || JSON.stringify([
-  { id: 1, type: 'photo', title: 'Rencontre annuelle des membres', desc: 'Photos souvenirs des événements LAS à Kinshasa.', url: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=600&q=80', date: '2026-03-01' }
-]));
+let mediaData = []; // Le stockage des médias sera migré vers Supabase Storage dans une étape dédiée.
 
 let currentView = 'table';
 
-function loadData(){
-  try {
-    const raw = localStorage.getItem(DB_KEY);
-    if (raw){ return JSON.parse(raw).map(normalize); }
-  } catch(e){}
-  return DEFAULT_MEMBERS.map(normalize);
-}
+function loadData(){ return []; }
+// Les fiches réelles sont chargées depuis Supabase après validation de la session.
 
-function saveData(){
-  try { localStorage.setItem(DB_KEY, JSON.stringify(membersData)); }
-  catch(e){ alert("Sauvegarde impossible (stockage plein ou photo trop lourde)."); }
+async function saveData(){
+  await LASData.saveMembers(membersData);
 }
 
 function saveMediaStorage(){
@@ -509,6 +490,7 @@ function switchTab(tab){
     mBtn.className = "px-4 py-2 rounded-xl text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 flex items-center gap-2";
     renderMedia('ALL');
   }
+  if (ROLE === "membre") mBtn.classList.add("hidden");
 }
 
 // ---------- Cotisations ----------
@@ -618,7 +600,7 @@ function renderBirthdays(){
   const banner = document.getElementById('birthday-banner');
   const soon = membersData
     .map(m => ({ m, d: daysUntilBirthday(m) }))
-    .filter(x => x.d !== null && x.d >= 0 && x.d <= 2)
+    .filter(x => x.m.birthdayVisible !== false && x.d !== null && x.d >= 0 && x.d <= 2)
     .sort((a,b) => a.d - b.d);
 
   if(soon.length === 0){ banner.classList.add('hidden'); banner.innerHTML=''; return; }
@@ -640,7 +622,7 @@ function renderBirthdays(){
             🎉 ${when}${a!==null ? ` · ${a+ (d===0?0:1)} ans` : ''}
           </span>
         </span>
-      </button>`;
+      </button><button type="button" onclick="shareBirthdayWish(${m.id})" class="text-[10px] font-bold px-2 py-1 rounded-lg bg-white text-las-800 hover:bg-amber-100 transition" aria-label="Envoyer les vœux d’anniversaire à ${escapeHTML(m.name)}">Envoyer les vœux</button>`;
   }).join('');
 
   banner.innerHTML = `
@@ -660,6 +642,17 @@ function renderBirthdays(){
   banner.classList.remove('hidden');
 }
 
+function shareBirthdayWish(id){
+  const m = membersData.find(x => x.id === Number(id));
+  if (!m || !m.birthdate || daysUntilBirthday(m) !== 0) {
+    alert("Les vœux sont disponibles le jour de l’anniversaire. Vérifiez la date de naissance.");
+    return;
+  }
+  const message = "Joyeux anniversaire, " + m.name + " ! 🎂🎉 Toute la famille de l’ASBL Les Amis de la Semence te souhaite santé, paix, bonheur et réussite dans tes projets. Que cette nouvelle année soit riche en fraternité, en solidarité et en belles réalisations. Avec toute notre affection, la famille LAS. 🌱";
+  const phone = String(m.phone || "").replace(/\\D/g, "");
+  if (!phone) { alert(message); return; }
+  window.open("https://wa.me/" + phone + "?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
+}
 function getFiltered(){
   const q = document.getElementById('search-input').value.toLowerCase().trim();
   const fAsbl = document.getElementById('filter-asbl').value;
@@ -868,15 +861,18 @@ function renderDetail(m, year){
 
 function changeYear(id, year){ const m=membersData.find(x=>x.id===id); if(m) renderDetail(m, parseInt(year)); }
 function togglePay(id, year, monthIdx){
+  if (!canPay()) { alert("Votre rôle ne permet pas de modifier les cotisations."); return; }
   const m = membersData.find(x=>x.id===id); if(!m) return;
   if(!m.payments[year]) m.payments[year]=Array(12).fill(false);
   m.payments[year][monthIdx] = !m.payments[year][monthIdx];
-  saveData(); renderDetail(m, year); calculateStats(); renderData();
+  LASData.saveMemberPayments(m).catch(e=>{console.error(e);alert("Enregistrement des cotisations impossible. Vérifiez les droits du trésorier.");}); renderDetail(m, year); calculateStats(); renderData();
 }
 function markAll(id, year, val){
+  if (!canPay()) { alert("Votre rôle ne permet pas de modifier les cotisations."); return; }
   const m = membersData.find(x=>x.id===id); if(!m) return;
   m.payments[year] = Array(12).fill(val);
-  saveData(); renderDetail(m, year); calculateStats(); renderData();
+  LASData.saveMemberPayments(m).catch(e=>{console.error(e);alert("Enregistrement des cotisations impossible. Vérifiez les droits du trésorier.");});
+  renderDetail(m, year); calculateStats(); renderData();
 }
 
 // ============================================================
@@ -893,7 +889,7 @@ function closePasswordModal(){
   document.getElementById('password-modal').classList.add('hidden');
 }
 
-function handlePasswordChange(e){
+async function handlePasswordChange(e){
   e.preventDefault();
   const oldP = document.getElementById('old-pass').value;
   const newP = document.getElementById('new-pass').value;
@@ -907,7 +903,7 @@ function handlePasswordChange(e){
     return;
   }
 
-  const res = changeUserPassword(SESSION.user, oldP, newP);
+  const res = await changeUserPassword(SESSION.user, oldP, newP);
   if(res.success){
     msgEl.className = "text-xs font-bold p-3 rounded-xl text-center bg-emerald-50 text-emerald-600 border border-emerald-200";
     msgEl.textContent = res.message;
@@ -925,6 +921,7 @@ function handlePasswordChange(e){
 // ============================================================
 let tempPhoto = "";
 function openMemberModal(member=null){
+  if (!canEdit()) { alert("Votre rôle ne permet pas de gérer les fiches membres."); return; }
   const modal=document.getElementById('member-modal');
   const title=document.getElementById('modal-title');
   document.getElementById('member-form').reset();
@@ -986,14 +983,17 @@ function editMember(id){
   const m=membersData.find(x=>x.id===id); if(m) openMemberModal(m);
 }
 function deleteMember(id){
+  if (!canDelete()) { alert("Seul l’administrateur peut supprimer un membre."); return; }
   const m=membersData.find(x=>x.id===id); if(!m) return;
   if(confirm(`Supprimer définitivement le membre "${m.name}" ?`)){
     membersData=membersData.filter(x=>x.id!==id);
-    saveData(); calculateStats(); renderBirthdays(); renderData();
+    LASData.deleteMember(id).then(()=>{calculateStats();renderBirthdays();renderData();}).catch(e=>{console.error(e);alert("Suppression impossible. Rechargez les données avant de réessayer.");});
+    calculateStats(); renderBirthdays(); renderData();
   }
 }
-function saveMember(e){
+async function saveMember(e){
   e.preventDefault();
+  if (!canEdit()) { alert("Votre rôle ne permet pas de gérer les fiches membres."); return; }
   const idVal=document.getElementById('member-id').value;
   const data={
     name:document.getElementById('input-name').value.trim(),
@@ -1011,14 +1011,21 @@ function saveMember(e){
     reunion:document.getElementById('input-reunion').value,
     photo:tempPhoto
   };
-  if(idVal){
-    const i=membersData.findIndex(m=>m.id===parseInt(idVal));
-    if(i!==-1) membersData[i]=normalize(Object.assign({}, membersData[i], data, {id:parseInt(idVal)}));
-  } else {
-    const nextId=membersData.length?Math.max(...membersData.map(m=>m.id))+1:1;
-    membersData.unshift(normalize(Object.assign({id:nextId}, data)));
+  try {
+    if(idVal){
+      const i=membersData.findIndex(m=>m.id===parseInt(idVal));
+      if(i!==-1) membersData[i]=normalize(Object.assign({},membersData[i],data,{id:parseInt(idVal)}));
+      await saveData();
+    } else {
+      const newId=await LASData.createMember(data);
+      membersData.unshift(normalize(Object.assign({id:newId},data)));
+    }
+    calculateStats(); renderBirthdays(); renderData(); closeMemberModal();
+  } catch(err) {
+    console.error(err);
+    try { membersData=(await LASData.loadMembers()).map(normalize); calculateStats(); renderBirthdays(); renderData(); } catch(_) {}
+    alert("La fiche n’a pas pu être enregistrée dans Supabase. Vérifiez vos droits et réessayez.");
   }
-  saveData(); calculateStats(); renderBirthdays(); renderData(); closeMemberModal();
 }
 
 // ============================================================
@@ -1063,11 +1070,13 @@ function printMemberCard(){
 // ============================================================
 //  LOGIQUE DU BLOG / PHOTOTHÈQUE / DOCUMENTS
 // ============================================================
-function openMediaModal(){ document.getElementById('media-modal').classList.remove('hidden'); }
+function openMediaModal(){ alert("L’ajout de médias est temporairement désactivé pendant la migration vers le stockage privé Supabase."); }
 function closeMediaModal(){ document.getElementById('media-modal').classList.add('hidden'); }
 
 function saveMedia(e){
   e.preventDefault();
+  alert("L’ajout de médias est temporairement désactivé pendant la migration vers le stockage privé Supabase.");
+  return;
   const type = document.getElementById('media-type').value;
   const title = document.getElementById('media-title').value.trim();
   const desc = document.getElementById('media-desc').value.trim();
@@ -1143,6 +1152,7 @@ function renderMedia(filter){
 }
 
 function deleteMedia(id){
+  if (!isAdmin()) { alert("Seul l’administrateur peut supprimer un média."); return; }
   if(confirm("Supprimer cette publication ?")){
     mediaData = mediaData.filter(m => m.id !== id);
     saveMediaStorage();
@@ -1188,15 +1198,69 @@ function exportCSV(){
 function applyRoleUI(){
   set('current-user', SESSION.user);
   set('current-role', SESSION.label || ROLE);
+  const add = document.getElementById('btn-add');
+  if (add) add.classList.toggle('hidden', !canEdit());
+  if (ROLE === 'membre') {
+    document.getElementById('tab-btn-members')?.classList.add('hidden');
+    document.getElementById('section-members')?.classList.add('hidden');
+    document.getElementById('tab-btn-media')?.classList.remove('hidden');
+    document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.add('hidden'));
+  }
+  const passwordButton = document.querySelector('button[onclick="openPasswordModal()"]');
+  if (passwordButton) passwordButton.classList.toggle('hidden', !SESSION.email);
+  document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.toggle('hidden', ROLE === 'membre'));
 }
-['search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderData));
-['filter-asbl','filter-cotis','filter-reunion','filter-forum','sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderData));
+['search-input'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('input',renderData); });
+['filter-asbl','filter-cotis','filter-reunion','filter-forum','sort-by'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('change',renderData); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeMemberModal(); closeDetail(); closeMediaModal(); closePasswordModal(); } });
 
-applyRoleUI();
-calculateStats();
-renderBirthdays();
-renderData();
+async function bootstrapLAS(){
+  const main = document.querySelector("main");
+  const header = document.querySelector("header");
+  // Fail closed: le tableau de bord reste masqué tant que la session et le profil ne sont pas validés.
+  if (main) main.classList.add("las-auth-gated");
+  if (header) header.classList.add("las-auth-gated");
+
+  let result;
+  try {
+    try { await window.LAS_SUPABASE_READY; } catch (_) {}
+    if (typeof initAuth !== "function") throw new Error("Auth.js n’a pas chargé initAuth().");
+    result = await initAuth();
+  } catch (e) {
+    console.error("Initialisation de l’authentification LAS impossible:", e);
+    window.location.replace("login.html");
+    return;
+  }
+
+  if (!result || !result.success || !LAS_AUTH_READY || !SESSION) {
+    window.location.replace("login.html");
+    return;
+  }
+
+  try {
+    if (ROLE !== "membre") {
+      membersData = (await LASData.loadMembers()).map(normalize);
+      calculateStats(); renderBirthdays(); renderData();
+    } else {
+      document.getElementById("tab-btn-members")?.classList.add("hidden");
+      document.getElementById("section-members")?.classList.add("hidden");
+    }
+    applyRoleUI();
+    if (header) header.classList.remove("las-auth-gated");
+    if (main) main.classList.remove("las-auth-gated");
+    switchTab("media");
+    await Promise.all([LASBlog.load(), LASBlog.loadBirthdays()]);
+    if (ROLE !== "membre") switchTab("members");
+  } catch (e) {
+    console.error(e);
+    // L’identité a été vérifiée, mais les données ne sont pas disponibles : n’afficher aucune donnée locale de secours.
+    if (main) {
+      main.classList.remove("las-auth-gated");
+      main.innerHTML = '<section class="max-w-2xl mx-auto mt-12 p-6 bg-white border border-rose-200 rounded-2xl"><h2 class="font-black text-rose-700">Connexion aux données LAS impossible</h2><p class="mt-2 text-sm text-slate-600">Votre session est reconnue, mais les données ne peuvent pas être chargées. Vérifiez la configuration Supabase, les tables et les politiques RLS avant de réessayer.</p></section>';
+    }
+  }
+}
+bootstrapLAS();
 </script>
 </body>
 </html>
