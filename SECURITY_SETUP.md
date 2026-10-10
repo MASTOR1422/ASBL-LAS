@@ -32,8 +32,11 @@ Ordre des fichiers actuellement suivis :
 6. `20261010164810_las_legacy_policy_cleanup.sql`
 7. `20261010165117_las_storage_cleanup_permissions.sql`
 8. `20261010174724_restrict_sync_member_identity_rpc.sql`
+9. `20261010190500_las_media_upload_capacity.sql`
 
-Pour un projet neuf, exécuter d’abord `supabase/schema.sql`, puis les huit migrations ci-dessus dans l’ordre. Pour le projet LAS existant, les huit migrations listées sont déjà enregistrées dans l’historique Supabase : ne pas les réexécuter manuellement.
+Pour un projet neuf, exécuter d’abord `supabase/schema.sql`, puis les neuf migrations ci-dessus dans l’ordre. Pour le projet LAS existant, les neuf migrations listées sont déjà enregistrées dans l’historique Supabase : ne pas les réexécuter manuellement.
+
+Le bucket privé `las-private-media` accepte JPG, PNG, WebP, PDF, MP4 et WebM, jusqu’à 50 Mo par fichier.
 
 Les migrations préservent les tables historiques. `monthly_contributions` reste disponible pour les montants encaissés; `member_payments` sert aux cases mensuelles de l’interface. Le bucket `las-private-media` doit rester privé et les fichiers doivent être lus avec des URL signées à durée limitée.
 
