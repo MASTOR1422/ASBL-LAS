@@ -461,9 +461,9 @@ let currentView = 'table';
 
 function loadData(){ return []; // Les fiches réelles sont chargées depuis Supabase après validation de la session. }
 
-function saveData(){
-  try { localStorage.setItem(DB_KEY, JSON.stringify(membersData)); }
-  catch(e){ alert("Sauvegarde impossible (stockage plein ou photo trop lourde)."); }
+async function saveData(){
+  try { await LASData.saveMembers(membersData); }
+  catch(e){ console.error(e); alert("Enregistrement distant impossible. Vérifiez la connexion Supabase et vos droits."); }
 }
 
 function saveMediaStorage(){
@@ -867,7 +867,8 @@ function markAll(id, year, val){
   if (!canPay()) { alert("Votre rôle ne permet pas de modifier les cotisations."); return; }
   const m = membersData.find(x=>x.id===id); if(!m) return;
   m.payments[year] = Array(12).fill(val);
-  saveData(); renderDetail(m, year); calculateStats(); renderData();
+  LASData.saveMemberPayments(m).catch(e=>{console.error(e);alert("Enregistrement des cotisations impossible. Vérifiez les droits du trésorier.");});
+  renderDetail(m, year); calculateStats(); renderData();
 }
 
 // ============================================================
@@ -982,7 +983,8 @@ function deleteMember(id){
   const m=membersData.find(x=>x.id===id); if(!m) return;
   if(confirm(`Supprimer définitivement le membre "${m.name}" ?`)){
     membersData=membersData.filter(x=>x.id!==id);
-    saveData(); calculateStats(); renderBirthdays(); renderData();
+    LASData.deleteMember(id).then(()=>{calculateStats();renderBirthdays();renderData();}).catch(e=>{console.error(e);alert("Suppression impossible. Rechargez les données avant de réessayer.");});
+    calculateStats(); renderBirthdays(); renderData();
   }
 }
 function saveMember(e){
