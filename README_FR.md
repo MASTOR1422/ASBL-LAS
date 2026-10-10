@@ -35,7 +35,7 @@ Le dépôt contient l’application web de l’ASBL Les Amis de la Semence, publ
 
 ### Projet LAS déjà configuré
 
-Ne réexécutez pas le socle `schema.sql`. La base connectée a déjà les migrations `username_auth`, `las_schema_alignment`, `las_private_rls_helpers`, `las_member_privacy`, `las_storage_path_access`, `las_legacy_policy_cleanup` et `las_storage_cleanup_permissions`. Conservez les données et appliquez seulement les nouvelles migrations non présentes dans l’historique.
+Ne réexécutez pas le socle `schema.sql`. La base connectée a déjà les migrations `username_auth`, `las_schema_alignment`, `las_private_rls_helpers`, `las_member_privacy`, `las_storage_path_access`, `las_legacy_policy_cleanup`, `las_storage_cleanup_permissions` et `restrict_sync_member_identity_rpc`. Conservez les données et appliquez seulement les nouvelles migrations non présentes dans l’historique.
 
 Le schéma conserve `monthly_contributions` (montants et devises) pour les écritures financières historiques. L’interface des cases mensuelles utilise `member_payments`. Les écritures historiques sont conservées; la migration d’alignement ne supprime aucune table.
 
