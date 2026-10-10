@@ -25,7 +25,7 @@ window.LASBlog = (() => {
     form.elements.namedItem("category").value="entraide";
     form.elements.namedItem("body").value="Joyeux anniversaire, "+m.name+" ! 🎉 Toute la famille de l’ASBL Les Amis de la Semence te souhaite santé, paix, bonheur et réussite dans tes projets. Que cette nouvelle année de vie soit riche en fraternité, solidarité et belles réalisations. Avec toute notre affection, la famille LAS. 🌱";
     document.getElementById("blog-message").textContent="Message de vœux préparé. Relisez-le puis publiez-le pour le partager avec les membres.";
-    form.body.focus();
+    form.elements.namedItem("body").focus();
   }
   async function load() {
     const host=document.getElementById("community-blog-list"); if(!host) return;
@@ -54,7 +54,7 @@ window.LASBlog = (() => {
     form.reset();msg.textContent="Publication ajoutée.";await load();
   }
   async function comment(e,postId){
-    e.preventDefault();const form=e.currentTarget, body=form.body.value.trim();
+    e.preventDefault();const form=e.currentTarget;
     const {data:{user}}=await db().auth.getUser();if(!user)return;
     const body=form.elements.namedItem("body").value.trim();
     if(!body)return;
