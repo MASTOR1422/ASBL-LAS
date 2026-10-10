@@ -29,11 +29,27 @@ Si le site n'est pas hébergé sur Vercel, il faut adapter l'endpoint de configu
 5. Vérifiez avec des comptes de test admin, secrétaire, trésorier et membre. Les rôles doivent être confirmés par RLS, pas seulement par les boutons masqués.
 
 ## Migration des données du navigateur
-1. Ouvrez le site sur l'ordinateur et le navigateur où les anciennes données LAS sont réellement stockées.
-2. Connectez-vous avec un compte administrateur Supabase actif.
-3. Ouvrez `/admin-migration.html`, vérifiez les volumes détectés et téléchargez la sauvegarde JSON.
-4. Lancez l'import. L'outil importe les fiches membres et les états mensuels de cotisation dans les tables dédiées. Il importe aussi les métadonnées médias disponibles et charge les fichiers base64 dans le bucket privé si leur taille ne dépasse pas 10 Mo.
-5. Les données d'origine ne sont pas supprimées. Contrôlez les comptes de lignes dans Supabase et testez les fiches et paiements dans le site avant toute suppression manuelle.
+1. Les données du navigateur ne sont accessibles que depuis leur origine actuelle. Comme la branche de travail est séparée, le navigateur du site de production et celui d'une prévisualisation peuvent avoir des stockages différents.
+2. Sur l'ancien site de production, ouvrez les outils de développement du navigateur (F12 → Console) et exécutez ce code pour télécharger une sauvegarde locale. Il ne transmet rien au réseau :
+
+```javascript
+const backup = {
+  createdAt: new Date().toISOString(),
+  members: localStorage.getItem("las_members_v2"),
+  media: localStorage.getItem("las_media_v1")
+};
+const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" }));
+const a = document.createElement("a");
+a.href = url;
+a.download = "las-backup-local.json";
+a.click();
+URL.revokeObjectURL(url);
+```
+
+3. Ouvrez la branche de travail sur l'hébergement configuré, connectez-vous avec un compte administrateur Supabase actif et ouvrez `/admin-migration.html`.
+4. Chargez le fichier JSON exporté, vérifiez les volumes, puis téléchargez une copie de sauvegarde avant de lancer l'import.
+5. L'outil importe les fiches membres et les états mensuels de cotisation dans les tables dédiées. Il importe aussi les métadonnées médias disponibles et charge les fichiers base64 dans le bucket privé si leur taille ne dépasse pas 10 Mo.
+6. Les données d'origine ne sont pas supprimées. Contrôlez les comptes de lignes dans Supabase et testez les fiches et paiements dans le site avant toute suppression manuelle.
 
 Important : les données du navigateur sont propres à chaque navigateur/appareil. Si plusieurs appareils contiennent des versions différentes, sauvegardez-les séparément et réconciliez les doublons avant de migrer. Les données de démonstration qui n'ont jamais été enregistrées dans `localStorage` ne sont pas automatiquement importées.
 
