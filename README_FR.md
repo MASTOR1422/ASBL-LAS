@@ -19,6 +19,7 @@ Le dépôt contient l’application web de l’ASBL Les Amis de la Semence, publ
 - `api/auth/` : endpoints serveur pour connexion par identifiant et récupération.
 - `api/supabase-config.js` : expose uniquement l’URL Supabase et la clé publishable.
 - `supabase/las-data.js`, `supabase/las-media.js`, `las-blog.js` : accès aux données.
+- `supabase/las-media.js` gère les uploads privés photo/PDF/vidéo; les fichiers de plus de 6 Mo utilisent TUS et la limite du bucket est de 50 Mo.
 - `supabase/schema.sql` : socle des tables pour un nouveau projet uniquement.
 - `supabase/migrations/` : migrations versionnées; leurs versions correspondent à l’historique Supabase du projet connecté.
 - `SECURITY_SETUP.md` : configuration et contrôles de sécurité.
