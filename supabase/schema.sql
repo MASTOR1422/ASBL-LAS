@@ -241,6 +241,11 @@ drop policy if exists comments_delete_author_admin on public.post_comments;
 create policy comments_delete_author_admin on public.post_comments for delete to authenticated
 using (author_id=auth.uid() or public.current_las_role()='admin');
 
+drop policy if exists media_read_authenticated on public.media_items;
+drop policy if exists media_insert_secretariat_admin on public.media_items;
+drop policy if exists media_update_secretariat_admin on public.media_items;
+drop policy if exists media_delete_admin on public.media_items;
+drop policy if exists media_update_active on public.media_items;
 drop policy if exists media_read_active on public.media_items;
 create policy media_read_active on public.media_items for select to authenticated
 using (public.is_las_active() and (status='published' or author_id=auth.uid() or public.current_las_role()='admin'));
@@ -268,6 +273,9 @@ values ('las-private-media','las-private-media',false,52428800,
 on conflict (id) do update set public=false, file_size_limit=52428800,
 allowed_mime_types=excluded.allowed_mime_types;
 
+drop policy if exists las_media_read_authenticated on storage.objects;
+drop policy if exists las_media_upload_secretariat_admin on storage.objects;
+drop policy if exists las_media_update_secretariat_admin on storage.objects;
 drop policy if exists las_media_select_active on storage.objects;
 create policy las_media_select_active on storage.objects for select to authenticated
 using (
