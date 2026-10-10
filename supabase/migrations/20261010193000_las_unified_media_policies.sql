@@ -35,7 +35,9 @@ create policy media_read_active on public.media_items for select to authenticate
 using (public.is_las_active() and (status='published' or author_id=auth.uid() or public.current_las_role()='admin'));
 
 drop policy if exists media_insert_secretariat_admin on public.media_items;
+drop policy if exists media_insert_staff on public.media_items;
 drop policy if exists media_update_secretariat_admin on public.media_items;
+drop policy if exists media_update_staff on public.media_items;
 drop policy if exists media_delete_admin on public.media_items;
 drop policy if exists media_update_active on public.media_items;
 drop policy if exists media_insert_active on public.media_items;
