@@ -73,7 +73,7 @@ for (const required of [
 ]) {
   if (!blogMigration.includes(required)) {
     failed = true;
-    process.stderr.write("Missing blog migration safeguard: " + required + "\\n");
+    process.stderr.write("Missing blog migration safeguard: " + required + "\n");
   }
 }
 
