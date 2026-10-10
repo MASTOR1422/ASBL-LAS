@@ -87,7 +87,7 @@ window.LASMedia = (() => {
     if (!db()) throw new Error("Supabase n’est pas initialisé. Rechargez la page.");
     const { data, error } = await db().from("media_items")
       .select("id,media_type,title,description,external_url,storage_path,created_at,status")
-      .eq("status", "published").order("published_date", { ascending: false });
+      .eq("status", "published").order("created_at", { ascending: false });
     if (error) throw error;
     return Promise.all((data || []).map(async row => {
       let url = row.external_url || "";
