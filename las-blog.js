@@ -2,6 +2,31 @@
 window.LASBlog = (() => {
   const db=()=>window.lasSupabase;
   const esc=s=>String(s??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+  const birthdayCache=new Map();
+  async function loadBirthdays(){
+    const host=document.getElementById("community-birthdays");if(!host)return;
+    const {data,error}=await db().rpc("las_birthday_feed");
+    if(error){host.innerHTML='<p class="text-xs text-slate-500">Les rappels d’anniversaire sont momentanément indisponibles.</p>';return;}
+    const today=new Date();today.setHours(0,0,0,0);
+    const upcoming=(data||[]).map(m=>{
+      let next=new Date(today.getFullYear(),Number(m.birth_month)-1,Number(m.birth_day));next.setHours(0,0,0,0);
+      if(next<today)next=new Date(today.getFullYear()+1,Number(m.birth_month)-1,Number(m.birth_day));
+      const days=Math.round((next-today)/86400000);
+      birthdayCache.set(String(m.member_id),{name:m.display_name,days});
+      return {...m,days,next};
+    }).filter(m=>m.days<=7).sort((a,b)=>a.days-b.days);
+    if(!upcoming.length){host.innerHTML='<p class="text-xs text-slate-500">Aucun anniversaire dans les 7 prochains jours.</p>';return;}
+    host.innerHTML='<div class="flex flex-wrap gap-2">'+upcoming.map(m=>'<div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2"><span class="text-lg">🎂</span><div><p class="text-xs font-bold text-slate-800">'+esc(m.display_name)+'</p><p class="text-[10px] text-slate-500">'+(m.days===0?"Aujourd’hui":m.days===1?"Demain":"Dans "+m.days+" jours")+' · '+m.next.toLocaleDateString("fr-FR",{day:"2-digit",month:"long"})+'</p></div><button type="button" onclick="LASBlog.wishBirthday(\''+m.member_id+'\')" class="text-[10px] font-bold text-las-700 underline">Préparer un vœu</button></div>').join("")+'</div>';
+  }
+  function wishBirthday(id){
+    const m=birthdayCache.get(String(id));if(!m)return;
+    const form=document.querySelector("#community-blog form");if(!form)return;
+    form.title.value="Joyeux anniversaire à "+m.name+" 🎂";
+    form.category.value="entraide";
+    form.body.value="Joyeux anniversaire, "+m.name+" ! 🎉 Toute la famille de l’ASBL Les Amis de la Semence te souhaite santé, paix, bonheur et réussite dans tes projets. Que cette nouvelle année de vie soit riche en fraternité, solidarité et belles réalisations. Avec toute notre affection, la famille LAS. 🌱";
+    document.getElementById("blog-message").textContent="Message de vœux préparé. Relisez-le puis publiez-le pour le partager avec les membres.";
+    form.body.focus();
+  }
   async function load() {
     const host=document.getElementById("community-blog-list"); if(!host) return;
     host.innerHTML='<p class="text-xs text-slate-500">Chargement des échanges…</p>';
@@ -59,5 +84,5 @@ window.LASBlog = (() => {
     if(error){alert("Modération refusée par les droits de sécurité.");return;}
     await loadComments(postId);
   }
-  return {load,publish,comment,removePost,hidePost,removeComment,hideComment};
+  return {load,loadBirthdays,wishBirthday,publish,comment,removePost,hidePost,removeComment,hideComment};
 })();
