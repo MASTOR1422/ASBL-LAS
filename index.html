@@ -1189,7 +1189,7 @@ function renderMedia(filter){
       preview = '<div class="w-full h-36 bg-slate-50 text-slate-500 flex flex-col items-center justify-center rounded-t-2xl gap-2"><i class="fa-solid fa-file-lines text-4xl"></i><span class="text-xs font-bold">Publication LAS</span></div>';
     }
     const deleteButton = ROLE === "admin" ? '<button type="button" onclick="deleteMedia(' + Number(m.id) + ')" class="text-rose-500 hover:underline"><i class="fa-solid fa-trash"></i> Supprimer</button>' : "";
-    const downloadLink = m.type === "pdf" && url ? '<a href="' + escapeHTML(url) + '" target="_blank" rel="noopener noreferrer" class="text-las-700 font-bold hover:underline"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir le PDF</a>' : "";
+    const downloadLink = url ? '<a href="' + escapeHTML(url) + '" target="_blank" rel="noopener noreferrer" class="text-las-700 font-bold hover:underline" aria-label="Ouvrir le fichier dans un nouvel onglet"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir</a>' : "";
     return '<article class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between"><div>' + preview +
       '<div class="p-4 space-y-2"><span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-las-100 text-las-800">' + escapeHTML(m.type) + '</span>' +
       '<h3 class="font-bold text-slate-900 text-sm">' + escapeHTML(m.title) + '</h3><p class="text-xs text-slate-600">' + escapeHTML(m.desc || "") + '</p></div></div>' +
