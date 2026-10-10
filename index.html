@@ -1129,7 +1129,7 @@ async function refreshMedia(){
   const grid = document.getElementById("media-grid");
   try {
     mediaData = await LASMedia.load();
-    renderMedia("ALL");
+    filterMedia("ALL");
   } catch (e) {
     console.error("Chargement de la photothèque LAS impossible:", e);
     if (grid) grid.innerHTML = '<div class="col-span-full text-center py-10 text-rose-600 text-xs">La photothèque est momentanément indisponible. Vérifiez le stockage privé et les politiques Supabase.</div>';
