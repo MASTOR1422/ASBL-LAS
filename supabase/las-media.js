@@ -143,7 +143,11 @@ window.LASMedia = (() => {
   async function remove(id) {
     if (ROLE !== "admin") throw new Error("Seul l’administrateur peut supprimer un média.");
     const mediaId = String(id || "").trim();
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(mediaId)) {
+    // Le projet peut provenir de l'ancien schéma bigint ou du schéma UUID récent.
+    // Valider les deux formats sans convertir l'identifiant en nombre (perte de précision possible).
+    const validUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(mediaId);
+    const validLegacyId = /^[1-9][0-9]{0,18}$/.test(mediaId);
+    if (!validUuid && !validLegacyId) {
       throw new Error("Identifiant de média invalide.");
     }
     const client = db();
