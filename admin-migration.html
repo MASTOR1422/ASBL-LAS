@@ -76,6 +76,7 @@ async function migrate(){
 document.getElementById("backup").addEventListener("click",downloadBackup);
 migrateBtn.addEventListener("click",()=>migrate());
 (async()=>{try{
+ await window.LAS_SUPABASE_READY;
  if(!lasIsConfigured())throw new Error("Configuration Supabase absente. Renseignez supabase-config.js avec l’URL du projet et la clé publique.");
  const result=await initAuth();if(!result.success)throw new Error("Connectez-vous d’abord via login.html avec un compte Supabase actif.");
  if(!isAdmin())throw new Error("Accès réservé à un profil dont le rôle Supabase est admin.");
