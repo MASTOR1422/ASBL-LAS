@@ -74,7 +74,7 @@ window.LASData = (() => {
   }
   async function saveMembers(members) {
     if(!["admin","secretaire"].includes(ROLE)) throw new Error("Droits insuffisants pour modifier les fiches membres.");
-    const rows=[], uploadedPaths=[], photoUpdates=[];
+    const rows=[], uploadedPaths=[], photoUpdates=[], photoRemovals=[];
     try {
       for(const m of members){
         const row={
@@ -83,8 +83,9 @@ window.LASData = (() => {
           birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,
           joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,
           meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active",
-          birthday_visible:m.birthdayVisible!==false,photo_path:m.photoPath||null
+          birthday_visible:m.birthdayVisible!==false,photo_path:m.photoRemoved?null:(m.photoPath||null)
         };
+        if(m.photoRemoved && m.photoPath) photoRemovals.push({member:m,oldPath:m.photoPath});
         if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
           const blob=await (await fetch(m.photo)).blob();
           if(blob.size>10*1024*1024) throw new Error("La photo de "+m.name+" dépasse la limite de 10 Mo.");
@@ -112,14 +113,22 @@ window.LASData = (() => {
     }
     for(const item of photoUpdates) {
       item.member.photoPath=item.path;
+      item.member.photoRemoved=false;
       try {
-        const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(item.path,300);
+        const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(item.path,3600);
         item.member.photo=!signError&&signed?.signedUrl?signed.signedUrl:"";
       } catch (_) { item.member.photo=""; }
       if(item.oldPath) {
         const {error:cleanupError}=await client().storage.from("las-private-media").remove([item.oldPath]);
         if(cleanupError) console.warn("L’ancienne photo n’a pas pu être supprimée.",cleanupError);
       }
+    }
+    for(const item of photoRemovals) {
+      item.member.photoPath=null;
+      item.member.photo="";
+      item.member.photoRemoved=false;
+      const {error:cleanupError}=await client().storage.from("las-private-media").remove([item.oldPath]);
+      if(cleanupError) console.warn("L’ancienne photo n’a pas pu être supprimée.",cleanupError);
     }
   }
   async function deleteMember(id) {
