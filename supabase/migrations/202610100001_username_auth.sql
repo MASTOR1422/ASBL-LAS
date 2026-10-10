@@ -16,6 +16,7 @@ create unique index if not exists auth_login_map_username_lower_uidx
 
 alter table public.auth_login_map enable row level security;
 revoke all on table public.auth_login_map from anon, authenticated;
+grant select, insert, update, delete on table public.auth_login_map to service_role;
 -- Deliberately no client-facing policies: only the server-side service key may query this mapping.
 
 -- Backfill only users who already have an application profile. The suffix makes generated
