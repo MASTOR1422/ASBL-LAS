@@ -1205,6 +1205,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeMemberModal(
 async function bootstrapLAS(){
   const main = document.querySelector("main");
   if (main) main.classList.add("hidden");
+  try { await window.LAS_SUPABASE_READY; } catch (_) {}
   const result = await initAuth();
   if (!result.success) { window.location.replace("login.html"); return; }
   try {
