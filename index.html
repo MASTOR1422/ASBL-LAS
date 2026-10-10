@@ -8,6 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="supabase-client.js"></script>
     <script src="Auth.js"></script>
 
     <script>
@@ -77,6 +80,7 @@
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
+                    <img src="logo LAS_2.jpg" alt="Logo officiel ASBL LAS" class="w-10 h-10 object-contain bg-white rounded-lg p-1 border border-las-500/30" onerror="this.onerror=null;this.src='logo LAS.jpg'">
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700">
                         <i class="fa-solid fa-user-shield text-las-400 text-xs"></i>
                         <span class="text-xs font-bold" id="current-user">—</span>
@@ -868,12 +872,14 @@ function renderDetail(m, year){
 
 function changeYear(id, year){ const m=membersData.find(x=>x.id===id); if(m) renderDetail(m, parseInt(year)); }
 function togglePay(id, year, monthIdx){
+  if (!canPay()) { alert("Votre rôle ne permet pas de modifier les cotisations."); return; }
   const m = membersData.find(x=>x.id===id); if(!m) return;
   if(!m.payments[year]) m.payments[year]=Array(12).fill(false);
   m.payments[year][monthIdx] = !m.payments[year][monthIdx];
   saveData(); renderDetail(m, year); calculateStats(); renderData();
 }
 function markAll(id, year, val){
+  if (!canPay()) { alert("Votre rôle ne permet pas de modifier les cotisations."); return; }
   const m = membersData.find(x=>x.id===id); if(!m) return;
   m.payments[year] = Array(12).fill(val);
   saveData(); renderDetail(m, year); calculateStats(); renderData();
@@ -925,6 +931,7 @@ function handlePasswordChange(e){
 // ============================================================
 let tempPhoto = "";
 function openMemberModal(member=null){
+  if (!canEdit()) { alert("Votre rôle ne permet pas de gérer les fiches membres."); return; }
   const modal=document.getElementById('member-modal');
   const title=document.getElementById('modal-title');
   document.getElementById('member-form').reset();
@@ -986,6 +993,7 @@ function editMember(id){
   const m=membersData.find(x=>x.id===id); if(m) openMemberModal(m);
 }
 function deleteMember(id){
+  if (!canDelete()) { alert("Seul l’administrateur peut supprimer un membre."); return; }
   const m=membersData.find(x=>x.id===id); if(!m) return;
   if(confirm(`Supprimer définitivement le membre "${m.name}" ?`)){
     membersData=membersData.filter(x=>x.id!==id);
@@ -994,6 +1002,7 @@ function deleteMember(id){
 }
 function saveMember(e){
   e.preventDefault();
+  if (!canEdit()) { alert("Votre rôle ne permet pas de gérer les fiches membres."); return; }
   const idVal=document.getElementById('member-id').value;
   const data={
     name:document.getElementById('input-name').value.trim(),
@@ -1063,11 +1072,12 @@ function printMemberCard(){
 // ============================================================
 //  LOGIQUE DU BLOG / PHOTOTHÈQUE / DOCUMENTS
 // ============================================================
-function openMediaModal(){ document.getElementById('media-modal').classList.remove('hidden'); }
+function openMediaModal(){ if (!SESSION) { alert("Connexion requise."); return; } document.getElementById('media-modal').classList.remove('hidden'); }
 function closeMediaModal(){ document.getElementById('media-modal').classList.add('hidden'); }
 
 function saveMedia(e){
   e.preventDefault();
+  if (!SESSION) { alert("Connexion requise."); return; }
   const type = document.getElementById('media-type').value;
   const title = document.getElementById('media-title').value.trim();
   const desc = document.getElementById('media-desc').value.trim();
@@ -1143,6 +1153,7 @@ function renderMedia(filter){
 }
 
 function deleteMedia(id){
+  if (!isAdmin()) { alert("Seul l’administrateur peut supprimer un média."); return; }
   if(confirm("Supprimer cette publication ?")){
     mediaData = mediaData.filter(m => m.id !== id);
     saveMediaStorage();
@@ -1188,15 +1199,31 @@ function exportCSV(){
 function applyRoleUI(){
   set('current-user', SESSION.user);
   set('current-role', SESSION.label || ROLE);
+  const add = document.getElementById('btn-add');
+  if (add) add.classList.toggle('hidden', !canEdit());
+  const passwordButton = document.querySelector('button[onclick="openPasswordModal()"]');
+  if (passwordButton) passwordButton.classList.toggle('hidden', !SESSION.email);
+  document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.toggle('hidden', ROLE === 'membre'));
 }
 ['search-input'].forEach(id=>document.getElementById(id).addEventListener('input',renderData));
 ['filter-asbl','filter-cotis','filter-reunion','filter-forum','sort-by'].forEach(id=>document.getElementById(id).addEventListener('change',renderData));
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeMemberModal(); closeDetail(); closeMediaModal(); closePasswordModal(); } });
 
-applyRoleUI();
-calculateStats();
-renderBirthdays();
-renderData();
+async function bootstrapLAS(){
+  const main = document.querySelector("main");
+  if (main) main.classList.add("hidden");
+  const result = await initAuth();
+  if (!result.success) {
+    window.location.replace("login.html");
+    return;
+  }
+  if (main) main.classList.remove("hidden");
+  applyRoleUI();
+  calculateStats();
+  renderBirthdays();
+  renderData();
+}
+bootstrapLAS();
 </script>
 </body>
 </html>
