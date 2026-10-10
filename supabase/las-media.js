@@ -34,6 +34,49 @@ window.LASMedia = (() => {
     };
   }
 
+  async function uploadLargeFile(path, file, mime, onProgress) {
+    if (!window.tus || typeof window.tus.Upload !== "function") {
+      throw new Error("Le module de transfert de gros fichiers n’est pas chargé. Rechargez la page ou utilisez un fichier de moins de 6 Mo.");
+    }
+    const { data: sessionData, error: sessionError } = await db().auth.getSession();
+    const session = sessionData?.session;
+    if (sessionError || !session?.access_token) throw new Error("Session expirée. Reconnectez-vous.");
+    const config = window.LAS_SUPABASE_CONFIG || {};
+    const apiUrl = new URL(config.url);
+    const projectRef = apiUrl.hostname.split(".")[0];
+    const endpoint = apiUrl.hostname.endsWith(".supabase.co")
+      ? "https://" + projectRef + ".storage.supabase.co/storage/v1/upload/resumable"
+      : apiUrl.origin + "/storage/v1/upload/resumable";
+    return new Promise((resolve, reject) => {
+      const upload = new window.tus.Upload(file, {
+        endpoint,
+        retryDelays: [0, 3000, 5000, 10000, 20000],
+        headers: {
+          authorization: "Bearer " + session.access_token,
+          apikey: config.publishableKey,
+          "x-upsert": "false"
+        },
+        uploadDataDuringCreation: true,
+        removeFingerprintOnSuccess: true,
+        chunkSize: 6 * 1024 * 1024,
+        metadata: {
+          bucketName: "las-private-media",
+          objectName: path,
+          contentType: mime,
+          cacheControl: "3600"
+        },
+        onError(error) { reject(new Error("Échec du transfert reprenable : " + (error?.message || "erreur réseau"))); },
+        onProgress(bytesUploaded, bytesTotal) {
+          if (typeof onProgress === "function" && bytesTotal > 0) {
+            onProgress(Math.min(100, Math.round(bytesUploaded / bytesTotal * 100)));
+          }
+        },
+        onSuccess() { if (typeof onProgress === "function") onProgress(100); resolve(); }
+      });
+      upload.start();
+    });
+  }
+
   async function signedUrl(path) {
     const { data, error } = await db().storage.from("las-private-media").createSignedUrl(path, 3600);
     if (error) throw error;
@@ -72,9 +115,14 @@ window.LASMedia = (() => {
     if (authError || !authData?.user) throw new Error("Session expirée. Reconnectez-vous.");
     const uuid = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
     const path = "media/" + authData.user.id + "/" + uuid + "." + ext;
-    const { error: uploadError } = await client.storage.from("las-private-media")
-      .upload(path, file, { contentType: mime, upsert: false });
-    if (uploadError) throw new Error("Échec du transfert vers le stockage : " + uploadError.message);
+    if (file.size > 6 * 1024 * 1024) {
+      await uploadLargeFile(path, file, mime, metadata.onProgress);
+    } else {
+      const { error: uploadError } = await client.storage.from("las-private-media")
+        .upload(path, file, { contentType: mime, cacheControl: "3600", upsert: false });
+      if (uploadError) throw new Error("Échec du transfert vers le stockage : " + uploadError.message);
+      if (typeof metadata.onProgress === "function") metadata.onProgress(100);
+    }
     const { data, error } = await client.from("media_items").insert({
       author_id: authData.user.id,
       title: title.slice(0,180),
