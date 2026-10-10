@@ -137,7 +137,7 @@ create or replace function public.sync_las_member_identity()
 returns void language plpgsql security definer set search_path = public, auth
 as $$
 begin
-  if public.current_las_role() <> 'admin' then
+  if coalesce(public.current_las_role(),'') <> 'admin' then
     raise exception 'Administrator role required';
   end if;
   perform setval(
