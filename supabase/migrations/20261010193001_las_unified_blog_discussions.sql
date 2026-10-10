@@ -70,7 +70,7 @@ using (author_id=auth.uid() or public.current_las_role()='admin');
 grant select, insert, update, delete on public.posts, public.post_comments to authenticated;
 
 -- Activer les événements du blog dans Supabase Realtime si la publication est disponible.
-do $
+do $realtime$
 begin
   if exists (select 1 from pg_publication where pubname='supabase_realtime') then
     if not exists (
@@ -86,6 +86,6 @@ begin
       execute 'alter publication supabase_realtime add table public.post_comments';
     end if;
   end if;
-end $;
+end $realtime$;
 
 commit;
