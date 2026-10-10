@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Migration sécurisée LAS</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script><script src="supabase-client.js"></script><script src="Auth.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+<main class="max-w-3xl mx-auto p-4 sm:p-8">
+<header class="bg-slate-900 text-white rounded-2xl p-5 flex items-center gap-4">
+<img src="logo LAS_2.jpg" alt="Logo LAS" class="w-14 h-14 object-contain bg-white rounded-xl p-1" onerror="this.onerror=null;this.src='logo LAS.jpg'">
+<div><h1 class="font-black text-xl">Migration des données LAS</h1><p class="text-sm text-slate-300">Membres, cotisations et médias hérités</p></div>
+</header>
+<section class="mt-5 bg-white border rounded-2xl p-5 space-y-4">
+<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-900"><strong>Précautions :</strong> cette page ne supprime aucune donnée du navigateur. Elle doit être ouverte sur l’appareil et le navigateur qui contiennent les données historiques. Téléchargez d’abord une sauvegarde JSON. Exécutez le SQL de <code>supabase/schema.sql</code> dans votre projet Supabase avant l’import.</div>
+<div id="status" class="text-sm text-slate-600" aria-live="polite">Vérification de la session…</div>
+<div id="counts" class="grid grid-cols-2 gap-3"></div>
+<button id="backup" class="w-full border border-slate-300 rounded-xl py-3 font-bold text-sm">1. Télécharger une sauvegarde JSON du navigateur actuel</button>
+<label class="block text-sm font-bold">Ou charger une sauvegarde exportée depuis l’ancien site
+<input id="backup-file" type="file" accept=".json,application/json" class="block mt-2 w-full text-xs font-normal"></label>
+<button id="migrate" disabled class="w-full bg-las-700 bg-green-700 disabled:bg-slate-300 text-white rounded-xl py-3 font-bold text-sm">2. Importer dans Supabase</button>
+<div id="log" class="text-xs text-slate-600 whitespace-pre-wrap break-words"></div>
+</section>
+<p class="text-xs text-slate-500 mt-4">La migration est réservée à un administrateur LAS actif. Les médias base64 de plus de 10 Mo seront ignorés avec un avertissement. Vérifiez ensuite les nombres importés avant de retirer l’ancien stockage.</p>
+</main>
+<script>
+const statusEl=document.getElementById("status"),countsEl=document.getElementById("counts"),logEl=document.getElementById("log"),migrateBtn=document.getElementById("migrate");
+let members=[],media=[],ready=false,sourceBackup=null;
+function readLegacy(){
+ const rawMembers=localStorage.getItem("las_members_v2"),rawMedia=localStorage.getItem("las_media_v1");
+ try{members=rawMembers?JSON.parse(rawMembers):[]}catch(e){throw new Error("Le stockage des membres est illisible; aucune donnée n’a été modifiée.");}
+ try{media=rawMedia?JSON.parse(rawMedia):[]}catch(e){throw new Error("Le stockage des médias est illisible; aucune donnée n’a été modifiée.");}
+ if(!Array.isArray(members)||!Array.isArray(media))throw new Error("Format de données historique invalide.");
+ countsEl.innerHTML='<div class="rounded-xl bg-slate-50 p-4"><span class="block text-2xl font-black">'+members.length+'</span><span class="text-xs text-slate-500">Fiches membres détectées</span></div><div class="rounded-xl bg-slate-50 p-4"><span class="block text-2xl font-black">'+media.length+'</span><span class="text-xs text-slate-500">Médias détectés</span></div>';
+ return {members,media,hasSource:!!rawMembers||!!rawMedia};
+}
+function downloadBackup(){
+ const data=sourceBackup?{createdAt:new Date().toISOString(),members:members,media:media}:{createdAt:new Date().toISOString(),members:localStorage.getItem("las_members_v2"),media:localStorage.getItem("las_media_v1")};
+ const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+ const a=document.createElement("a");a.href=url;a.download="las-backup-local-"+new Date().toISOString().slice(0,10)+".json";a.click();URL.revokeObjectURL(url);
+ logEl.textContent="Sauvegarde générée. Conservez ce fichier dans un emplacement privé.";
+}
+function log(line){logEl.textContent+=line+"\n";}
+async function migrate(){
+ if(!ready||!isAdmin())throw new Error("Un compte administrateur actif est requis.");
+ if(!members.length&&!media.length)throw new Error("Aucune donnée historique trouvée dans ce navigateur. N’importez pas les données d’exemple codées dans le site.");
+ migrateBtn.disabled=true;document.getElementById("backup").disabled=true;logEl.textContent="";
+ try{
+  const {data:{user}}=await lasSupabase.auth.getUser();if(!user)throw new Error("Session expirée.");
+  const {data:existingMembers,error:existingError}=await lasSupabase.from("members").select("id,photo_path");if(existingError)throw existingError;
+  const existingPhotoById=Object.fromEntries((existingMembers||[]).map(r=>[String(r.id),r.photo_path]));
+  const rows=[];
+  for(const m of members){
+   const row={id:Number(m.id),name:String(m.name||"Membre sans nom").trim(),phone:m.phone||null,email:m.email||null,address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active",birthday_visible:m.birthdayVisible!==false,photo_path:existingPhotoById[String(m.id)]||null};
+   if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
+    const blob=await (await fetch(m.photo)).blob();
+    if(blob.size<=10*1024*1024){
+     const ext=(blob.type.split("/")[1]||"jpg").replace(/[^a-z0-9]/gi,"").slice(0,8)||"jpg";
+     const path="members/"+Number(m.id)+"/"+crypto.randomUUID()+"."+ext;
+     const {error:photoError}=await lasSupabase.storage.from("las-private-media").upload(path,blob,{contentType:blob.type,upsert:false});
+     if(photoError)throw photoError;row.photo_path=path;
+    }else log("Photo trop volumineuse, non importée : "+String(m.name||m.id));
+   }
+   rows.push(row);
+  }
+  if(rows.length){const {error}=await lasSupabase.from("members").upsert(rows,{onConflict:"id"});if(error)throw error;const {error:seqError}=await lasSupabase.rpc("sync_las_member_identity");if(seqError)throw seqError;log("Fiches membres importées : "+rows.length);}
+  const pays=[];
+  for(const m of members)for(const [year,months] of Object.entries(m.payments||{}))for(let i=0;i<(months||[]).length;i++)pays.push({member_id:Number(m.id),payment_year:Number(year),payment_month:i+1,paid:!!months[i],updated_by:user.id});
+  if(pays.length){const {error}=await lasSupabase.from("member_payments").upsert(pays,{onConflict:"member_id,payment_year,payment_month"});if(error)throw error;log("Écritures mensuelles de cotisations importées : "+pays.length);}
+  let importedMedia=0,skippedMedia=0;
+  for(const m of media){
+   const type=["photo","pdf","video"].includes(m.type)?m.type:"article";
+   let storage_path=null,external_url=null;
+   if(typeof m.url==="string"&&m.url.startsWith("data:")){
+    const response=await fetch(m.url);const blob=await response.blob();
+    if(blob.size>10*1024*1024){skippedMedia++;log("Média ignoré (>10 Mo) : "+String(m.title||m.id));continue;}
+    const ext=(blob.type.split("/")[1]||"bin").replace(/[^a-z0-9]/gi,"").slice(0,8)||"bin";
+    storage_path=user.id+"/legacy-"+String(m.id||Date.now())+"-"+crypto.randomUUID()+"."+ext;
+    const {error}=await lasSupabase.storage.from("las-private-media").upload(storage_path,blob,{contentType:blob.type,upsert:false});
+    if(error)throw error;
+   }else if(typeof m.url==="string"&&/^https:\/\//i.test(m.url)){external_url=m.url;}
+   const {error}=await lasSupabase.from("media_items").insert({legacy_id:String(m.id??""),author_id:user.id,title:String(m.title||"Publication LAS").slice(0,180),description:String(m.desc||""),media_type:type,storage_path,external_url,status:"published"});
+   if(error)throw error;importedMedia++;
+  }
+  log("Médias importés : "+importedMedia+"; ignorés : "+skippedMedia+".");
+  log("Migration terminée. Les données sources restent dans le navigateur. Vérifiez les résultats dans Supabase avant toute suppression manuelle.");
+  statusEl.textContent="Migration terminée; contrôlez les résultats et les journaux ci-dessus.";
+ }catch(e){log("ERREUR : "+(e.message||String(e)));statusEl.textContent="Migration interrompue. Les données sources n’ont pas été supprimées.";}
+ finally{migrateBtn.disabled=false;document.getElementById("backup").disabled=false;}
+}
+document.getElementById("backup").addEventListener("click",downloadBackup);
+document.getElementById("backup-file").addEventListener("change",async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+  const obj=JSON.parse(await file.text());
+  const m=typeof obj.members==="string"?(obj.members?JSON.parse(obj.members):[]):obj.members;
+  const md=typeof obj.media==="string"?(obj.media?JSON.parse(obj.media):[]):obj.media;
+  if(!Array.isArray(m)||!Array.isArray(md))throw new Error("Le fichier doit contenir des tableaux members et media.");
+  members=m;media=md;sourceBackup=obj;
+  countsEl.innerHTML='<div class="rounded-xl bg-slate-50 p-4"><span class="block text-2xl font-black">'+members.length+'</span><span class="text-xs text-slate-500">Fiches membres dans la sauvegarde</span></div><div class="rounded-xl bg-slate-50 p-4"><span class="block text-2xl font-black">'+media.length+'</span><span class="text-xs text-slate-500">Médias dans la sauvegarde</span></div>';
+  statusEl.textContent="Sauvegarde chargée. Vérifiez les volumes et téléchargez-la à nouveau si nécessaire.";
+  ready=!!(window.LAS_SUPABASE_CONFIG&&window.lasSupabase&&isAdmin());
+  migrateBtn.disabled=!(ready&&(members.length||media.length));
+ }catch(err){statusEl.textContent="Fichier de sauvegarde invalide : "+(err.message||String(err));migrateBtn.disabled=true;}
+});
+migrateBtn.addEventListener("click",()=>migrate());
+(async()=>{try{
+ await window.LAS_SUPABASE_READY;
+ if(!lasIsConfigured())throw new Error("Configuration Supabase absente. Renseignez supabase-config.js avec l’URL du projet et la clé publique.");
+ const result=await initAuth();if(!result.success)throw new Error("Connectez-vous d’abord via login.html avec un compte Supabase actif.");
+ if(!isAdmin())throw new Error("Accès réservé à un profil dont le rôle Supabase est admin.");
+ const src=readLegacy();if(!src.hasSource)statusEl.textContent="Session administrateur valide, mais aucune donnée historique n’est enregistrée dans ce navigateur. Ouvrez cette page sur le navigateur source.";
+ else statusEl.textContent="Session administrateur valide. Vérifiez les volumes, téléchargez une sauvegarde, puis lancez l’import.";
+ ready=true;migrateBtn.disabled=!(src.hasSource&&(members.length||media.length));
+ }catch(e){statusEl.textContent=e.message||String(e);migrateBtn.disabled=true;}})();
+</script>
+</body></html>
