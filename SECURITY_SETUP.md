@@ -35,8 +35,8 @@ Si le site n'est pas hébergé sur Vercel, il faut adapter l'endpoint de configu
 ```javascript
 const backup = {
   createdAt: new Date().toISOString(),
-  members: localStorage.getItem("las_members_v2"),
-  media: localStorage.getItem("las_media_v1")
+  members: typeof membersData !== "undefined" ? membersData : JSON.parse(localStorage.getItem("las_members_v2") || "[]"),
+  media: typeof mediaData !== "undefined" ? mediaData : JSON.parse(localStorage.getItem("las_media_v1") || "[]")
 };
 const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" }));
 const a = document.createElement("a");
