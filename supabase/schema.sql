@@ -29,6 +29,7 @@ create table if not exists public.members (
   forum_status text,
   meeting_status text,
   photo_path text,
+  birthday_visible boolean not null default true,
   status text not null default 'active' check (status in ('active','inactive','suspended')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -57,6 +58,7 @@ alter table public.members add column if not exists asbl_status text;
 alter table public.members add column if not exists forum_status text;
 alter table public.members add column if not exists meeting_status text;
 alter table public.members add column if not exists photo_path text;
+alter table public.members add column if not exists birthday_visible boolean not null default true;
 alter table public.members add column if not exists status text not null default 'active';
 alter table public.members add column if not exists created_at timestamptz not null default now();
 alter table public.members add column if not exists updated_at timestamptz not null default now();
@@ -133,6 +135,21 @@ returns boolean language sql stable security definer set search_path = public, a
 as $$
   select exists(select 1 from public.profiles where id = auth.uid() and active = true)
 $$;
+
+create or replace function public.las_birthday_feed()
+returns table(member_id bigint, display_name text, birth_month integer, birth_day integer)
+language sql stable security definer set search_path = public, auth
+as $$
+  select m.id, m.name, extract(month from m.birthdate)::integer, extract(day from m.birthdate)::integer
+  from public.members m
+  where public.is_las_active()
+    and m.status = 'active'
+    and m.birthday_visible = true
+    and m.birthdate is not null
+  order by extract(month from m.birthdate), extract(day from m.birthdate), m.name
+$$;
+revoke all on function public.las_birthday_feed() from public;
+grant execute on function public.las_birthday_feed() to authenticated;
 
 create or replace function public.sync_las_member_identity()
 returns void language plpgsql security definer set search_path = public, auth
