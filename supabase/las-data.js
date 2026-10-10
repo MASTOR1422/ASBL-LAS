@@ -24,6 +24,10 @@ window.LASData = (() => {
       const y=String(p.payment_year); if(!m.payments[y]) m.payments[y]=Array(12).fill(false);
       m.payments[y][Number(p.payment_month)-1]=!!p.paid;
     }
+    await Promise.all(mr.data.filter(r=>r.photo_path).map(async r=>{
+      const {data,error}=await db.storage.from("las-private-media").createSignedUrl(r.photo_path,300);
+      if(!error&&data?.signedUrl&&map.has(Number(r.id))) map.get(Number(r.id)).photo=data.signedUrl;
+    }));
     return [...map.values()];
   }
   async function createMember(m) {
@@ -41,13 +45,26 @@ window.LASData = (() => {
   }
   async function saveMembers(members) {
     if(!["admin","secretaire"].includes(ROLE)) throw new Error("Droits insuffisants pour modifier les fiches membres.");
-    const rows=members.map(m=>({
-      id:Number(m.id),name:String(m.name||"").trim(),phone:m.phone||null,email:m.email||null,
-      address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,
-      birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,
-      joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,
-      meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active"
-    }));
+    const rows=[];
+    for(const m of members){
+      const row={
+        id:Number(m.id),name:String(m.name||"").trim(),phone:m.phone||null,email:m.email||null,
+        address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,
+        birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,
+        joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,
+        meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active"
+      };
+      if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
+        const blob=await (await fetch(m.photo)).blob();
+        if(blob.size>10*1024*1024) throw new Error("La photo de "+m.name+" dépasse la limite de 10 Mo.");
+        const ext=(blob.type.split("/")[1]||"jpg").replace(/[^a-z0-9]/gi,"").slice(0,8)||"jpg";
+        const path="members/"+Number(m.id)+"/"+crypto.randomUUID()+"."+ext;
+        const {error:uploadError}=await client().storage.from("las-private-media").upload(path,blob,{contentType:blob.type,upsert:false});
+        if(uploadError) throw uploadError;
+        row.photo_path=path;
+      }
+      rows.push(row);
+    }
     if(!rows.length) return;
     const {error}=await client().from("members").upsert(rows,{onConflict:"id"});
     if(error) throw error;
