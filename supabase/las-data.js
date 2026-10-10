@@ -7,7 +7,7 @@ window.LASData = (() => {
       note:r.note||"", birthdate:r.birthdate||"", birthplace:r.birthplace||"",
       profession:r.profession||"", poste:r.position||"", joined:r.joined_on||"",
       asbl:r.asbl_status||"OUI", forum:r.forum_status||"NON", reunion:r.meeting_status||"NON",
-      photo:"", payments:{}
+      photo:"", photoPath:r.photo_path||null, payments:{}
     };
   }
   async function loadMembers() {
@@ -41,7 +41,19 @@ window.LASData = (() => {
     };
     const {data,error}=await client().from("members").insert(row).select("id").single();
     if(error) throw error;
-    return Number(data.id);
+    const id=Number(data.id);
+    if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
+      const blob=await (await fetch(m.photo)).blob();
+      if(blob.size>10*1024*1024) throw new Error("La photo dépasse la limite de 10 Mo.");
+      const ext=(blob.type.split("/")[1]||"jpg").replace(/[^a-z0-9]/gi,"").slice(0,8)||"jpg";
+      const path="members/"+id+"/"+crypto.randomUUID()+"."+ext;
+      const {error:uploadError}=await client().storage.from("las-private-media").upload(path,blob,{contentType:blob.type,upsert:false});
+      if(uploadError) throw uploadError;
+      const {error:updateError}=await client().from("members").update({photo_path:path}).eq("id",id);
+      if(updateError) throw updateError;
+      m.photoPath=path;
+    }
+    return id;
   }
   async function saveMembers(members) {
     if(!["admin","secretaire"].includes(ROLE)) throw new Error("Droits insuffisants pour modifier les fiches membres.");
@@ -52,7 +64,7 @@ window.LASData = (() => {
         address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,
         birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,
         joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,
-        meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active"
+        meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active",photo_path:m.photoPath||null
       };
       if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
         const blob=await (await fetch(m.photo)).blob();
@@ -61,7 +73,7 @@ window.LASData = (() => {
         const path="members/"+Number(m.id)+"/"+crypto.randomUUID()+"."+ext;
         const {error:uploadError}=await client().storage.from("las-private-media").upload(path,blob,{contentType:blob.type,upsert:false});
         if(uploadError) throw uploadError;
-        row.photo_path=path;
+        row.photo_path=path; m.photoPath=path;
       }
       rows.push(row);
     }
