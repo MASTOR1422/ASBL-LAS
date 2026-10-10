@@ -1,73 +1,46 @@
-# Mise en service sécurisée — ASBL LAS
+# Authentification LAS par nom d'utilisateur
 
-## Ce que le dépôt contient maintenant
-- Authentification via Supabase Auth; aucune session administrateur automatique ni mot de passe codé en dur.
-- Rôles chargés depuis `public.profiles`; aucun rôle sélectionnable sur la page de connexion.
-- Configuration publique chargée à l'exécution via `/api/supabase-config`, sans committer de clé dans le dépôt.
-- Données de membres et cotisations lues/écrites dans Supabase, sous politiques RLS.
-- Blog communautaire et commentaires pour les comptes actifs.
-- Outil de sauvegarde et migration historique à `/admin-migration.html`.
-- La branche `security/las-security-by-design` reste séparée de `main`.
+## Changements préparés
+- La page de connexion utilise un nom d'utilisateur et un mot de passe.
+- La recherche nom d'utilisateur → adresse Auth se fait côté serveur dans `/api/auth/*`.
+- La table privée `public.auth_login_map` ne possède aucune politique RLS donnant accès aux navigateurs.
+- La récupération renvoie un e-mail vers `/reset-password.html`; la page permet de définir un nouveau mot de passe.
+- Les messages de récupération ne révèlent pas si un identifiant existe.
+- Aucun compte, profil ou contenu existant n'est supprimé.
 
-## Configuration du projet Supabase existant
-La branche principale du dépôt ne contenait pas d'URL Supabase ni de clé publique configurée. Le code ne permet donc pas d'identifier automatiquement le projet existant. Aucun secret n'a été recherché ou ajouté au dépôt.
+## Variables Vercel nécessaires
+Conservez les variables publiques déjà utilisées et ajoutez les variables serveur suivantes dans **Vercel → Project Settings → Environment Variables** :
+- `SUPABASE_SERVICE_ROLE_KEY`: clé service-role/secret, serveur uniquement, jamais préfixée `NEXT_PUBLIC_`.
+- `APP_BASE_URL`: URL exacte du site déployé, par exemple `https://asbl-las-security-preview.vercel.app` pour la prévisualisation actuelle.
+- `SUPABASE_URL`: URL du projet Supabase.
+- `SUPABASE_PUBLISHABLE_KEY`: clé publishable (ou anon).
 
-### 1. Variables de déploiement
-Dans Vercel → Project Settings → Environment Variables, ajoutez :
-- `SUPABASE_URL` : URL HTTPS du projet Supabase.
-- `SUPABASE_PUBLISHABLE_KEY` : clé publishable (ou anon) du projet.
+Ne placez jamais la clé service-role/secret dans `supabase-config.js`, dans le HTML, dans GitHub ou dans une variable `NEXT_PUBLIC_*`.
 
-Ne configurez jamais `service_role`, une clé secrète ou un mot de passe dans une variable exposée au navigateur. Redéployez après l'ajout des variables. L'endpoint `/api/supabase-config` renvoie uniquement l'URL et la clé publique nécessaire au client.
+## Migration de base de données
+1. Faites une sauvegarde du projet Supabase.
+2. Exécutez `supabase/migrations/202610100001_username_auth.sql` dans le SQL Editor du projet existant.
+3. Vérifiez que les utilisateurs déjà autorisés ont une ligne dans `auth_login_map`. La migration ne supprime aucune table ni aucun utilisateur.
+4. Dans **Authentication → URL Configuration**, définissez **Site URL** sur la base URL déployée et ajoutez `https://asbl-las-security-preview.vercel.app/**` (ainsi que les URL de production et de développement réellement utilisées) aux Redirect URLs.
+5. Vérifiez le modèle d'e-mail de récupération Supabase et le lien de redirection vers `/reset-password.html`.
 
-Si le site n'est pas hébergé sur Vercel, il faut adapter l'endpoint de configuration à l'hébergeur avant déploiement.
+## Création manuelle et sûre du compte root
+Aucun mot de passe générique n'est codé dans le dépôt et aucun compte privilégié n'est créé automatiquement par le navigateur.
+1. Dans Supabase → Authentication → Users, créez un nouvel utilisateur avec **ton adresse e-mail de secours personnelle** et un mot de passe long aléatoire, ou utilisez l'option d'invitation/réinitialisation proposée par le Dashboard.
+2. Copiez son UUID et créez dans `public.profiles` le profil correspondant avec `role='admin'`, `active=true`, `display_name='Root LAS'`. Adaptez les colonnes obligatoires à la structure réellement présente.
+3. Dans SQL Editor, après vérification de l'UUID et de l'adresse, ajoutez la ligne correspondante à `public.auth_login_map` avec `username='root'` et l'adresse e-mail de cet utilisateur. Ne modifiez pas le profil administrateur actuel.
+4. Connectez-vous une première fois avec `root`, puis changez le mot de passe pour un mot de passe unique conservé dans un gestionnaire de mots de passe.
 
-### 2. Schéma et autorisations
-1. Faites une sauvegarde de la base Supabase existante.
-2. Examinez `supabase/schema.sql`; il crée les tables `profiles`, `members`, `member_payments`, `posts`, `post_comments`, `media_items` et le bucket privé `las-private-media`, avec RLS.
-3. Exécutez le SQL dans le SQL Editor du projet existant uniquement après avoir vérifié les éventuelles tables déjà présentes. Le script n'efface pas les tables, mais une installation antérieure avec des colonnes différentes doit être réconciliée avant exécution.
-4. Créez les comptes dans Supabase Authentication, puis ajoutez manuellement leurs profils via le Dashboard avec le même UUID. Attribuez les rôles depuis le Dashboard; les profils restent inactifs jusqu'à validation.
-5. Vérifiez avec des comptes de test admin, secrétaire, trésorier et membre. Les rôles doivent être confirmés par RLS, pas seulement par les boutons masqués.
+**Ne réutilisez pas un mot de passe générique permanent.** Le nom d'utilisateur `root` n'est pas un secret : la sécurité repose sur un mot de passe fort, la récupération vérifiée et les contrôles de rôle/RLS.
 
-## Migration des données du navigateur
-1. Les données du navigateur ne sont accessibles que depuis leur origine actuelle. Comme la branche de travail est séparée, le navigateur du site de production et celui d'une prévisualisation peuvent avoir des stockages différents.
-2. Sur l'ancien site de production, ouvrez les outils de développement du navigateur (F12 → Console) et exécutez ce code pour télécharger une sauvegarde locale. Il ne transmet rien au réseau :
+## Récupération administrateur
+Si l'e-mail de récupération n'est plus accessible, le propriétaire doit utiliser le Dashboard Supabase pour lancer une réinitialisation/invitation sur l'adresse de secours ou corriger l'adresse après vérification d'identité. Ne créez pas de bouton public qui modifie les mots de passe ou les rôles sans authentification. Si une récupération assistée est nécessaire, elle doit être opérée côté serveur avec une procédure d'identité distincte et auditée.
 
-```javascript
-const backup = {
-  createdAt: new Date().toISOString(),
-  members: typeof membersData !== "undefined" ? membersData : JSON.parse(localStorage.getItem("las_members_v2") || "[]"),
-  media: typeof mediaData !== "undefined" ? mediaData : JSON.parse(localStorage.getItem("las_media_v1") || "[]")
-};
-const url = URL.createObjectURL(new Blob([JSON.stringify(backup, null, 2)], { type: "application/json" }));
-const a = document.createElement("a");
-a.href = url;
-a.download = "las-backup-local.json";
-a.click();
-URL.revokeObjectURL(url);
-```
-
-3. Ouvrez la branche de travail sur l'hébergement configuré, connectez-vous avec un compte administrateur Supabase actif et ouvrez `/admin-migration.html`.
-4. Chargez le fichier JSON exporté, vérifiez les volumes, puis téléchargez une copie de sauvegarde avant de lancer l'import.
-5. L'outil importe les fiches membres et les états mensuels de cotisation dans les tables dédiées. Il importe aussi les métadonnées médias disponibles et charge les fichiers base64 dans le bucket privé si leur taille ne dépasse pas 10 Mo.
-6. Les données d'origine ne sont pas supprimées. Contrôlez les comptes de lignes dans Supabase et testez les fiches et paiements dans le site avant toute suppression manuelle.
-
-Important : les données du navigateur sont propres à chaque navigateur/appareil. Si plusieurs appareils contiennent des versions différentes, sauvegardez-les séparément et réconciliez les doublons avant de migrer. Les données de démonstration qui n'ont jamais été enregistrées dans `localStorage` ne sont pas automatiquement importées.
-
-## Blog communautaire
-Les publications et commentaires sont enregistrés dans `posts` et `post_comments`. Seuls les profils actifs peuvent lire et écrire. Les auteurs peuvent modifier/supprimer leurs propres publications/commentaires; l'administrateur peut modérer. Vérifiez ces règles par des tentatives d'accès direct à la base, pas uniquement via l'interface.
-
-## Limites connues avant production
-- Le contenu historique de photothèque qui n'a pas été migré ne s'affichera pas dans la nouvelle session; vérifiez la page de migration.
-- Le composant historique de photothèque/ajout de média n'est pas encore entièrement remplacé par le stockage Supabase dans l'interface principale. N'utilisez pas cette partie pour de nouveaux documents confidentiels avant l'étape dédiée au média.
-- Les fiches complètes et cotisations sont visibles seulement aux rôles admin, secrétaire et trésorier via RLS. Les membres ordinaires accèdent au blog, pas au répertoire financier.
-- Vérifiez les formats de dates, les identifiants membres existants et la cohérence des années de cotisation avant l'import.
-- Le rappel d'anniversaire utilise les dates de naissance autorisées; définissez une politique interne sur qui peut voir ces données personnelles.
-- Exécutez des tests fonctionnels et RLS avant de fusionner. Cette branche n'est pas fusionnée dans `main`.
-
-## Tests minimums
-- Session absente, profil absent/inactif, et mauvais mot de passe : accès refusé.
-- Membre : peut publier/commenter mais ne peut pas lire/modifier les tables de membres ou de cotisations.
-- Secrétaire : peut gérer les fiches mais ne peut pas modifier les paiements.
-- Trésorier : peut lire les données financières et modifier les paiements, mais pas supprimer des membres.
-- Admin : peut modérer et gérer les opérations prévues.
-- Import : comptez les membres, mois de cotisation et médias avant/après; vérifiez que la source locale est toujours présente.
+## Contrôles avant fusion
+- Connexion avec un identifiant existant généré par la migration.
+- Identifiant ou mot de passe incorrect : refus générique.
+- Compte inactif : refus.
+- Demande de récupération : réponse neutre et e-mail reçu.
+- Lien récent : la page `reset-password.html` permet de changer le mot de passe.
+- Lien expiré : message explicite et retour vers `login.html`.
+- Vérifier les rôles et politiques RLS avec des comptes de test.
