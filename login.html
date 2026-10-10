@@ -101,7 +101,8 @@
                 errorBox.className = "bg-rose-50 text-rose-600 text-xs font-bold p-3.5 rounded-xl text-center border border-rose-200";
             } finally { button.disabled = false; }
         }
-        document.addEventListener("DOMContentLoaded", () => {
+        document.addEventListener("DOMContentLoaded", async () => {
+            try { await window.LAS_SUPABASE_READY; } catch (_) {}
             if (!lasIsConfigured()) {
                 const box = document.getElementById("error-msg");
                 box.textContent = "Configuration requise : renseignez l’URL et la clé publique Supabase dans supabase-config.js, puis appliquez supabase/schema.sql. Aucun accès de secours n’est activé.";
