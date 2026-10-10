@@ -29,6 +29,10 @@ create index if not exists comments_post_created_idx on public.post_comments (po
 alter table public.posts enable row level security;
 alter table public.post_comments enable row level security;
 
+drop policy if exists posts_read_published on public.posts;
+drop policy if exists posts_create_active_member on public.posts;
+drop policy if exists posts_update_author_or_admin on public.posts;
+drop policy if exists posts_delete_author_or_admin on public.posts;
 drop policy if exists posts_read_active on public.posts;
 create policy posts_read_active on public.posts for select to authenticated
 using (public.is_las_active() and (status='published' or public.current_las_role()='admin'));
