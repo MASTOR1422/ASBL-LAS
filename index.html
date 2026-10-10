@@ -9,10 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
     <script src="supabase-client.js"></script>
     <script src="Auth.js"></script>
     <script src="supabase/las-data.js"></script>
+    <script src="supabase/las-media.js"></script>
     <script src="las-blog.js"></script>
 
     <script>
@@ -70,7 +70,7 @@
                     <div class="relative shrink-0">
                         <img src="logo LAS_2.jpg" alt="Logo ASBL LAS"
                              class="w-14 h-14 object-contain bg-white rounded-xl p-1 shadow-md border border-las-500/30 ring-2 ring-las-500/20"
-                             onerror="this.onerror=null;this.src='logo LAS.jpg';this.onerror=function(){this.replaceWith(document.getElementById('svg-logo-fallback').cloneNode(true));};">
+                             onerror="this.onerror=null;this.replaceWith(document.getElementById('svg-logo-fallback').cloneNode(true));">
                         <div id="svg-logo-fallback" class="hidden w-14 h-14 rounded-xl bg-white p-0.5 shadow-md border border-las-500/30 flex items-center justify-center">
                             <i class="fa-solid fa-seedling text-2xl text-las-600"></i>
                         </div>
@@ -84,7 +84,7 @@
                 </div>
 
                 <div class="flex items-center gap-2.5 w-full lg:w-auto justify-end flex-wrap">
-                    <img src="logo LAS_2.jpg" alt="Logo officiel ASBL LAS" class="w-10 h-10 object-contain bg-white rounded-lg p-1 border border-las-500/30" onerror="this.onerror=null;this.src='logo LAS.jpg'">
+                    <img src="logo LAS_2.jpg" alt="Logo officiel ASBL LAS" class="w-10 h-10 object-contain bg-white rounded-lg p-1 border border-las-500/30">
                     <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700">
                         <i class="fa-solid fa-user-shield text-las-400 text-xs"></i>
                         <span class="text-xs font-bold" id="current-user">—</span>
@@ -128,7 +128,7 @@
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <img src="logo LAS_2.jpg" alt="Logo ASBL LAS" class="w-16 h-16 object-contain rounded-lg border border-slate-300 p-0.5"
-                     onerror="this.onerror=null;this.src='logo LAS.jpg';this.onerror=function(){this.replaceWith(document.getElementById('svg-logo-fallback').cloneNode(true));};">
+                     onerror="this.onerror=null;this.replaceWith(document.getElementById('svg-logo-fallback').cloneNode(true));">
                 <div>
                     <h1 class="text-lg font-black text-slate-900 uppercase tracking-tight">ASBL LES AMIS DE LA SEMENCE (LAS)</h1>
                     <p class="text-xs font-bold text-las-800">RÉPERTOIRE OFFICIEL ET ÉTAT DES COTISATIONS ET PRÉSENCES</p>
@@ -261,6 +261,7 @@
 
             <!-- FILTRES DE MÉDIAS -->
             <div class="flex items-center gap-2 overflow-x-auto pb-2">
+                <button id="btn-add-media" type="button" onclick="openMediaModal()" class="hidden shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-bold bg-green-700 text-white hover:bg-green-600 transition"><i class="fa-solid fa-upload mr-1"></i> Publier un média</button>
                 <button onclick="filterMedia('ALL')" id="filter-media-ALL" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Tous</button>
                 <button onclick="filterMedia('photo')" id="filter-media-photo" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Photothèque (Photos)</button>
                 <button onclick="filterMedia('pdf')" id="filter-media-pdf" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition">Documents PDF / Rapports</button>
@@ -443,7 +444,6 @@ const COTISATION_MENSUELLE = 10;
 const MOIS = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Août","Sep","Oct","Nov","Déc"];
 const ANNEE_COURANTE = new Date().getFullYear();
 const DB_KEY = "las_members_v2";
-const MEDIA_KEY = "las_media_v1";
 
 const DEFAULT_MEMBERS = [];
 
@@ -467,11 +467,6 @@ function loadData(){ return []; }
 
 async function saveData(){
   await LASData.saveMembers(membersData);
-}
-
-function saveMediaStorage(){
-  try { localStorage.setItem(MEDIA_KEY, JSON.stringify(mediaData)); }
-  catch(e){}
 }
 
 function switchTab(tab){
@@ -1068,95 +1063,106 @@ function printMemberCard(){
 }
 
 // ============================================================
-//  LOGIQUE DU BLOG / PHOTOTHÈQUE / DOCUMENTS
+//  LOGIQUE DE LA PHOTOTHÈQUE — Supabase Storage privé
 // ============================================================
-function openMediaModal(){ alert("L’ajout de médias est temporairement désactivé pendant la migration vers le stockage privé Supabase."); }
-function closeMediaModal(){ document.getElementById('media-modal').classList.add('hidden'); }
+function openMediaModal(){
+  if (!["admin","secretaire"].includes(ROLE)) { alert("Votre rôle ne permet pas de publier un média."); return; }
+  document.getElementById("media-modal").classList.remove("hidden");
+}
+function closeMediaModal(){ document.getElementById("media-modal").classList.add("hidden"); }
 
-function saveMedia(e){
+function safeMediaUrl(value){
+  try {
+    const url = new URL(String(value || ""), window.location.origin);
+    return url.protocol === "https:" ? url.href : "";
+  } catch (_) { return ""; }
+}
+
+async function refreshMedia(){
+  const grid = document.getElementById("media-grid");
+  try {
+    mediaData = await LASMedia.load();
+    renderMedia("ALL");
+  } catch (e) {
+    console.error("Chargement de la photothèque LAS impossible:", e);
+    if (grid) grid.innerHTML = '<div class="col-span-full text-center py-10 text-rose-600 text-xs">La photothèque est momentanément indisponible. Vérifiez le stockage privé et les politiques Supabase.</div>';
+  }
+}
+
+async function saveMedia(e){
   e.preventDefault();
-  alert("L’ajout de médias est temporairement désactivé pendant la migration vers le stockage privé Supabase.");
-  return;
-  const type = document.getElementById('media-type').value;
-  const title = document.getElementById('media-title').value.trim();
-  const desc = document.getElementById('media-desc').value.trim();
-  const fileInput = document.getElementById('media-file');
-
-  if(fileInput.files && fileInput.files[0]){
-    const reader = new FileReader();
-    reader.onload = function(ev){
-      mediaData.unshift({
-        id: Date.now(),
-        type: type,
-        title: title,
-        desc: desc,
-        url: ev.target.result,
-        date: new Date().toISOString().slice(0,10)
-      });
-      saveMediaStorage();
-      closeMediaModal();
-      renderMedia('ALL');
-    };
-    reader.readAsDataURL(fileInput.files[0]);
+  if (!["admin","secretaire"].includes(ROLE)) { alert("Votre rôle ne permet pas de publier un média."); return; }
+  const form = e.currentTarget;
+  const submit = form.querySelector('button[type="submit"]');
+  const original = submit ? submit.textContent : "";
+  const file = document.getElementById("media-file").files[0];
+  try {
+    if (submit) { submit.disabled = true; submit.textContent = "Publication…"; }
+    await LASMedia.upload(file, {
+      type: document.getElementById("media-type").value,
+      title: document.getElementById("media-title").value,
+      description: document.getElementById("media-desc").value
+    });
+    form.reset();
+    closeMediaModal();
+    await refreshMedia();
+    alert("Média publié dans le stockage privé LAS.");
+  } catch (e) {
+    console.error(e);
+    alert(e.message || "Publication impossible. Vérifiez le fichier, les autorisations et la connexion.");
+  } finally {
+    if (submit) { submit.disabled = false; submit.textContent = original || "Publier"; }
   }
 }
 
 function filterMedia(type){
-  ['ALL','photo','pdf','video'].forEach(t => {
-    const btn = document.getElementById(`filter-media-${t}`);
-    if(btn) btn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition";
+  ["ALL","photo","pdf","video"].forEach(t => {
+    const btn = document.getElementById("filter-media-" + t);
+    if (btn) btn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition";
   });
-  const activeBtn = document.getElementById(`filter-media-${type}`);
-  if(activeBtn) activeBtn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition";
+  const activeBtn = document.getElementById("filter-media-" + type);
+  if (activeBtn) activeBtn.className = "px-3.5 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition";
   renderMedia(type);
 }
 
 function renderMedia(filter){
-  const grid = document.getElementById('media-grid');
-  const filtered = filter === 'ALL' ? mediaData : mediaData.filter(m => m.type === filter);
-
-  if(filtered.length === 0){
-    grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-xs font-medium">Aucun contenu trouvé.</div>`;
+  const grid = document.getElementById("media-grid");
+  if (!grid) return;
+  const filtered = filter === "ALL" ? mediaData : mediaData.filter(m => m.type === filter);
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400 text-xs font-medium">Aucun contenu publié pour le moment.</div>';
     return;
   }
-
   grid.innerHTML = filtered.map(m => {
-    let preview = '';
-    if(m.type === 'photo'){
-      preview = `<img src="${m.url}" alt="" class="w-full h-48 object-cover rounded-t-2xl">`;
-    } else if(m.type === 'pdf'){
-      preview = `<div class="w-full h-36 bg-rose-50 text-rose-600 flex flex-col items-center justify-center rounded-t-2xl gap-2"><i class="fa-solid fa-file-pdf text-4xl"></i><span class="text-xs font-bold">Document PDF</span></div>`;
+    const url = safeMediaUrl(m.url);
+    let preview = "";
+    if (m.type === "photo" && url) {
+      preview = '<img src="' + escapeHTML(url) + '" alt="" loading="lazy" class="w-full h-48 object-cover rounded-t-2xl">';
+    } else if (m.type === "pdf") {
+      preview = '<div class="w-full h-36 bg-rose-50 text-rose-600 flex flex-col items-center justify-center rounded-t-2xl gap-2"><i class="fa-solid fa-file-pdf text-4xl"></i><span class="text-xs font-bold">Document PDF</span></div>';
+    } else if (m.type === "video" && url) {
+      preview = '<video src="' + escapeHTML(url) + '" controls preload="metadata" class="w-full h-48 object-cover rounded-t-2xl bg-black"></video>';
     } else {
-      preview = `<video src="${m.url}" controls class="w-full h-48 object-cover rounded-t-2xl bg-black"></video>`;
+      preview = '<div class="w-full h-36 bg-slate-50 text-slate-500 flex flex-col items-center justify-center rounded-t-2xl gap-2"><i class="fa-solid fa-file-lines text-4xl"></i><span class="text-xs font-bold">Publication LAS</span></div>';
     }
-
-    return `
-      <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between">
-        <div>
-          ${preview}
-          <div class="p-4 space-y-2">
-            <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-las-100 text-las-800">${m.type}</span>
-            <h3 class="font-bold text-slate-900 text-sm">${escapeHTML(m.title)}</h3>
-            <p class="text-xs text-slate-600">${escapeHTML(m.desc || '')}</p>
-          </div>
-        </div>
-        <div class="p-4 pt-0 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100 mt-2">
-          <span>${m.date}</span>
-          <div class="flex gap-2">
-            ${m.type === 'pdf' ? `<a href="${m.url}" download="Document_LAS.pdf" class="text-las-700 font-bold hover:underline"><i class="fa-solid fa-download"></i> Télécharger</a>` : ''}
-            <button onclick="deleteMedia(${m.id})" class="text-rose-500 hover:underline"><i class="fa-solid fa-trash"></i></button>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
+    const deleteButton = ROLE === "admin" ? '<button type="button" onclick="deleteMedia(' + Number(m.id) + ')" class="text-rose-500 hover:underline"><i class="fa-solid fa-trash"></i> Supprimer</button>' : "";
+    const downloadLink = m.type === "pdf" && url ? '<a href="' + escapeHTML(url) + '" target="_blank" rel="noopener noreferrer" class="text-las-700 font-bold hover:underline"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir le PDF</a>' : "";
+    return '<article class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col justify-between"><div>' + preview +
+      '<div class="p-4 space-y-2"><span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-las-100 text-las-800">' + escapeHTML(m.type) + '</span>' +
+      '<h3 class="font-bold text-slate-900 text-sm">' + escapeHTML(m.title) + '</h3><p class="text-xs text-slate-600">' + escapeHTML(m.desc || "") + '</p></div></div>' +
+      '<div class="p-4 pt-0 flex items-center justify-between gap-2 text-[11px] text-slate-400 border-t border-slate-100 mt-2"><span>' + escapeHTML(m.date || "") + '</span><div class="flex gap-2">' + downloadLink + deleteButton + '</div></div></article>';
+  }).join("");
 }
 
-function deleteMedia(id){
-  if (!isAdmin()) { alert("Seul l’administrateur peut supprimer un média."); return; }
-  if(confirm("Supprimer cette publication ?")){
-    mediaData = mediaData.filter(m => m.id !== id);
-    saveMediaStorage();
-    renderMedia('ALL');
+async function deleteMedia(id){
+  if (ROLE !== "admin") { alert("Seul l’administrateur peut supprimer un média."); return; }
+  if (!confirm("Supprimer définitivement ce média du catalogue LAS ?")) return;
+  try {
+    await LASMedia.remove(id);
+    await refreshMedia();
+  } catch (e) {
+    console.error(e);
+    alert(e.message || "Suppression impossible. Vérifiez les droits et réessayez.");
   }
 }
 
@@ -1206,6 +1212,8 @@ function applyRoleUI(){
     document.getElementById('tab-btn-media')?.classList.remove('hidden');
     document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.add('hidden'));
   }
+  const mediaAdd = document.getElementById("btn-add-media");
+  if (mediaAdd) mediaAdd.classList.toggle("hidden", !["admin","secretaire"].includes(ROLE));
   const passwordButton = document.querySelector('button[onclick="openPasswordModal()"]');
   if (passwordButton) passwordButton.classList.toggle('hidden', !SESSION.email);
   document.querySelectorAll('button[onclick^="exportCSV"], button[onclick^="window.print"]').forEach(el => el.classList.toggle('hidden', ROLE === 'membre'));
@@ -1246,6 +1254,7 @@ async function bootstrapLAS(){
       document.getElementById("section-members")?.classList.add("hidden");
     }
     applyRoleUI();
+    await refreshMedia();
     if (header) header.classList.remove("las-auth-gated");
     if (main) main.classList.remove("las-auth-gated");
     switchTab("media");
