@@ -133,6 +133,11 @@ async function requestPasswordReset(username) {
 async function changeUserPassword(_username, oldPassword, newPassword) {
   if (!LAS_AUTH_READY || !window.lasSupabase) return { success: false, message: "Session expirée. Reconnectez-vous." };
   if (!newPassword || newPassword.length < 12) return { success: false, message: "Utilisez au moins 12 caractères pour le nouveau mot de passe." };
+  const { error: verifyError } = await window.lasSupabase.auth.signInWithPassword({
+    email: SESSION.email,
+    password: oldPassword
+  });
+  if (verifyError) return { success: false, message: "L’ancien mot de passe est incorrect." };
   const { error } = await window.lasSupabase.auth.updateUser({ password: newPassword });
   if (error) return { success: false, message: "Modification impossible : " + error.message };
   return { success: true, message: "Mot de passe modifié avec succès." };
