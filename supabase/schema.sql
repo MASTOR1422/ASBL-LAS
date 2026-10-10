@@ -131,7 +131,7 @@ create or replace function public.is_las_active()
 returns boolean language sql stable security definer set search_path = public, auth
 as $$
   select exists(select 1 from public.profiles where id = auth.uid() and active = true)
-$;
+$$;
 
 create or replace function public.sync_las_member_identity()
 returns void language plpgsql security definer set search_path = public, auth
@@ -146,7 +146,7 @@ begin
     false
   );
 end;
-$;
+$$;
 revoke all on function public.sync_las_member_identity() from public;
 grant execute on function public.sync_las_member_identity() to authenticated;
 
