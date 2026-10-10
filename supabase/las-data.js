@@ -39,47 +39,88 @@ window.LASData = (() => {
       joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,
       meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active",birthday_visible:m.birthdayVisible!==false
     };
-    const {data,error}=await client().from("members").insert(row).select("id").single();
-    if(error) throw error;
-    const id=Number(data.id);
-    if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
-      const blob=await (await fetch(m.photo)).blob();
-      if(blob.size>10*1024*1024) throw new Error("La photo dépasse la limite de 10 Mo.");
-      const ext=(blob.type.split("/")[1]||"jpg").replace(/[^a-z0-9]/gi,"").slice(0,8)||"jpg";
-      const path="members/"+id+"/"+crypto.randomUUID()+"."+ext;
-      const {error:uploadError}=await client().storage.from("las-private-media").upload(path,blob,{contentType:blob.type,upsert:false});
-      if(uploadError) throw uploadError;
-      const {error:updateError}=await client().from("members").update({photo_path:path}).eq("id",id);
-      if(updateError) throw updateError;
-      m.photoPath=path;
+    let uploadedPath=null;
+    try {
+      if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
+        const blob=await (await fetch(m.photo)).blob();
+        if(blob.size>10*1024*1024) throw new Error("La photo dépasse la limite de 10 Mo.");
+        if(!["image/jpeg","image/png","image/webp"].includes(blob.type)) throw new Error("Format de photo non pris en charge. Utilisez JPG, PNG ou WebP.");
+        const ext=blob.type==="image/jpeg"?"jpg":blob.type.split("/")[1];
+        uploadedPath="members/new/"+crypto.randomUUID()+"."+ext;
+        const {error:uploadError}=await client().storage.from("las-private-media").upload(uploadedPath,blob,{contentType:blob.type,upsert:false});
+        if(uploadError) throw uploadError;
+        row.photo_path=uploadedPath;
+      }
+      const {data,error}=await client().from("members").insert(row).select("id").single();
+      if(error) throw error;
+      const id=Number(data.id);
+      m.photoPath=uploadedPath;
+      if(uploadedPath){
+        try {
+          const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(uploadedPath,300);
+          m.photo=!signError&&signed?.signedUrl?signed.signedUrl:"";
+        } catch (_) { m.photo=""; }
+      } else if(typeof m.photo==="string"&&m.photo.startsWith("data:")) {
+        m.photo="";
+      }
+      return id;
+    } catch(error) {
+      if(uploadedPath) {
+        const {error:cleanupError}=await client().storage.from("las-private-media").remove([uploadedPath]);
+        if(cleanupError) console.warn("Nettoyage du fichier photo incomplet.",cleanupError);
+      }
+      throw error;
     }
-    return id;
   }
   async function saveMembers(members) {
     if(!["admin","secretaire"].includes(ROLE)) throw new Error("Droits insuffisants pour modifier les fiches membres.");
-    const rows=[];
-    for(const m of members){
-      const row={
-        id:Number(m.id),name:String(m.name||"").trim(),phone:m.phone||null,email:m.email||null,
-        address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,
-        birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,
-        joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,
-        meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active",birthday_visible:m.birthdayVisible!==false,photo_path:m.photoPath||null
-      };
-      if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
-        const blob=await (await fetch(m.photo)).blob();
-        if(blob.size>10*1024*1024) throw new Error("La photo de "+m.name+" dépasse la limite de 10 Mo.");
-        const ext=(blob.type.split("/")[1]||"jpg").replace(/[^a-z0-9]/gi,"").slice(0,8)||"jpg";
-        const path="members/"+Number(m.id)+"/"+crypto.randomUUID()+"."+ext;
-        const {error:uploadError}=await client().storage.from("las-private-media").upload(path,blob,{contentType:blob.type,upsert:false});
-        if(uploadError) throw uploadError;
-        row.photo_path=path; m.photoPath=path;
+    const rows=[], uploadedPaths=[], photoUpdates=[];
+    try {
+      for(const m of members){
+        const row={
+          id:Number(m.id),name:String(m.name||"").trim(),phone:m.phone||null,email:m.email||null,
+          address:m.address||null,note:m.note||null,birthdate:m.birthdate||null,
+          birthplace:m.birthplace||null,profession:m.profession||null,position:m.poste||null,
+          joined_on:m.joined||null,asbl_status:m.asbl||null,forum_status:m.forum||null,
+          meeting_status:m.reunion||null,status:m.asbl==="NON"?"inactive":"active",
+          birthday_visible:m.birthdayVisible!==false,photo_path:m.photoPath||null
+        };
+        if(typeof m.photo==="string"&&m.photo.startsWith("data:")){
+          const blob=await (await fetch(m.photo)).blob();
+          if(blob.size>10*1024*1024) throw new Error("La photo de "+m.name+" dépasse la limite de 10 Mo.");
+          if(!["image/jpeg","image/png","image/webp"].includes(blob.type)) throw new Error("Format de photo non pris en charge pour "+m.name+". Utilisez JPG, PNG ou WebP.");
+          const ext=blob.type==="image/jpeg"?"jpg":blob.type.split("/")[1];
+          const path="members/"+Number(m.id)+"/"+crypto.randomUUID()+"."+ext;
+          const {error:uploadError}=await client().storage.from("las-private-media").upload(path,blob,{contentType:blob.type,upsert:false});
+          if(uploadError) throw uploadError;
+          uploadedPaths.push(path);
+          photoUpdates.push({member:m,path,oldPath:m.photoPath||null});
+          row.photo_path=path;
+        }
+        rows.push(row);
       }
-      rows.push(row);
+      if(rows.length){
+        const {error}=await client().from("members").upsert(rows,{onConflict:"id"});
+        if(error) throw error;
+      }
+    } catch(error) {
+      if(uploadedPaths.length){
+        const {error:cleanupError}=await client().storage.from("las-private-media").remove(uploadedPaths);
+        if(cleanupError) console.warn("Nettoyage des fichiers photos incomplet.",cleanupError);
+      }
+      throw error;
     }
-    if(!rows.length) return;
-    const {error}=await client().from("members").upsert(rows,{onConflict:"id"});
-    if(error) throw error;
+    for(const item of photoUpdates) {
+      item.member.photoPath=item.path;
+      try {
+        const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(item.path,300);
+        item.member.photo=!signError&&signed?.signedUrl?signed.signedUrl:"";
+      } catch (_) { item.member.photo=""; }
+      if(item.oldPath) {
+        const {error:cleanupError}=await client().storage.from("las-private-media").remove([item.oldPath]);
+        if(cleanupError) console.warn("L’ancienne photo n’a pas pu être supprimée.",cleanupError);
+      }
+    }
   }
   async function deleteMember(id) {
     if (ROLE !== "admin") throw new Error("Seul l’administrateur peut supprimer un membre.");
