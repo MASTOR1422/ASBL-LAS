@@ -14,10 +14,10 @@ window.LASMedia = (() => {
 
   function fileDetails(file) {
     const ext = String(file?.name || "").split(".").pop().toLowerCase();
-    const mime = MIME_BY_EXT[ext] || String(file?.type || "").toLowerCase();
-    if (!Object.values(MIME_BY_EXT).includes(mime)) {
-      throw new Error("Format non autorisé. Utilisez JPG, PNG, WebP, PDF, MP4 ou WebM.");
+    if (!Object.prototype.hasOwnProperty.call(MIME_BY_EXT, ext)) {
+      throw new Error("Extension non autorisée. Utilisez JPG, PNG, WebP, PDF, MP4 ou WebM.");
     }
+    const mime = MIME_BY_EXT[ext];
     if (file.type && file.type !== "application/octet-stream" && file.type !== mime &&
         !(file.type === "image/jpg" && mime === "image/jpeg")) {
       throw new Error("Le type du fichier ne correspond pas à son extension. Choisissez le bon fichier.");
