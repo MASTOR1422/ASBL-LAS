@@ -105,8 +105,9 @@ alter table public.post_comments enable row level security;
 alter table public.media_items enable row level security;
 
 drop policy if exists profiles_read_self_or_admin on public.profiles;
-create policy profiles_read_self_or_admin on public.profiles for select to authenticated
-using (id = auth.uid() or public.current_las_role() = 'admin');
+drop policy if exists profiles_read_active_names on public.profiles;
+create policy profiles_read_active_names on public.profiles for select to authenticated
+using (id = auth.uid() or public.current_las_role() = 'admin' or public.is_las_active());
 
 drop policy if exists members_read_staff on public.members;
 create policy members_read_staff on public.members for select to authenticated
