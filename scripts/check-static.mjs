@@ -46,9 +46,6 @@ for (const required of [
   }
 }
 
-if (failed) process.exit(1);
-
-
 const mediaMigration = readFileSync("supabase/migrations/20261010193000_las_unified_media_policies.sql", "utf8");
 for (const required of [
   "create policy media_read_active",
@@ -82,3 +79,5 @@ if (!mediaClient.includes("validLegacyId")) {
   failed = true;
   process.stderr.write("Media client must support legacy bigint IDs.\n");
 }
+
+if (failed) process.exit(1);
