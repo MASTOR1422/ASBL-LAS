@@ -38,40 +38,40 @@ drop policy if exists posts_insert_active on public.posts;
 drop policy if exists posts_update_author_admin on public.posts;
 drop policy if exists posts_delete_author_admin on public.posts;
 create policy posts_read_active on public.posts for select to authenticated
-using (private.is_las_active() and (status='published' or private.has_role('admin')));
+using (private.las_is_active() and (status='published' or private.las_current_role()='admin'));
 
 drop policy if exists posts_insert_active on public.posts;
 create policy posts_insert_active on public.posts for insert to authenticated
-with check (author_id=auth.uid() and private.is_las_active());
+with check (author_id=auth.uid() and private.las_is_active());
 
 drop policy if exists posts_update_author_admin on public.posts;
 create policy posts_update_author_admin on public.posts for update to authenticated
-using (author_id=auth.uid() or private.has_role('admin'))
-with check (author_id=auth.uid() or private.has_role('admin'));
+using (author_id=auth.uid() or private.las_current_role()='admin')
+with check (author_id=auth.uid() or private.las_current_role()='admin');
 
 drop policy if exists posts_delete_author_admin on public.posts;
 create policy posts_delete_author_admin on public.posts for delete to authenticated
-using (author_id=auth.uid() or private.has_role('admin'));
+using (author_id=auth.uid() or private.las_current_role()='admin');
 
 drop policy if exists comments_read_active on public.post_comments;
 drop policy if exists comments_insert_active on public.post_comments;
 drop policy if exists comments_update_author_admin on public.post_comments;
 drop policy if exists comments_delete_author_admin on public.post_comments;
 create policy comments_read_active on public.post_comments for select to authenticated
-using (private.is_las_active() and (status='published' or author_id=auth.uid() or private.has_role('admin')));
+using (private.las_is_active() and (status='published' or author_id=auth.uid() or private.las_current_role()='admin'));
 
 drop policy if exists comments_insert_active on public.post_comments;
 create policy comments_insert_active on public.post_comments for insert to authenticated
-with check (author_id=auth.uid() and private.is_las_active());
+with check (author_id=auth.uid() and private.las_is_active());
 
 drop policy if exists comments_update_author_admin on public.post_comments;
 create policy comments_update_author_admin on public.post_comments for update to authenticated
-using (author_id=auth.uid() or private.has_role('admin'))
-with check (author_id=auth.uid() or private.has_role('admin'));
+using (author_id=auth.uid() or private.las_current_role()='admin')
+with check (author_id=auth.uid() or private.las_current_role()='admin');
 
 drop policy if exists comments_delete_author_admin on public.post_comments;
 create policy comments_delete_author_admin on public.post_comments for delete to authenticated
-using (author_id=auth.uid() or private.has_role('admin'));
+using (author_id=auth.uid() or private.las_current_role()='admin');
 
 grant select, insert, update, delete on public.posts, public.post_comments to authenticated;
 
