@@ -55,6 +55,12 @@ window.LASData = (() => {
       if(error) throw error;
       const id=Number(data.id);
       m.photoPath=uploadedPath;
+      if(uploadedPath){
+        const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(uploadedPath,300);
+        m.photo=!signError&&signed?.signedUrl?signed.signedUrl:"";
+      } else if(typeof m.photo==="string"&&m.photo.startsWith("data:")) {
+        m.photo="";
+      }
       return id;
     } catch(error) {
       if(uploadedPath) {
@@ -104,6 +110,8 @@ window.LASData = (() => {
     }
     for(const item of photoUpdates) {
       item.member.photoPath=item.path;
+      const {data:signed,error:signError}=await client().storage.from("las-private-media").createSignedUrl(item.path,300);
+      item.member.photo=!signError&&signed?.signedUrl?signed.signedUrl:"";
       if(item.oldPath) {
         const {error:cleanupError}=await client().storage.from("las-private-media").remove([item.oldPath]);
         if(cleanupError) console.warn("L’ancienne photo n’a pas pu être supprimée.",cleanupError);
