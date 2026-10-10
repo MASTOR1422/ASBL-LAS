@@ -108,7 +108,7 @@ document.getElementById("backup-file").addEventListener("change",async e=>{
 migrateBtn.addEventListener("click",()=>migrate());
 (async()=>{try{
  await window.LAS_SUPABASE_READY;
- if(!lasIsConfigured())throw new Error("Configuration Supabase absente. Renseignez supabase-config.js avec l’URL du projet et la clé publique.");
+ if(!lasIsConfigured())throw new Error("Configuration Supabase absente. Vérifiez les variables Vercel et l’endpoint /api/supabase-config.");
  const result=await initAuth();if(!result.success)throw new Error("Connectez-vous d’abord via login.html avec un compte Supabase actif.");
  if(!isAdmin())throw new Error("Accès réservé à un profil dont le rôle Supabase est admin.");
  const src=readLegacy();if(!src.hasSource)statusEl.textContent="Session administrateur valide, mais aucune donnée historique n’est enregistrée dans ce navigateur. Ouvrez cette page sur le navigateur source.";
