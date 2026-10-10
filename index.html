@@ -988,7 +988,7 @@ function deleteMember(id){
     calculateStats(); renderBirthdays(); renderData();
   }
 }
-function saveMember(e){
+async function saveMember(e){
   e.preventDefault();
   if (!canEdit()) { alert("Votre rôle ne permet pas de gérer les fiches membres."); return; }
   const idVal=document.getElementById('member-id').value;
@@ -1008,14 +1008,20 @@ function saveMember(e){
     reunion:document.getElementById('input-reunion').value,
     photo:tempPhoto
   };
-  if(idVal){
-    const i=membersData.findIndex(m=>m.id===parseInt(idVal));
-    if(i!==-1) membersData[i]=normalize(Object.assign({}, membersData[i], data, {id:parseInt(idVal)}));
-  } else {
-    const nextId=membersData.length?Math.max(...membersData.map(m=>m.id))+1:1;
-    membersData.unshift(normalize(Object.assign({id:nextId}, data)));
+  try {
+    if(idVal){
+      const i=membersData.findIndex(m=>m.id===parseInt(idVal));
+      if(i!==-1) membersData[i]=normalize(Object.assign({},membersData[i],data,{id:parseInt(idVal)}));
+      await saveData();
+    } else {
+      const newId=await LASData.createMember(data);
+      membersData.unshift(normalize(Object.assign({id:newId},data)));
+    }
+    calculateStats(); renderBirthdays(); renderData(); closeMemberModal();
+  } catch(err) {
+    console.error(err);
+    alert("La fiche n’a pas pu être enregistrée dans Supabase. Vérifiez vos droits et réessayez.");
   }
-  saveData(); calculateStats(); renderBirthdays(); renderData(); closeMemberModal();
 }
 
 // ============================================================
