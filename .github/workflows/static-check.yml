@@ -7,6 +7,7 @@ on:
       - integration/las-unified-platform
       - release/las-coherent
       - security/las-security-by-design
+      - fix/las-private-schema-usage
   pull_request:
     branches:
       - main
