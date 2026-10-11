@@ -60,6 +60,7 @@ for (const required of [
     process.stderr.write("Missing media migration safeguard: " + required + "\n");
   }
 }
+
 const blogMigration = readFileSync("supabase/migrations/20261010193001_las_unified_blog_discussions.sql", "utf8");
 for (const required of [
   "drop policy if exists posts_insert_active",
@@ -71,6 +72,18 @@ for (const required of [
   if (!blogMigration.includes(required)) {
     failed = true;
     process.stderr.write("Missing blog migration safeguard: " + required + "\n");
+  }
+}
+
+const privateSchemaMigration = readFileSync("supabase/migrations/20261011200000_las_private_schema_usage.sql", "utf8");
+for (const required of [
+  "revoke all on schema private from public, anon",
+  "grant usage on schema private to authenticated",
+  "revoke create on schema private from public, anon, authenticated"
+]) {
+  if (!privateSchemaMigration.includes(required)) {
+    failed = true;
+    process.stderr.write("Missing private schema permission safeguard: " + required + "\n");
   }
 }
 
