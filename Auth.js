@@ -113,6 +113,27 @@ async function signIn(usernameOrEmail, password) {
   return { success: true, session: result.session };
 }
 
+async function requestPasswordReset(email) {
+  try { await window.LAS_SUPABASE_READY; } catch (_) {
+    return { success: false, message: "Le service de récupération est temporairement indisponible. Réessayez plus tard." };
+  }
+  if (!lasIsConfigured() || !window.lasSupabase?.auth) {
+    return { success: false, message: "Le service de récupération n’est pas configuré. Contactez l’administrateur LAS." };
+  }
+  const address = String(email || "").trim().toLowerCase();
+  if (!address || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
+    return { success: false, message: "Saisissez une adresse e-mail valide." };
+  }
+  const redirectTo = new URL("reset-password.html", window.location.href).href;
+  const { error } = await window.lasSupabase.auth.resetPasswordForEmail(address, { redirectTo });
+  if (error) {
+    console.error("Demande de réinitialisation LAS échouée:", error.message);
+    return { success: false, message: "Impossible d’envoyer la demande pour le moment. Vérifiez la configuration e-mail puis réessayez." };
+  }
+  // Même confirmation pour toute adresse afin de ne pas révéler les comptes existants.
+  return { success: true, message: "Si cette adresse correspond à un compte, un e-mail de réinitialisation sera envoyé. Vérifiez aussi vos courriers indésirables." };
+}
+
 async function changeUserPassword(_username, oldPassword, newPassword) {
   if (!LAS_AUTH_READY || !window.lasSupabase) return { success: false, message: "Session expirée. Reconnectez-vous." };
   if (!newPassword || newPassword.length < 12) return { success: false, message: "Utilisez au moins 12 caractères pour le nouveau mot de passe." };
