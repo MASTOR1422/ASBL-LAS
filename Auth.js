@@ -138,3 +138,50 @@ function escapeHTML(str) {
   return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;")
     .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 }
+
+
+// Envoie un lien de réinitialisation au titulaire de l'adresse e-mail.
+async function requestPasswordReset(email) {
+  try { await window.LAS_SUPABASE_READY; } catch (_) {
+    return { success: false, message: "Le service de connexion n’est pas disponible. Réessayez plus tard." };
+  }
+  if (!lasIsConfigured() || !window.lasSupabase?.auth) {
+    return { success: false, message: "Le service de réinitialisation n’est pas configuré." };
+  }
+  const address = String(email || "").trim();
+  if (!address || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(address)) {
+    return { success: false, message: "Saisissez une adresse e-mail valide." };
+  }
+  const redirectTo = new URL("reset-password.html", window.location.href).href;
+  const { error } = await window.lasSupabase.auth.resetPasswordForEmail(address, { redirectTo });
+  if (error) {
+    console.error("Erreur de demande de réinitialisation LAS:", error);
+    return { success: false, message: "Impossible d’envoyer le lien pour le moment. Vérifiez la configuration e-mail ou réessayez plus tard." };
+  }
+  // Réponse volontairement identique, pour ne pas révéler si une adresse possède un compte.
+  return { success: true, message: "Si cette adresse correspond à un compte autorisé, un e-mail de réinitialisation sera envoyé. Vérifiez aussi vos courriers indésirables." };
+}
+
+// Change le mot de passe après ouverture d'un lien de récupération Supabase valide.
+async function completePasswordReset(newPassword) {
+  try { await window.LAS_SUPABASE_READY; } catch (_) {
+    return { success: false, message: "Le service de connexion n’est pas disponible. Réessayez plus tard." };
+  }
+  if (!lasIsConfigured() || !window.lasSupabase?.auth) {
+    return { success: false, message: "Le service de réinitialisation n’est pas configuré." };
+  }
+  if (typeof newPassword !== "string" || newPassword.length < 12) {
+    return { success: false, message: "Le nouveau mot de passe doit contenir au moins 12 caractères." };
+  }
+  const { data: sessionData, error: sessionError } = await window.lasSupabase.auth.getSession();
+  if (sessionError || !sessionData?.session?.user) {
+    return { success: false, message: "Le lien est invalide ou expiré. Demandez un nouveau lien de réinitialisation." };
+  }
+  const { error } = await window.lasSupabase.auth.updateUser({ password: newPassword });
+  if (error) {
+    console.error("Erreur de mise à jour du mot de passe LAS:", error);
+    return { success: false, message: "Modification impossible. Le lien a peut-être expiré ; demandez-en un nouveau." };
+  }
+  await window.lasSupabase.auth.signOut();
+  return { success: true, message: "Votre mot de passe a été modifié. Vous pouvez maintenant vous connecter." };
+}
