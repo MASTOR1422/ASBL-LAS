@@ -1,4 +1,4 @@
-// Username login proxy. Requires server-only SUPABASE_SERVICE_ROLE_KEY.
+// Connexion LAS par prénom. La résolution du prénom reste côté serveur.
 function json(res, status, body) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -8,10 +8,33 @@ function sameOrigin(req) {
   const base = process.env.APP_BASE_URL;
   if (!base) return false;
   try {
-    const allowed = new URL(base).origin;
-    const origin = req.headers.origin;
-    return !!origin && new URL(origin).origin === allowed;
+    return !!req.headers.origin && new URL(req.headers.origin).origin === new URL(base).origin;
   } catch (_) { return false; }
+}
+function normalizeName(value) {
+  return String(value || "").trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+function firstName(displayName) {
+  return normalizeName(String(displayName || "").trim().split(/\s+/)[0] || "");
+}
+async function getUniqueActiveProfile(url, headers, firstNameInput) {
+  const response = await fetch(url + "/rest/v1/profiles?select=id,display_name,active&active=eq.true&limit=1000", {
+    headers: { ...headers, Accept: "application/json" }
+  });
+  if (!response.ok) throw new Error("profile_lookup_failed");
+  const profiles = await response.json();
+  if (!Array.isArray(profiles)) throw new Error("profile_lookup_failed");
+  const matches = profiles.filter(profile => firstName(profile.display_name) === firstNameInput);
+  // Les prénoms ne sont pas nécessairement uniques : ne jamais choisir arbitrairement.
+  return matches.length === 1 ? matches[0] : null;
+}
+async function getLoginEmail(url, headers, userId) {
+  const response = await fetch(url + "/rest/v1/auth_login_map?user_id=eq." + encodeURIComponent(userId) + "&select=user_id,login_email&limit=1", {
+    headers: { ...headers, Accept: "application/json" }
+  });
+  if (!response.ok) throw new Error("login_map_lookup_failed");
+  const rows = await response.json();
+  return Array.isArray(rows) ? rows[0] : null;
 }
 export default async function handler(req, res) {
   if (req.method !== "POST") return json(res, 405, { message: "Méthode non autorisée." });
@@ -20,34 +43,27 @@ export default async function handler(req, res) {
   const publicKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !publicKey || !secretKey) return json(res, 503, { message: "Service de connexion non configuré." });
-  const username = String(req.body?.username || "").trim().toLowerCase();
+  const first = normalizeName(req.body?.username);
   const password = String(req.body?.password || "");
-  if (!/^[a-z0-9._-]{3,80}$/.test(username) || password.length < 1 || password.length > 1024) {
-    return json(res, 400, { message: "Identifiant ou mot de passe incorrect." });
+  if (!/^[a-z][a-z'-]{1,79}$/.test(first) || password.length < 1 || password.length > 1024) {
+    return json(res, 401, { message: "Prénom ou mot de passe incorrect." });
   }
   try {
     const headers = { apikey: secretKey, Authorization: "Bearer " + secretKey };
-    const mapResponse = await fetch(url + "/rest/v1/auth_login_map?username=eq." + encodeURIComponent(username) + "&select=user_id,login_email&limit=1", { headers: { ...headers, Accept: "application/json" } });
-    if (!mapResponse.ok) return json(res, 503, { message: "Service de connexion temporairement indisponible." });
-    const rows = await mapResponse.json();
-    if (!Array.isArray(rows) || !rows[0]?.login_email || !rows[0]?.user_id) return json(res, 401, { message: "Identifiant ou mot de passe incorrect." });
-    const profileResponse = await fetch(url + "/rest/v1/profiles?id=eq." + encodeURIComponent(rows[0].user_id) + "&select=active&limit=1", { headers: { ...headers, Accept: "application/json" } });
-    if (!profileResponse.ok) return json(res, 503, { message: "Service de connexion temporairement indisponible." });
-    const profiles = await profileResponse.json();
-    if (!profiles?.[0] || profiles[0].active !== true) return json(res, 401, { message: "Identifiant ou mot de passe incorrect." });
+    const profile = await getUniqueActiveProfile(url, headers, first);
+    if (!profile) return json(res, 401, { message: "Prénom ou mot de passe incorrect. Si plusieurs membres partagent ce prénom, contactez l’administrateur." });
+    const mappedUser = await getLoginEmail(url, headers, profile.id);
+    if (!mappedUser?.login_email) return json(res, 401, { message: "Prénom ou mot de passe incorrect." });
     const authResponse = await fetch(url + "/auth/v1/token?grant_type=password", {
       method: "POST",
       headers: { apikey: publicKey, "Content-Type": "application/json" },
-      body: JSON.stringify({ email: rows[0].login_email, password })
+      body: JSON.stringify({ email: mappedUser.login_email, password })
     });
     const authData = await authResponse.json().catch(() => ({}));
     if (!authResponse.ok || !authData.access_token || !authData.refresh_token) {
-      return json(res, 401, { message: "Identifiant ou mot de passe incorrect." });
+      return json(res, 401, { message: "Prénom ou mot de passe incorrect." });
     }
-    return json(res, 200, {
-      access_token: authData.access_token,
-      refresh_token: authData.refresh_token
-    });
+    return json(res, 200, { access_token: authData.access_token, refresh_token: authData.refresh_token });
   } catch (_) {
     return json(res, 503, { message: "Service de connexion temporairement indisponible." });
   }
