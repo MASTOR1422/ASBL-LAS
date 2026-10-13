@@ -61,18 +61,24 @@
   });
   document.getElementById("forgot-button").addEventListener("click", async () => {
     const username = usernameInput.value.trim();
-    if (!username) { usernameInput.focus(); showMessage("Saisissez d’abord votre nom d’utilisateur.", "error"); return; }
+    if (!username) { usernameInput.focus(); messageBox.classList.remove("hidden"); showMessage("Saisissez d’abord votre nom d’utilisateur.", "error"); return; }
     const button = document.getElementById("forgot-button");
     button.disabled = true;
     messageBox.classList.remove("hidden");
     showMessage("Envoi de la demande…", "ok");
-    const result = await requestPasswordReset(username);
-    showMessage(result.message, result.success ? "ok" : "error");
-    button.disabled = false;
+    try {
+      const result = await requestPasswordReset(username);
+      showMessage(result.message, result.success ? "ok" : "error");
+    } catch (_) {
+      showMessage("Service de récupération temporairement indisponible. Réessayez plus tard.", "error");
+    } finally { button.disabled = false; }
   });
   document.addEventListener("DOMContentLoaded", async () => {
     try { await window.LAS_SUPABASE_READY; }
-    catch (_) { messageBox.classList.remove("hidden"); showMessage("Configuration du service indisponible. Contactez l’administrateur LAS.", "error"); }
+    catch (error) {
+      messageBox.classList.remove("hidden");
+      showMessage(error?.message || "Configuration du service indisponible. Contactez l’administrateur LAS.", "error");
+    }
   });
 </script>
 </body></html>
