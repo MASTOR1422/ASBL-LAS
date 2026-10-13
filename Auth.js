@@ -38,26 +38,35 @@ async function initAuth() {
     const session = authResult?.data?.session;
     if (authResult?.error || !session?.user) { clearAuthState(); return { success: false, reason: "not-authenticated" }; }
 
-    let profileResult;
+    let verification;
     try {
-      profileResult = await window.lasSupabase.from("profiles")
-        .select("role, member_id, display_name, active").eq("id", session.user.id).single();
+      const verifyResponse = await fetch("/api/auth/verify-session", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + session.access_token
+        },
+        body: "{}",
+        cache: "no-store"
+      });
+      verification = await verifyResponse.json().catch(() => ({}));
+      if (!verifyResponse.ok || !verification.profile || !verification.user) {
+        if (verifyResponse.status === 401 || verification.reason === "profile-unavailable" || verification.reason === "invalid-role") {
+          try { await window.lasSupabase.auth.signOut(); } catch (_) {}
+        }
+        clearAuthState();
+        return {
+          success: false,
+          reason: verification.reason || (verifyResponse.status >= 500 ? "profile-check-failed" : "profile-unavailable"),
+          message: verification.message || "Le serveur n’a pas pu confirmer votre profil LAS."
+        };
+      }
     } catch (_) {
-      try { await window.lasSupabase.auth.signOut(); } catch (_) {}
       clearAuthState();
-      return { success: false, reason: "profile-unavailable", message: "Impossible de vérifier votre profil d’accès. Contactez l’administrateur LAS." };
+      return { success: false, reason: "profile-check-failed", message: "Le service de vérification du profil est inaccessible. Réessayez." };
     }
-    const profile = profileResult?.data;
-    if (profileResult?.error || !profile || profile.active !== true) {
-      try { await window.lasSupabase.auth.signOut(); } catch (_) {}
-      clearAuthState();
-      return { success: false, reason: "profile-unavailable", message: "Compte non activé ou profil d’accès indisponible. Contactez l’administrateur LAS." };
-    }
-    if (!["admin", "tresorier", "secretaire", "membre"].includes(profile.role)) {
-      try { await window.lasSupabase.auth.signOut(); } catch (_) {}
-      clearAuthState();
-      return { success: false, reason: "invalid-role", message: "Rôle non autorisé. Contactez l’administrateur LAS." };
-    }
+    const profile = verification.profile;
     ROLE = profile.role;
     MEMBER_ID = profile.member_id || null;
     SESSION = {
