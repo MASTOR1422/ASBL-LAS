@@ -1,0 +1,40 @@
+name: ASBL-LAS V2 static checks
+on:
+  push:
+    branches:
+      - rewrite/asbl-las-v2
+  pull_request:
+    branches:
+      - main
+permissions:
+  contents: read
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout reviewed source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check JavaScript syntax
+        run: |
+          set -eu
+          for file in api/supabase-config.js api/auth/username-login.js api/auth/verify-session.js api/auth/recover.js v2/assets/site.js v2/assets/auth.js v2/assets/reset.js v2/assets/portal.js v2/assets/public-content.js supabase-client.js; do
+            test -f "$file"
+            node --check "$file"
+          done
+      - name: Validate JSON configuration
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('package.json','utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('vercel.json','utf8'))"
+      - name: Verify V2 pages and local assets
+        run: |
+          set -eu
+          test -f v2/index.html
+          test -f v2/login.html
+          test -f v2/espace.html
+          test -f reset-password.html
+          grep -q 'public-content.js' v2/index.html
+          grep -q 'portal.js' v2/espace.html
+          grep -q 'username-login' v2/assets/auth.js
+          grep -q 'verify-session' v2/assets/portal.js
