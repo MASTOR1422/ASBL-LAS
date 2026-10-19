@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="fr">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Mon espace | ASBL-LAS</title><link rel="stylesheet" href="./assets/site.css"></head>
+<body>
+  <header class="site-header"><a class="brand" href="./index.html"><span class="brand-mark">LAS</span><span><strong>Les Amis de la Semence</strong><small>Espace membres</small></span></a><div class="account-actions"><span id="member-label" class="muted">Vérification de la session…</span><button id="logout-button" class="button button-small button-outline" type="button">Déconnexion</button></div></header>
+  <main class="portal-wrap"><div class="portal-heading"><p class="eyebrow">Espace privé</p><h1 id="welcome-title">Mon espace</h1><p class="muted">Les informations affichées ici doivent être limitées à votre compte et à votre rôle.</p></div>
+    <div id="portal-alert" class="notice" role="status">Vérification de votre session…</div>
+    <div id="portal-content" hidden><section class="cards portal-cards"><article class="feature-card"><span class="card-number">01</span><h2>Mon profil</h2><p>Vos informations personnelles et associatives.</p><p class="muted">Les champs du profil seront connectés après validation des règles RLS.</p></article><article class="feature-card"><span class="card-number">02</span><h2>Mes cotisations</h2><p>Consultez uniquement votre situation personnelle.</p><p class="muted">Aucun paiement ne peut être modifié par un membre ordinaire.</p></article><article class="feature-card"><span class="card-number">03</span><h2>Ma tontine</h2><p>Suivi des périodes et de votre participation selon les règles de l'association.</p><p class="muted">Le module financier sera activé après validation du schéma et de l'audit.</p></article><article class="feature-card"><span class="card-number">04</span><h2>Entraide</h2><p>Les demandes de soutien et les informations utiles aux membres.</p></article></section>
+    <section id="admin-panel" class="admin-panel" hidden><p class="eyebrow">Gestion</p><h2>Administration LAS</h2><p>Les fonctions de gestion seront affichées selon le rôle vérifié côté serveur. Les actions financières exigeront des politiques RLS et un journal d'audit opérationnel.</p></section></div>
+  </main>
+  <script src="../supabase-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../supabase-client.js"></script><script src="./assets/portal.js" defer></script>
+</body></html>
