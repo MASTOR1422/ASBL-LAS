@@ -20,8 +20,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22.13.0"
-          cache: npm
-          cache-dependency-path: local/package.json
       - name: Install local server dependencies
         working-directory: local
         run: npm install --no-audit --no-fund
