@@ -7,10 +7,12 @@ function json(res, status, body) {
 }
 
 function sameOrigin(req) {
-  const base = process.env.APP_BASE_URL;
-  if (!base) return false;
+  const origin = req.headers.origin;
+  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "").split(",")[0].trim().toLowerCase();
+  if (!origin || !host) return false;
   try {
-    return !!req.headers.origin && new URL(req.headers.origin).origin === new URL(base).origin;
+    const parsed = new URL(origin);
+    return (parsed.protocol === "https:" || parsed.hostname === "localhost") && parsed.host.toLowerCase() === host;
   } catch (_) {
     return false;
   }
