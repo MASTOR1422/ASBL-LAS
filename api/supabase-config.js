@@ -5,8 +5,9 @@
 export default function handler(req, res) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
   res.setHeader("Content-Type", "application/json; charset=utf-8");
-  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+  const isPreview = process.env.VERCEL_ENV === "preview";
+  const url = (isPreview ? process.env.SUPABASE_PREVIEW_URL : (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)) || "";
+  const publishableKey = (isPreview ? process.env.SUPABASE_PREVIEW_PUBLISHABLE_KEY : (process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) || "";
   if (!url || !publishableKey) {
     res.status(503).json({ error: "Supabase public configuration is missing." });
     return;
