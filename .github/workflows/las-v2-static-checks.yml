@@ -34,6 +34,7 @@ jobs:
           test -f v2/login.html
           test -f v2/espace.html
           test -f reset-password.html
+          test -f v2/reset-password.html
           grep -q 'public-content.js' v2/index.html
           grep -q 'portal.js' v2/espace.html
           grep -q 'username-login' v2/assets/auth.js
