@@ -178,7 +178,7 @@ grant select (id, media_type, title, description, external_url, published_date, 
 drop policy if exists media_public_read_anon on public.media_items;
 create policy media_public_read_anon on public.media_items
 for select to anon
-using (status = 'published' and external_url is not null and external_url ~* '^https?://');
+using (status = 'published' and external_url is not null and external_url ~* '^https://');
 
 -- Seules les annonces et activités publiées sont accessibles sans connexion.
 revoke select on table public.posts from anon;
