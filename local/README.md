@@ -56,3 +56,24 @@ Cette base est séparée de Supabase. Elle démarre vide : les données ne sont 
 ## Important — état fonctionnel
 
 Cette première couche fournit le schéma SQLite et le socle serveur local (authentification locale et endpoints de données de base). La page V2 existante utilise encore Supabase dans son navigateur : elle ne doit pas être considérée comme entièrement migrée tant que les écrans ne sont pas raccordés aux API locales et testés. Ne pas fusionner la branche ni désactiver Supabase avant cette validation. Vercel n'est pas adapté à un fichier SQLite local persistant sans stockage durable partagé.
+
+
+## Créer un compte membre / trésorier / secrétaire
+
+Après avoir importé les fiches membres, utiliser la commande ci-dessous. Pour un compte membre, renseigner l’identifiant numérique de la fiche dans LAS_MEMBER_ID. La commande réinitialise aussi le mot de passe et révoque les anciennes sessions si le nom d’utilisateur existe déjà.
+
+```bash
+LAS_USERNAME=prenom.nom LAS_PASSWORD='Un-Mot-De-Passe-Long-Unique' LAS_ROLE=membre LAS_MEMBER_ID=1 LAS_DISPLAY_NAME='Prénom Nom' npm run create-user
+```
+
+Rôles acceptés : admin, tresorier, secretaire, membre.
+
+## Importer des données exportées
+
+import-data.js accepte un fichier JSON privé dont les clés sont les noms de tables (members, monthly_contributions, member_payments, posts, media_items, post_comments, tontine_periods, tontine_entries, aid_requests) et les valeurs des tableaux d’objets exportés. Il conserve les identifiants quand ils sont fournis, ignore les conflits existants et importe dans une transaction.
+
+```bash
+node import-data.js ./export-las.json
+```
+
+Le fichier d’export ne doit pas être ajouté au dépôt. Les références d’anciens utilisateurs/auteurs sont volontairement omises lors de l’import, car leurs identités et mots de passe ne se transfèrent pas automatiquement. Recréez les comptes locaux avec create-user.js, puis rattachez-les aux fiches membres.
