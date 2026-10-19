@@ -39,7 +39,12 @@ using (
   )
 );
 
--- Journaliser aussi les modifications de la table historique des paiements.
+-- Journaliser les modifications des deux registres de cotisations/paiements.
+drop trigger if exists monthly_contributions_audit on public.monthly_contributions;
+create trigger monthly_contributions_audit
+after insert or update or delete on public.monthly_contributions
+for each row execute function public.audit_row_change();
+
 drop trigger if exists member_payments_audit on public.member_payments;
 create trigger member_payments_audit
 after insert or update or delete on public.member_payments
@@ -163,6 +168,22 @@ with check (
   (select private.has_role('secretaire')) or
   (select private.has_role('tresorier'))
 );
+
+-- Exposer uniquement les colonnes nécessaires aux contenus publiés; aucun storage_path n'est public.
+revoke select on table public.media_items from anon;
+grant select (id, media_type, title, description, external_url, published_date) on table public.media_items to anon;
+drop policy if exists media_public_read_anon on public.media_items;
+create policy media_public_read_anon on public.media_items
+for select to anon
+using (status = 'published' and external_url is not null and external_url ~* '^https?://');
+
+-- Seules les annonces et activités publiées sont accessibles sans connexion.
+revoke select on table public.posts from anon;
+grant select (id, title, body, category, created_at) on table public.posts to anon;
+drop policy if exists posts_public_read_anon on public.posts;
+create policy posts_public_read_anon on public.posts
+for select to anon
+using (status = 'published' and category in ('annonce', 'evenement'));
 
 -- Les modifications financières et demandes d'aide laissent une trace consultable
 -- uniquement par les administrateurs via la politique audit_read_admin existante.
