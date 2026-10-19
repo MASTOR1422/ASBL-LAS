@@ -33,7 +33,6 @@ const importAll=db.transaction(()=>{
       const values=columns.map(column=>row[column]===undefined?null:row[column]);
       // User IDs are deliberately not imported: passwords from Supabase Auth cannot be exported in plaintext.
       // Clear legacy actor IDs so imported records do not fail foreign-key checks.
-      if(table==="monthly_contributions") values[columns.indexOf("recorded_by")]=undefined;
       try { const info=stmt.run(...values); if(info.changes)inserted++;else ignored++; }
       catch(error){throw new Error("Import "+table+" id="+row.id+": "+error.message);}
     }
