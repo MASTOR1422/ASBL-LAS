@@ -25,6 +25,8 @@ const port = Number(process.env.PORT || process.env.LAS_PORT || 3000);
 const cookieName = "las_session";
 const sessionHours = Math.max(1, Math.min(168, Number(process.env.LAS_SESSION_HOURS || 12)));
 const dummyPasswordHash = await bcrypt.hash(randomBytes(32).toString("hex"), 12);
+const loginAttempts = new Map();
+db.prepare("DELETE FROM sessions WHERE expires_at <= strftime('%Y-%m-%dT%H:%M:%fZ','now')").run();
 const isHttps = process.env.LAS_HTTPS === "1";
 app.disable("x-powered-by");
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
@@ -75,16 +77,22 @@ const amount = (v) => Number.isFinite(Number(v)) && Number(v) >= 0;
 const intRange = (v,min,max) => Number.isInteger(Number(v)) && Number(v)>=min && Number(v)<=max;
 
 app.post("/api/auth/login", requireOrigin, async (req, res) => {
+  const ip = String(req.ip || "local");
+  const now = Date.now();
+  const recent = (loginAttempts.get(ip) || []).filter(timestamp => now - timestamp < 15 * 60_000);
+  if (recent.length >= 10) { loginAttempts.set(ip, recent); return jsonError(res, 429, "Trop de tentatives. Réessayez dans 15 minutes."); }
   const username = String(req.body?.username || "").trim().toLowerCase();
   const password = String(req.body?.password || "");
   if (!/^[a-z0-9._-]{3,80}$/.test(username) || !password || password.length > 1024) return jsonError(res, 401, "Nom d'utilisateur ou mot de passe incorrect.");
   const user = db.prepare("SELECT * FROM users WHERE username=? COLLATE NOCASE LIMIT 1").get(username);
   const valid = user && user.active === 1 && await bcrypt.compare(password, user.password_hash);
   if (!valid) {
+    recent.push(now); loginAttempts.set(ip, recent);
     // Similar response and password hash work for missing users reduce account enumeration.
     if (!user) await bcrypt.compare(password, dummyPasswordHash);
     return jsonError(res, 401, "Nom d'utilisateur ou mot de passe incorrect.");
   }
+  loginAttempts.delete(ip);
   const raw = randomBytes(32).toString("base64url");
   const expires = new Date(Date.now() + sessionHours * 3600_000).toISOString();
   db.prepare("INSERT INTO sessions(id,user_id,token_hash,expires_at) VALUES(?,?,?,?)").run(randomUUID(), user.id, sha(raw), expires);
@@ -100,7 +108,7 @@ app.post("/api/auth/logout", requireOrigin, authenticate, (req, res) => {
   res.json({ ok:true });
 });
 
-app.get("/api/public/posts", (req, res) => res.json(db.prepare("SELECT id,title,body,category,created_at FROM posts WHERE status='published' ORDER BY created_at DESC LIMIT 50").all()));
+app.get("/api/public/posts", (req, res) => res.json(db.prepare("SELECT id,title,body,category,created_at FROM posts WHERE status='published' AND category IN ('annonce','evenement') ORDER BY created_at DESC LIMIT 50").all()));
 app.get("/api/public/media", (req, res) => res.json(db.prepare("SELECT id,media_type,title,description,external_url,published_date FROM media_items WHERE status='published' AND external_url LIKE 'https://%' ORDER BY published_date DESC LIMIT 100").all()));
 
 app.get("/api/me", authenticate, (req, res) => {
