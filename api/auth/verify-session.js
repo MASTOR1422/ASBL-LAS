@@ -29,9 +29,10 @@ export default async function handler(req, res) {
     return json(res, 403, { reason: "origin-rejected", message: "Requête refusée." });
   }
 
-  const url = String(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "").trim();
-  const publicKey = String(process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
-  const serviceKey = String(process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+  const isPreview = process.env.VERCEL_ENV === "preview";
+  const url = String((isPreview ? process.env.SUPABASE_PREVIEW_URL : (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)) || "").trim();
+  const publicKey = String((isPreview ? process.env.SUPABASE_PREVIEW_PUBLISHABLE_KEY : (process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)) || "").trim();
+  const serviceKey = String((isPreview ? process.env.SUPABASE_PREVIEW_SERVICE_ROLE_KEY : process.env.SUPABASE_SERVICE_ROLE_KEY) || "").trim();
   const authHeader = String(req.headers.authorization || "");
   const accessToken = authHeader.match(/^Bearer\s+(.+)$/i)?.[1];
 
