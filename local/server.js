@@ -134,7 +134,7 @@ app.post("/api/me/aid", requireOrigin, authenticate, (req, res) => {
   const subject=String(req.body?.subject||"").trim(), description=String(req.body?.description||"").trim();
   if(subject.length<3||subject.length>160||description.length<3||description.length>5000) return jsonError(res,400,"Objet ou description invalide.");
   const info=db.prepare("INSERT INTO aid_requests(member_id,subject,description) VALUES(?,?,?)").run(req.user.member_id,subject,description);
-  audit("aid_requests",info.lastInsertRowid,"INSERT",null,{member_id:req.user.member_id,subject,status:"pending"},req.user.id);
+  db.prepare("UPDATE audit_logs SET changed_by=? WHERE id=(SELECT MAX(id) FROM audit_logs WHERE table_name='aid_requests' AND record_id=? AND action='INSERT')").run(req.user.id,String(info.lastInsertRowid));
   res.status(201).json({id:info.lastInsertRowid,ok:true});
 });
 
@@ -146,7 +146,7 @@ app.post("/api/admin/members", requireOrigin, authenticate, allow("admin","secre
   if(name.length<2||name.length>200) return jsonError(res,400,"Nom invalide.");
   const info=db.prepare("INSERT INTO members(name,phone,email,profession,birthdate,birthplace,address,joined_on,position,asbl_status,meeting_status,forum_status,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)")
     .run(name,req.body.phone||null,req.body.email||null,req.body.profession||null,req.body.birthdate||null,req.body.birthplace||null,req.body.address||null,req.body.joined_on||null,req.body.position||null,req.body.asbl_status||null,req.body.meeting_status||null,req.body.forum_status||null,req.body.status||"active");
-  audit("members",info.lastInsertRowid,"INSERT",null,{name},req.user.id);
+  db.prepare("UPDATE audit_logs SET changed_by=? WHERE id=(SELECT MAX(id) FROM audit_logs WHERE table_name='members' AND record_id=? AND action='INSERT')").run(req.user.id,String(info.lastInsertRowid));
   res.status(201).json({id:info.lastInsertRowid});
 });
 app.post("/api/admin/contributions", requireOrigin, authenticate, allow(...roles.finance), (req,res) => {
@@ -154,7 +154,6 @@ app.post("/api/admin/contributions", requireOrigin, authenticate, allow(...roles
   if(!Number.isInteger(memberId)||!intRange(year,2000,2200)||!intRange(month,1,12)||!amount(value)||!["CDF","USD"].includes(currency)) return jsonError(res,400,"Données de cotisation invalides.");
   try {
     const info=db.prepare("INSERT INTO monthly_contributions(member_id,contribution_year,contribution_month,amount,currency,paid_at,note,recorded_by) VALUES(?,?,?,?,?,?,?,?)").run(memberId,year,month,value,currency,req.body.paid_at||new Date().toISOString(),String(req.body.note||"").slice(0,1000)||null,req.user.id);
-    audit("monthly_contributions",info.lastInsertRowid,"INSERT",null,{member_id:memberId,year,month,amount:value,currency},req.user.id);
     res.status(201).json({id:info.lastInsertRowid});
   } catch { jsonError(res,409,"Cette cotisation existe déjà ou le membre est introuvable."); }
 });
@@ -181,7 +180,7 @@ app.get("/api/admin/tontine/entries", authenticate, allow(...roles.management), 
 app.post("/api/admin/tontine/entries", requireOrigin, authenticate, allow(...roles.finance), (req,res) => {
   const periodId=Number(req.body?.period_id), memberId=Number(req.body?.member_id), value=Number(req.body?.amount), currency=String(req.body?.currency||"CDF"), status=String(req.body?.status||"due");
   if(!Number.isInteger(periodId)||!Number.isInteger(memberId)||!amount(value)||!["CDF","USD"].includes(currency)||!["due","paid","late","cancelled"].includes(status)) return jsonError(res,400,"Données de participation invalides.");
-  try { const info=db.prepare("INSERT INTO tontine_entries(period_id,member_id,amount,currency,status,recorded_by) VALUES(?,?,?,?,?,?)").run(periodId,memberId,value,currency,status,req.user.id); audit("tontine_entries",info.lastInsertRowid,"INSERT",null,{periodId,memberId,value,currency,status},req.user.id); res.status(201).json({id:info.lastInsertRowid}); }
+  try { const info=db.prepare("INSERT INTO tontine_entries(period_id,member_id,amount,currency,status,recorded_by) VALUES(?,?,?,?,?,?)").run(periodId,memberId,value,currency,status,req.user.id); res.status(201).json({id:info.lastInsertRowid}); }
   catch { jsonError(res,409,"Période ou membre introuvable, ou membre déjà inscrit."); }
 });
 app.get("/api/admin/audit", authenticate, allow("admin"), (req,res) => res.json(db.prepare("SELECT id,table_name,record_id,action,old_data,new_data,changed_by,changed_at FROM audit_logs ORDER BY changed_at DESC LIMIT 500").all()));
