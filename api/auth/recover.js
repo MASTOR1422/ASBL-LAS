@@ -7,10 +7,12 @@ function json(res, status, body) {
 }
 
 function sameOrigin(req) {
-  const base = process.env.APP_BASE_URL;
-  if (!base) return false;
+  const origin = req.headers.origin;
+  const host = String(req.headers["x-forwarded-host"] || req.headers.host || "").split(",")[0].trim().toLowerCase();
+  if (!origin || !host) return false;
   try {
-    return !!req.headers.origin && new URL(req.headers.origin).origin === new URL(base).origin;
+    const parsed = new URL(origin);
+    return (parsed.protocol === "https:" || parsed.hostname === "localhost") && parsed.host.toLowerCase() === host;
   } catch (_) {
     return false;
   }
@@ -23,8 +25,7 @@ export default async function handler(req, res) {
   const url = process.env.SUPABASE_URL;
   const publicKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const base = process.env.APP_BASE_URL;
-  if (!url || !publicKey || !secretKey || !base) {
+  if (!url || !publicKey || !secretKey) {
     return json(res, 503, { message: "Service de récupération non configuré." });
   }
 
@@ -65,7 +66,7 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true });
     }
 
-    const redirect = new URL("/reset-password.html", base).toString();
+    const redirect = new URL("/reset-password.html", req.headers.origin).toString();
     const recoveryResponse = await fetch(
       url + "/auth/v1/recover?redirect_to=" + encodeURIComponent(redirect),
       {
