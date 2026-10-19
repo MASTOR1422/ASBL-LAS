@@ -82,6 +82,8 @@ create table if not exists public.tontine_entries (
 
 alter table public.tontine_periods enable row level security;
 alter table public.tontine_entries enable row level security;
+grant select, insert, update, delete on table public.tontine_periods to authenticated;
+grant select, insert, update, delete on table public.tontine_entries to authenticated;
 
 drop policy if exists tontine_periods_read_active on public.tontine_periods;
 create policy tontine_periods_read_active on public.tontine_periods
@@ -132,6 +134,7 @@ create table if not exists public.aid_requests (
 );
 
 alter table public.aid_requests enable row level security;
+grant select, insert, update, delete on table public.aid_requests to authenticated;
 
 drop policy if exists aid_requests_read_self on public.aid_requests;
 create policy aid_requests_read_self on public.aid_requests
@@ -171,7 +174,7 @@ with check (
 
 -- Exposer uniquement les colonnes nécessaires aux contenus publiés; aucun storage_path n'est public.
 revoke select on table public.media_items from anon;
-grant select (id, media_type, title, description, external_url, published_date) on table public.media_items to anon;
+grant select (id, media_type, title, description, external_url, published_date, status) on table public.media_items to anon;
 drop policy if exists media_public_read_anon on public.media_items;
 create policy media_public_read_anon on public.media_items
 for select to anon
@@ -179,7 +182,7 @@ using (status = 'published' and external_url is not null and external_url ~* '^h
 
 -- Seules les annonces et activités publiées sont accessibles sans connexion.
 revoke select on table public.posts from anon;
-grant select (id, title, body, category, created_at) on table public.posts to anon;
+grant select (id, title, body, category, created_at, status) on table public.posts to anon;
 drop policy if exists posts_public_read_anon on public.posts;
 create policy posts_public_read_anon on public.posts
 for select to anon
