@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const el = (tag, text, cls) => { const n=document.createElement(tag); if(text!==undefined&&text!==null)n.textContent=String(text); if(cls)n.className=cls; return n; };
   const money = (value,currency="CDF") => new Intl.NumberFormat("fr-FR",{maximumFractionDigits:2}).format(Number(value||0))+" "+currency;
   const date = value => value ? new Date(value).toLocaleDateString("fr-FR") : "—";
-  const say = (target,message,ok=false) => { const n=$(target); if(n){n.textContent=message;n.classList.toggle("success",ok);} };
+  const say = (target,message,ok=false) => { const n=$(target); if(n){n.textContent=message;n.classList.toggle("success",ok);if(target==="#portal-alert")n.hidden=false;} };
   const api = async (path, options={}) => {
     const response=await fetch(path,{credentials:"same-origin",headers:{"Accept":"application/json",...(options.body?{"Content-Type":"application/json"}:{})},...options});
     const data=await response.json().catch(()=>({}));
@@ -49,8 +49,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     profile.append(dl);
     try {
       const [contributions,payments,tontine,aid]=await Promise.all([api("/api/me/contributions"),api("/api/me/payments"),api("/api/me/tontine"),api("/api/me/aid")]);
-      const total=contributions.reduce((sum,row)=>sum+Number(row.amount||0),0);
-      $("#contribution-summary").textContent=contributions.length?contributions.length+" enregistrement(s) · total affiché : "+money(total,contributions[0]?.currency):"Aucune cotisation enregistrée.";
+      const totals=contributions.reduce((sum,row)=>{const currency=row.currency||"CDF";sum[currency]=(sum[currency]||0)+Number(row.amount||0);return sum;},{});
+      $("#contribution-summary").textContent=contributions.length?contributions.length+" enregistrement(s) · total : "+Object.entries(totals).map(([currency,value])=>money(value,currency)).join(" · "):"Aucune cotisation enregistrée.";
       contribBox.replaceChildren(makeTable(["Période","Montant","Date","Note"],contributions.map(row=>[String(row.contribution_month).padStart(2,"0")+"/"+row.contribution_year,money(row.amount,row.currency),date(row.paid_at),row.note])));
       if(payments.length){contribBox.append(el("h3","Suivi mensuel"),makeTable(["Mois","État","Mis à jour"],payments.map(row=>[String(row.payment_month).padStart(2,"0")+"/"+row.payment_year,row.paid?"Payé":"À payer",date(row.updated_at)])));}
       $("#tontine-list").replaceChildren(makeTable(["Période","Montant","État","Paiement"],tontine.map(row=>[row.title,money(row.amount,row.currency),row.status,date(row.paid_at)])));
