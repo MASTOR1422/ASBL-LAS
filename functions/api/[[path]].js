@@ -84,7 +84,8 @@ async function currentUser(request, env) {
   if (!row || Number(row.active) !== 1) return null;
   await env.DB.prepare("UPDATE sessions SET last_seen_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=?").bind(row.session_id).run();
   const profile = await env.DB.prepare("SELECT member_id,active,display_name,role FROM profiles WHERE id=?").bind(row.id).first();
-  return { ...row, member_id: row.member_id ?? profile?.member_id ?? null, display_name: row.display_name || profile?.display_name || row.username, role: profile?.role || row.role };
+  if (!profile || Number(profile.active) !== 1) return null;
+  return { ...row, member_id: row.member_id ?? profile.member_id ?? null, display_name: row.display_name || profile.display_name || row.username, role: profile.role || row.role };
 }
 async function auth(request, env, roles = []) {
   const user = await currentUser(request, env);
