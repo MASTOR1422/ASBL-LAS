@@ -47,11 +47,17 @@ async function sha256(value) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return [...new Uint8Array(digest)].map(x => x.toString(16).padStart(2, "0")).join("");
 }
+function b64ToBytes(value) {
+  let normalized = String(value).replace(/-/g, "+").replace(/_/g, "/");
+  while (normalized.length % 4) normalized += "=";
+  const binary = atob(normalized);
+  return Uint8Array.from(binary, ch => ch.charCodeAt(0));
+}
 async function hashPassword(password) {
   const salt = randomToken(16);
   const iterations = 210000;
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: Uint8Array.from(atob(salt.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((salt.length + 3) % 4), c => c.charCodeAt(0)), iterations }, key, 256);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: b64ToBytes(salt), iterations }, key, 256);
   return `pbkdf2-sha256$${iterations}$${salt}$${bytesToB64(new Uint8Array(bits))}`;
 }
 async function verifyPassword(password, stored) {
@@ -60,12 +66,9 @@ async function verifyPassword(password, stored) {
   if (parts.length !== 4 || parts[0] !== "pbkdf2-sha256") return false;
   const iterations = Number(parts[1]);
   if (!Number.isInteger(iterations) || iterations < 100000 || iterations > 600000) return false;
-  const salt = parts[2];
-  const expected = parts[3];
-  const saltBytes = Uint8Array.from(atob(salt.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((salt.length + 3) % 4)), c => c.charCodeAt(0));
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: saltBytes, iterations }, key, 256);
-  return bytesToB64(new Uint8Array(bits)) === expected;
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: b64ToBytes(parts[2]), iterations }, key, 256);
+  return bytesToB64(new Uint8Array(bits)) === parts[3];
 }
 function validUsername(v) { return /^[a-z0-9._-]{3,80}$/.test(v); }
 function amount(v) { return Number.isFinite(Number(v)) && Number(v) >= 0; }
@@ -237,7 +240,7 @@ export async function onRequest({ request, env }) {
       const body=await bodyJson(request), subject=String(body?.subject||"").trim(), description=String(body?.description||"").trim();
       if(subject.length<3||subject.length>160||description.length<3||description.length>5000)return fail(400,"Objet ou description invalide.");
       const info=await env.DB.prepare("INSERT INTO aid_requests(member_id,subject,description) VALUES(?,?,?)").bind(result.user.member_id,subject,description).run();
-      await audit(env,"aid_requests",info.meta.last_row_id,"INSERT",null,{member_id:result.user.member_id,subject,status:"submitted"},result.user.id);
+
       return json({id:info.meta.last_row_id,ok:true},201);
     }
     if (path === "/api/admin/members" && method === "GET") {
@@ -251,7 +254,7 @@ export async function onRequest({ request, env }) {
       if(name.length<2||name.length>200)return fail(400,"Nom invalide.");
       const info=await env.DB.prepare("INSERT INTO members(name,phone,email,profession,birthdate,birthplace,address,joined_on,position,asbl_status,meeting_status,forum_status,status) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)")
        .bind(name,b.phone||null,b.email||null,b.profession||null,b.birthdate||null,b.birthplace||null,b.address||null,b.joined_on||null,b.position||null,b.asbl_status||"OUI",b.meeting_status||null,b.forum_status||null,b.status||"active").run();
-      await audit(env,"members",info.meta.last_row_id,"INSERT",null,{name,status:b.status||"active"},result.user.id);
+
       return json({id:info.meta.last_row_id},201);
     }
     if (path === "/api/admin/payments" && method === "GET") {
@@ -269,7 +272,7 @@ export async function onRequest({ request, env }) {
       if(!Number.isInteger(memberId)||!intRange(year,2000,2200)||!intRange(month,1,12)||!amount(value)||!["CDF","USD"].includes(currency))return fail(400,"Données de cotisation invalides.");
       try {
         const info=await env.DB.prepare("INSERT INTO monthly_contributions(member_id,contribution_year,contribution_month,amount,currency,paid_at,note,recorded_by) VALUES(?,?,?,?,?,?,?,?)").bind(memberId,year,month,value,currency,b.paid_at||new Date().toISOString(),String(b.note||"").slice(0,1000)||null,result.user.id).run();
-        await audit(env,"monthly_contributions",info.meta.last_row_id,"INSERT",null,{member_id:memberId,year,month,amount:value,currency},result.user.id);
+
         return json({id:info.meta.last_row_id},201);
       } catch { return fail(409,"Cette cotisation existe déjà ou le membre est introuvable."); }
     }
@@ -309,7 +312,7 @@ export async function onRequest({ request, env }) {
       const result=await auth(request,env,FINANCE);if(result.response)return result.response;
       const b=await bodyJson(request), periodId=Number(b?.period_id), memberId=Number(b?.member_id), value=Number(b?.amount), currency=String(b?.currency||"CDF"), status=String(b?.status||"due");
       if(!Number.isInteger(periodId)||!Number.isInteger(memberId)||!amount(value)||!["CDF","USD"].includes(currency)||!["due","paid","late","cancelled","waived"].includes(status))return fail(400,"Données de participation invalides.");
-      try {const info=await env.DB.prepare("INSERT INTO tontine_entries(period_id,member_id,amount,currency,status,recorded_by) VALUES(?,?,?,?,?,?)").bind(periodId,memberId,value,currency,status,result.user.id).run();await audit(env,"tontine_entries",info.meta.last_row_id,"INSERT",null,{period_id:periodId,member_id:memberId,amount:value,currency,status},result.user.id);return json({id:info.meta.last_row_id},201);}
+      try {const info=await env.DB.prepare("INSERT INTO tontine_entries(period_id,member_id,amount,currency,status,recorded_by) VALUES(?,?,?,?,?,?)").bind(periodId,memberId,value,currency,status,result.user.id).run();return json({id:info.meta.last_row_id},201);}
       catch{return fail(409,"Période ou membre introuvable, ou membre déjà inscrit.");}
     }
     if (path === "/api/admin/audit" && method === "GET") {
