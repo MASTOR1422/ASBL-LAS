@@ -77,3 +77,10 @@ node import-data.js ./export-las.json
 ```
 
 Le fichier d’export ne doit pas être ajouté au dépôt. Les références d’anciens utilisateurs/auteurs sont volontairement omises lors de l’import, car leurs identités et mots de passe ne se transfèrent pas automatiquement. Recréez les comptes locaux avec create-user.js, puis rattachez-les aux fiches membres.
+
+
+### Export unique depuis Supabase (migration seulement)
+
+Le fichier export-from-supabase.sql contient une requête SELECT en lecture seule. Dans l’ancien projet Supabase, ouvrir SQL Editor, exécuter cette requête et copier le résultat JSON dans un fichier privé export-las.json. Il contient aussi les tables de correspondance profils/identifiants pour aider à recréer les comptes, mais les mots de passe ne sont pas exportés. Garder ce fichier hors du dépôt et le supprimer de façon sûre après validation de la migration.
+
+Avant l’import, contrôler le nombre de lignes exportées et conserver une sauvegarde séparée. Cette étape utilise Supabase uniquement pour l’export initial; le serveur SQLite local n’y fait aucun appel.
