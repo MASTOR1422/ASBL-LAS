@@ -39,7 +39,7 @@ Do not put either value in source code or Git. Until these are configured and te
 - Member: `GET /api/me`, `GET /api/me/contributions`, `GET /api/me/payments`, `GET /api/me/tontine`, `GET|POST /api/me/aid`.
 - Staff/finance: `GET|POST /api/admin/members`, `PATCH /api/admin/members/:id`, `GET|POST /api/admin/contributions`, `GET|POST /api/admin/payments`, aid/tontine management routes.
 - Content: `GET|POST /api/admin/posts`, `PATCH /api/admin/posts/:uuid`, `GET|POST /api/admin/media`, `PATCH /api/admin/media/:id`, public comments and staff comment moderation.
-- Administration: `POST /api/admin/users`, `GET /api/admin/audit`.
+- Administration: `GET|POST /api/admin/users`, `PATCH /api/admin/users/:uuid`, `GET /api/admin/audit`.
 
 All mutating browser requests require a same-origin HTTPS request. The API uses an HttpOnly, Secure, SameSite=Strict session cookie and enforces roles on the server.
 
