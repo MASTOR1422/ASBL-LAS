@@ -22,9 +22,10 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return json(res, 405, { message: "Méthode non autorisée." });
   if (!sameOrigin(req)) return json(res, 403, { message: "Requête refusée." });
 
-  const url = process.env.SUPABASE_URL;
-  const publicKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const secretKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const isPreview = process.env.VERCEL_ENV === "preview";
+  const url = isPreview ? process.env.SUPABASE_PREVIEW_URL : (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL);
+  const publicKey = isPreview ? process.env.SUPABASE_PREVIEW_PUBLISHABLE_KEY : (process.env.SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+  const secretKey = isPreview ? process.env.SUPABASE_PREVIEW_SERVICE_ROLE_KEY : process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !publicKey || !secretKey) {
     return json(res, 503, { message: "Service de récupération non configuré." });
   }
@@ -66,7 +67,7 @@ export default async function handler(req, res) {
       return json(res, 200, { ok: true });
     }
 
-    const redirect = new URL("/reset-password.html", req.headers.origin).toString();
+    const redirect = new URL("/v2/reset-password.html", req.headers.origin).toString();
     const recoveryResponse = await fetch(
       url + "/auth/v1/recover?redirect_to=" + encodeURIComponent(redirect),
       {
