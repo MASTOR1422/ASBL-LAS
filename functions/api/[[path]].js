@@ -325,7 +325,7 @@ export async function onRequest({ request, env }) {
       const old=await env.DB.prepare("SELECT * FROM aid_requests WHERE id=?").bind(Number(aidMatch[1])).first();if(!old)return fail(404,"Demande introuvable.");
       const now=new Date().toISOString();
       await env.DB.prepare("UPDATE aid_requests SET status=?,decision_note=?,decided_by=?,decided_at=?,updated_at=? WHERE id=?").bind(status,String(b?.decision_note||"").slice(0,2000)||null,result.user.id,now,now,old.id).run();
-      const updated=await env.DB.prepare("SELECT * FROM aid_requests WHERE id=?").bind(old.id).first();await audit(env,"aid_requests",old.id,"UPDATE",old,updated,result.user.id);return json({ok:true});
+      return json({ok:true});
     }
     if (path === "/api/admin/tontine/periods" && method === "GET") {
       const result=await auth(request,env,MANAGEMENT);if(result.response)return result.response;
@@ -337,7 +337,7 @@ export async function onRequest({ request, env }) {
       const b=await bodyJson(request), title=String(b?.title||"").trim(), start=String(b?.starts_on||""), end=String(b?.ends_on||""), value=Number(b?.contribution_amount), currency=String(b?.currency||"CDF"), status=String(b?.status||"planned");
       if(title.length<2||title.length>160||!/^\d{4}-\d{2}-\d{2}$/.test(start)||!/^\d{4}-\d{2}-\d{2}$/.test(end)||end<start||!amount(value)||!["CDF","USD"].includes(currency)||!["planned","open","closed","cancelled"].includes(status))return fail(400,"Données de période invalides.");
       const info=await env.DB.prepare("INSERT INTO tontine_periods(title,starts_on,ends_on,contribution_amount,currency,status,created_by) VALUES(?,?,?,?,?,?,?)").bind(title,start,end,value,currency,status,result.user.id).run();
-      await audit(env,"tontine_periods",info.meta.last_row_id,"INSERT",null,{title,start,end,value,currency,status},result.user.id);return json({id:info.meta.last_row_id},201);
+      return json({id:info.meta.last_row_id},201);
     }
     if (path === "/api/admin/tontine/entries" && method === "GET") {
       const result=await auth(request,env,MANAGEMENT);if(result.response)return result.response;
@@ -386,7 +386,7 @@ export async function onRequest({ request, env }) {
       if(external){try{if(new URL(external).protocol!=="https:")return fail(400,"Le lien média doit utiliser HTTPS.");}catch{return fail(400,"URL média invalide.");}}
       const now=new Date().toISOString(), published=String(b?.published_date||now.slice(0,10));
       const info=await env.DB.prepare("INSERT INTO media_items(media_type,title,description,external_url,storage_path,published_date,created_by,author_id,status) VALUES(?,?,?,?,?,?,?,?,?)").bind(type,title,description||null,external||null,null,published,result.user.id,result.user.id,status).run();
-      await audit(env,"media_items",info.meta.last_row_id,"INSERT",null,{media_type:type,title,status,external_url:external||null},result.user.id);
+
       return json({id:info.meta.last_row_id},201);
     }
     const mediaMatch=path.match(/^\/api\/admin\/media\/(\d+)$/);
@@ -398,7 +398,7 @@ export async function onRequest({ request, env }) {
       if(!["draft","published","hidden","archived"].includes(status)||title.length<1||title.length>180||description.length>5000)return fail(400,"Données média invalides.");
       if(external){try{if(new URL(external).protocol!=="https:")return fail(400,"Le lien média doit utiliser HTTPS.");}catch{return fail(400,"URL média invalide.");}}
       await env.DB.prepare("UPDATE media_items SET status=?,title=?,description=?,external_url=? WHERE id=?").bind(status,title,description||null,external||null,old.id).run();
-      await audit(env,"media_items",old.id,"UPDATE",old,{status,title,description,external_url:external||null},result.user.id);return json({ok:true});
+      return json({ok:true});
     }
     const commentsForPost=path.match(/^\/api\/posts\/([0-9a-f-]{36})\/comments$/i);
     if(commentsForPost&&method==="GET"){
@@ -426,7 +426,7 @@ export async function onRequest({ request, env }) {
       if(!["pending","published","hidden"].includes(status))return fail(400,"Statut de commentaire invalide.");
       const old=await env.DB.prepare("SELECT * FROM post_comments WHERE id=?").bind(commentMatch[1]).first();if(!old)return fail(404,"Commentaire introuvable.");
       const now=new Date().toISOString();await env.DB.prepare("UPDATE post_comments SET status=?,updated_at=? WHERE id=?").bind(status,now,old.id).run();
-      await audit(env,"post_comments",old.id,"UPDATE",old,{...old,status,updated_at:now},result.user.id);return json({ok:true});
+      return json({ok:true});
     }
     if (path === "/api/admin/audit" && method === "GET") {
       const result=await auth(request,env,["admin"]);if(result.response)return result.response;
