@@ -98,7 +98,7 @@ async function audit(env, table, id, action, oldData, newData, actor) {
 }
 async function sendRecoveryEmail(env, origin, email, token) {
   if (!env.RESEND_API_KEY || !env.LAS_MAIL_FROM) return false;
-  const link = new URL("/reset-password.html?token=" + encodeURIComponent(token), origin).toString();
+  const link = new URL("/v2/reset-password.html?token=" + encodeURIComponent(token), origin).toString();
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: { "Authorization": "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" },
