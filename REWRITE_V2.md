@@ -14,6 +14,7 @@
 - Ne pas fusionner dans `main` ni promouvoir la production avant validation manuelle des scénarios d'accès.
 - Ne jamais supprimer, réinitialiser ou écraser la base Supabase existante.
 - `SUPABASE_SERVICE_ROLE_KEY` reste exclusivement côté serveur.
+- Les Preview Vercel doivent utiliser une base Supabase de test distincte via `SUPABASE_PREVIEW_URL`, `SUPABASE_PREVIEW_PUBLISHABLE_KEY` et `SUPABASE_PREVIEW_SERVICE_ROLE_KEY`. Si ces variables ne sont pas définies, l'authentification et les données restent volontairement bloquées au lieu de se rabattre sur la production.
 - Les droits d'accès sont appliqués par RLS et privilèges SQL, pas seulement par le masquage de l'interface.
 - Les membres ne doivent voir que leur fiche, leurs cotisations/paiements et leurs demandes d'entraide.
 - Les responsables habilités peuvent traiter les données financières et demandes; les changements financiers sont journalisés dans `audit_logs`.
@@ -30,8 +31,8 @@
 
 ## Contrôles restant obligatoires avant ouverture
 1. Vérifier la migration sur une base de préproduction isolée ou un clone, puis comparer le schéma et les politiques.
-2. Vérifier les variables Vercel Preview : `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` et `APP_BASE_URL`. Ne jamais afficher ou copier les valeurs secrètes dans GitHub.
-3. Autoriser les URL de redirection Supabase Auth pour le domaine de production et les previews Vercel nécessaires.
+2. Créer/configurer une base Supabase de test séparée et définir dans l'environnement Preview Vercel `SUPABASE_PREVIEW_URL`, `SUPABASE_PREVIEW_PUBLISHABLE_KEY` et `SUPABASE_PREVIEW_SERVICE_ROLE_KEY`. En Production, conserver `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` et `SUPABASE_SERVICE_ROLE_KEY`. Ne jamais afficher ou copier les valeurs secrètes dans GitHub.
+3. Autoriser les URL de redirection Supabase Auth pour le domaine de test et les previews Vercel nécessaires; le flux V2 redirige vers `/v2/reset-password.html`.
 4. Tester connexion valide/invalide, compte inactif, récupération e-mail, lien expiré, déconnexion et session expirée.
 5. Avec deux comptes membres distincts, vérifier qu'aucun ne peut lire ou modifier les données de l'autre.
 6. Vérifier les rôles admin, trésorier et secrétaire, les refus d'accès, les écritures d'audit et les données vides.
