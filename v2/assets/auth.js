@@ -1,1 +1,40 @@
-document.addEventListener("DOMContentLoaded",async()=>{const form=document.querySelector("#login-form");const button=document.querySelector("#submit-button");const message=document.querySelector("#login-message");const forgot=document.querySelector("#forgot-button");const say=(text,ok=false)=>{message.textContent=text;message.classList.toggle("success",ok);};try{await window.LAS_SUPABASE_READY;if(!window.lasSupabase)throw new Error("Client Supabase indisponible.");}catch(e){say("Le service de connexion est indisponible. Réessayez plus tard.");if(button)button.disabled=true;return;}form?.addEventListener("submit",async event=>{event.preventDefault();say("");button.disabled=true;button.textContent="Connexion…";const username=String(form.username.value||"").trim().toLowerCase();const password=String(form.password.value||"");try{const response=await fetch("../api/auth/username-login",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({username,password})});const data=await response.json().catch(()=>({}));if(!response.ok||!data.access_token||!data.refresh_token)throw new Error(data.message||"Connexion refusée. Vérifiez vos identifiants.");const result=await window.lasSupabase.auth.setSession({access_token:data.access_token,refresh_token:data.refresh_token});if(result.error)throw new Error("La session n’a pas pu être créée. Réessayez.");window.location.assign("./espace.html");}catch(error){say(error.message||"Connexion impossible.");}finally{button.disabled=false;button.textContent="Se connecter";}});forgot?.addEventListener("click",async()=>{const username=String(form?.username.value||"").trim().toLowerCase();if(!username){say("Saisissez d’abord votre nom d’utilisateur.");form?.username.focus();return;}forgot.disabled=true;say("Demande en cours…");try{const response=await fetch("../api/auth/recover",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify({username})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.message||"Service de récupération indisponible.");say("Si ce compte est actif, les instructions de récupération seront envoyées à l’adresse associée.",true);}catch(error){say(error.message||"Récupération impossible.");}finally{forgot.disabled=false;}});});
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("#login-form");
+  const button = document.querySelector("#submit-button");
+  const message = document.querySelector("#login-message");
+  const forgot = document.querySelector("#forgot-button");
+  const say = (text, ok = false) => {
+    message.textContent = text;
+    message.classList.toggle("success", ok);
+  };
+
+  form?.addEventListener("submit", async event => {
+    event.preventDefault();
+    say("");
+    button.disabled = true;
+    button.textContent = "Connexion…";
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({
+          username: String(form.elements.username.value || "").trim().toLowerCase(),
+          password: String(form.elements.password.value || "")
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.user) throw new Error(data.message || "Connexion refusée.");
+      window.location.assign("/espace.html");
+    } catch (error) {
+      say(error.message || "Connexion impossible.");
+    } finally {
+      button.disabled = false;
+      button.textContent = "Se connecter";
+    }
+  });
+
+  forgot?.addEventListener("click", () => {
+    say("La récupération automatique par e-mail n’est pas configurée dans le mode SQLite local. Contactez l’administrateur pour réinitialiser le mot de passe.");
+  });
+});
