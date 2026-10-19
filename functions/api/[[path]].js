@@ -433,6 +433,31 @@ export async function onRequest({ request, env }) {
       const result=await auth(request,env,["admin"]);if(result.response)return result.response;
       const {results}=await env.DB.prepare("SELECT id,table_name,record_id,action,old_data,new_data,changed_by,changed_at FROM audit_logs ORDER BY changed_at DESC LIMIT 500").all();return json(results);
     }
+    if (path === "/api/admin/users" && method === "GET") {
+      const result=await auth(request,env,["admin"]);if(result.response)return result.response;
+      const {results}=await env.DB.prepare("SELECT u.id,u.username,u.email,u.role,u.member_id,u.active,u.display_name,u.created_at,u.updated_at,p.full_name FROM users u LEFT JOIN profiles p ON p.id=u.id ORDER BY u.created_at DESC LIMIT 500").all();return json(results);
+    }
+    const userMatch=path.match(/^\/api\/admin\/users\/([0-9a-f-]{36})$/i);
+    if(userMatch&&method==="PATCH"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,["admin"]);if(result.response)return result.response;
+      const b=await bodyJson(request), id=userMatch[1], old=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(id).first();if(!old)return fail(404,"Compte introuvable.");
+      const role=String(b?.role??old.role), active=b?.active===undefined?Number(old.active):((b.active===true||b.active===1)?1:0);
+      const memberId=b?.member_id===undefined?old.member_id:(b.member_id===null||b.member_id===""?null:Number(b.member_id));
+      const display=String(b?.display_name??old.display_name??old.username).trim().slice(0,180);
+      if(!["admin","secretaire","tresorier","membre"].includes(role)||![0,1].includes(active)||(memberId!==null&&!Number.isInteger(memberId))||display.length<1)return fail(400,"Rôle, statut, fiche membre ou nom affiché invalide.");
+      if(id===result.user.id&&active===0)return fail(400,"Vous ne pouvez pas désactiver votre propre compte.");
+      const now=new Date().toISOString();
+      try {
+        await env.DB.batch([
+          env.DB.prepare("UPDATE users SET role=?,member_id=?,active=?,display_name=?,updated_at=? WHERE id=?").bind(role,memberId,active,display,now,id),
+          env.DB.prepare("UPDATE profiles SET role=?,member_id=?,active=?,display_name=?,full_name=? WHERE id=?").bind(role,memberId,active,display,display,id)
+        ]);
+      } catch { return fail(400,"La fiche membre ou les paramètres du compte sont invalides."); }
+      if(active===0)await env.DB.prepare("DELETE FROM sessions WHERE user_id=?").bind(id).run();
+      await audit(env,"users",id,"UPDATE",{role:old.role,member_id:old.member_id,active:old.active,display_name:old.display_name},{role,member_id:memberId,active,display_name:display},result.user.id);
+      return json({ok:true});
+    }
     if (path === "/api/admin/users" && method === "POST") {
       if(!requireOrigin(request))return fail(403,"Requête refusée.");
       const result=await auth(request,env,["admin"]);if(result.response)return result.response;
