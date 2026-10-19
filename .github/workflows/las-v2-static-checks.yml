@@ -1,4 +1,4 @@
-name: ASBL-LAS V2 static checks
+name: ASBL-LAS V2 SQLite checks
 on:
   push:
     branches:
@@ -9,33 +9,44 @@ on:
 permissions:
   contents: read
 jobs:
-  static-checks:
+  local-sqlite:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout reviewed source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.13.0"
+          cache: npm
+          cache-dependency-path: local/package.json
+      - name: Install local server dependencies
+        working-directory: local
+        run: npm install --no-audit --no-fund
       - name: Check JavaScript syntax
+        working-directory: local
+        run: npm run check
+      - name: Test SQLite schema and audit
+        working-directory: local
+        run: npm test
+      - name: Check V2 browser JavaScript
         run: |
           set -eu
-          for file in api/supabase-config.js api/auth/username-login.js api/auth/verify-session.js api/auth/recover.js v2/assets/site.js v2/assets/auth.js v2/assets/reset.js v2/assets/portal.js v2/assets/public-content.js supabase-client.js; do
+          for file in v2/assets/site.js v2/assets/auth.js v2/assets/portal.js v2/assets/public-content.js; do
             test -f "$file"
             node --check "$file"
           done
-      - name: Validate JSON configuration
-        run: |
-          node -e "JSON.parse(require('fs').readFileSync('package.json','utf8'))"
-          node -e "JSON.parse(require('fs').readFileSync('vercel.json','utf8'))"
-      - name: Verify V2 pages and local assets
+      - name: Verify local pages and ensure no Supabase browser client
         run: |
           set -eu
           test -f v2/index.html
           test -f v2/login.html
           test -f v2/espace.html
-          test -f reset-password.html
           test -f v2/reset-password.html
-          grep -q 'public-content.js' v2/index.html
-          grep -q 'portal.js' v2/espace.html
-          grep -q 'username-login' v2/assets/auth.js
-          grep -q 'verify-session' v2/assets/portal.js
+          test -f local/sqlite/schema.sql
+          test -f local/server.js
+          ! grep -q 'supabase-config.js\|supabase-client.js\|supabase-js@' v2/index.html
+          ! grep -q 'supabase-config.js\|supabase-client.js\|supabase-js@' v2/login.html
+          ! grep -q 'supabase-config.js\|supabase-client.js\|supabase-js@' v2/espace.html
