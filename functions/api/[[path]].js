@@ -315,6 +315,83 @@ export async function onRequest({ request, env }) {
       try {const info=await env.DB.prepare("INSERT INTO tontine_entries(period_id,member_id,amount,currency,status,recorded_by) VALUES(?,?,?,?,?,?)").bind(periodId,memberId,value,currency,status,result.user.id).run();return json({id:info.meta.last_row_id},201);}
       catch{return fail(409,"Période ou membre introuvable, ou membre déjà inscrit.");}
     }
+    if (path === "/api/admin/posts" && method === "GET") {
+      const result=await auth(request,env,MANAGEMENT);if(result.response)return result.response;
+      const {results}=await env.DB.prepare("SELECT p.*,u.username AS author_username FROM posts p LEFT JOIN users u ON u.id=p.author_id ORDER BY p.created_at DESC LIMIT 500").all();return json(results);
+    }
+    if (path === "/api/admin/posts" && method === "POST") {
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,["admin","secretaire"]);if(result.response)return result.response;
+      const b=await bodyJson(request), title=String(b?.title||"").trim(), content=String(b?.body||"").trim(), category=String(b?.category||"general"), status=String(b?.status||"draft");
+      if(title.length<1||title.length>180||content.length<1||content.length>10000||!["general","annonce","entraide","evenement"].includes(category)||!["draft","published","hidden","archived"].includes(status))return fail(400,"Titre, contenu, catégorie ou statut invalide.");
+      const id=crypto.randomUUID(), now=new Date().toISOString();
+      await env.DB.prepare("INSERT INTO posts(id,author_id,title,body,category,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?)").bind(id,result.user.id,title,content,category,status,now,now).run();
+      return json({id},201);
+    }
+    const postMatch=path.match(/^\/api\/admin\/posts\/([0-9a-f-]{36})$/i);
+    if(postMatch&&method==="PATCH"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,["admin","secretaire"]);if(result.response)return result.response;
+      const b=await bodyJson(request), old=await env.DB.prepare("SELECT * FROM posts WHERE id=?").bind(postMatch[1]).first();if(!old)return fail(404,"Publication introuvable.");
+      const title=String(b?.title??old.title).trim(), content=String(b?.body??old.body).trim(), category=String(b?.category??old.category), status=String(b?.status??old.status);
+      if(title.length<1||title.length>180||content.length<1||content.length>10000||!["general","annonce","entraide","evenement"].includes(category)||!["draft","published","hidden","archived"].includes(status))return fail(400,"Titre, contenu, catégorie ou statut invalide.");
+      await env.DB.prepare("UPDATE posts SET title=?,body=?,category=?,status=?,updated_at=? WHERE id=?").bind(title,content,category,status,new Date().toISOString(),old.id).run();
+      return json({ok:true});
+    }
+    if (path === "/api/admin/media" && method === "GET") {
+      const result=await auth(request,env,MANAGEMENT);if(result.response)return result.response;
+      const {results}=await env.DB.prepare("SELECT id,media_type,title,description,external_url,published_date,created_at,author_id,status FROM media_items ORDER BY published_date DESC LIMIT 500").all();return json(results);
+    }
+    if (path === "/api/admin/media" && method === "POST") {
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,["admin","secretaire"]);if(result.response)return result.response;
+      const b=await bodyJson(request), type=String(b?.media_type||""), title=String(b?.title||"").trim(), description=String(b?.description||"").trim(), external=String(b?.external_url||"").trim(), status=String(b?.status||"draft");
+      if(!["photo","pdf","video","article","link"].includes(type)||title.length<1||title.length>180||description.length>5000||!["draft","published","hidden","archived"].includes(status))return fail(400,"Type, titre, description ou statut invalide.");
+      if(external){try{if(new URL(external).protocol!=="https:")return fail(400,"Le lien média doit utiliser HTTPS.");}catch{return fail(400,"URL média invalide.");}}
+      const now=new Date().toISOString(), published=String(b?.published_date||now.slice(0,10));
+      const info=await env.DB.prepare("INSERT INTO media_items(media_type,title,description,external_url,storage_path,published_date,created_by,author_id,status) VALUES(?,?,?,?,?,?,?,?,?)").bind(type,title,description||null,external||null,null,published,result.user.id,result.user.id,status).run();
+      await audit(env,"media_items",info.meta.last_row_id,"INSERT",null,{media_type:type,title,status,external_url:external||null},result.user.id);
+      return json({id:info.meta.last_row_id},201);
+    }
+    const mediaMatch=path.match(/^\/api\/admin\/media\/(\d+)$/);
+    if(mediaMatch&&method==="PATCH"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,["admin","secretaire"]);if(result.response)return result.response;
+      const b=await bodyJson(request), old=await env.DB.prepare("SELECT * FROM media_items WHERE id=?").bind(Number(mediaMatch[1])).first();if(!old)return fail(404,"Média introuvable.");
+      const status=String(b?.status??old.status), title=String(b?.title??old.title).trim(), description=String(b?.description??old.description??"").trim(), external=String(b?.external_url??old.external_url??"").trim();
+      if(!["draft","published","hidden","archived"].includes(status)||title.length<1||title.length>180||description.length>5000)return fail(400,"Données média invalides.");
+      if(external){try{if(new URL(external).protocol!=="https:")return fail(400,"Le lien média doit utiliser HTTPS.");}catch{return fail(400,"URL média invalide.");}}
+      await env.DB.prepare("UPDATE media_items SET status=?,title=?,description=?,external_url=? WHERE id=?").bind(status,title,description||null,external||null,old.id).run();
+      await audit(env,"media_items",old.id,"UPDATE",old,{status,title,description,external_url:external||null},result.user.id);return json({ok:true});
+    }
+    const commentsForPost=path.match(/^\/api\/posts\/([0-9a-f-]{36})\/comments$/i);
+    if(commentsForPost&&method==="GET"){
+      const {results}=await env.DB.prepare("SELECT c.id,c.post_id,c.body,c.created_at,u.display_name,u.username FROM post_comments c LEFT JOIN users u ON u.id=c.author_id WHERE c.post_id=? AND c.status='published' ORDER BY c.created_at ASC LIMIT 200").bind(commentsForPost[1]).all();return json(results);
+    }
+    if(commentsForPost&&method==="POST"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env);if(result.response)return result.response;
+      const b=await bodyJson(request), content=String(b?.body||"").trim();
+      if(content.length<1||content.length>3000)return fail(400,"Le commentaire doit contenir entre 1 et 3000 caractères.");
+      const post=await env.DB.prepare("SELECT id FROM posts WHERE id=? AND status='published'").bind(commentsForPost[1]).first();if(!post)return fail(404,"Publication introuvable.");
+      const id=crypto.randomUUID(), now=new Date().toISOString();
+      await env.DB.prepare("INSERT INTO post_comments(id,post_id,author_id,body,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?)").bind(id,post.id,result.user.id,content,"pending",now,now).run();
+      return json({id,status:"pending",message:"Commentaire envoyé pour modération."},201);
+    }
+    if(path==="/api/admin/comments"&&method==="GET"){
+      const result=await auth(request,env,MANAGEMENT);if(result.response)return result.response;
+      const {results}=await env.DB.prepare("SELECT c.*,p.title AS post_title,u.username AS author_username FROM post_comments c LEFT JOIN posts p ON p.id=c.post_id LEFT JOIN users u ON u.id=c.author_id ORDER BY c.created_at DESC LIMIT 500").all();return json(results);
+    }
+    const commentMatch=path.match(/^\/api\/admin\/comments\/([0-9a-f-]{36})$/i);
+    if(commentMatch&&method==="PATCH"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,["admin","secretaire"]);if(result.response)return result.response;
+      const b=await bodyJson(request), status=String(b?.status||"");
+      if(!["pending","published","hidden"].includes(status))return fail(400,"Statut de commentaire invalide.");
+      const old=await env.DB.prepare("SELECT * FROM post_comments WHERE id=?").bind(commentMatch[1]).first();if(!old)return fail(404,"Commentaire introuvable.");
+      const now=new Date().toISOString();await env.DB.prepare("UPDATE post_comments SET status=?,updated_at=? WHERE id=?").bind(status,now,old.id).run();
+      await audit(env,"post_comments",old.id,"UPDATE",old,{...old,status,updated_at:now},result.user.id);return json({ok:true});
+    }
     if (path === "/api/admin/audit" && method === "GET") {
       const result=await auth(request,env,["admin"]);if(result.response)return result.response;
       const {results}=await env.DB.prepare("SELECT id,table_name,record_id,action,old_data,new_data,changed_by,changed_at FROM audit_logs ORDER BY changed_at DESC LIMIT 500").all();return json(results);
