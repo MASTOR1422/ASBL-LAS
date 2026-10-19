@@ -1,16 +1,19 @@
-/* Public runtime config loader. The endpoint returns only the browser-safe publishable key. */
+/* Le serveur choisit les variables adaptées à l'environnement; pas de repli vers une clé intégrée au dépôt. */
 window.LAS_SUPABASE_READY = (async function () {
-  let config = window.LAS_SUPABASE_CONFIG || null;
+  let config = null;
+  let response;
   try {
-    const response = await fetch("/api/supabase-config", { cache: "no-store", credentials: "same-origin" });
-    if (response.ok) {
-      const remote = await response.json();
-      if (remote.url && remote.publishableKey) config = remote;
-    }
-  } catch (_) {}
-  if (!config || !config.url || !config.publishableKey ||
-      config.url.includes("VOTRE-PROJET") || config.publishableKey.includes("REMPLACER")) {
-    throw new Error("Configuration Supabase absente. Configurez SUPABASE_URL et SUPABASE_PUBLISHABLE_KEY dans l'environnement Vercel.");
+    response = await fetch("/api/supabase-config", { cache: "no-store", credentials: "same-origin" });
+  } catch (_) {
+    throw new Error("Le service de configuration Supabase est indisponible.");
+  }
+  if (!response.ok) {
+    throw new Error("Configuration Supabase absente pour cet environnement. Configurez les variables Preview dédiées.");
+  }
+  const remote = await response.json().catch(() => ({}));
+  if (remote.url && remote.publishableKey) config = remote;
+  if (!config || !config.url || !config.publishableKey) {
+    throw new Error("Configuration Supabase invalide. Vérifiez les variables d'environnement Vercel.");
   }
   if (!window.supabase || typeof window.supabase.createClient !== "function") {
     throw new Error("La bibliothèque Supabase JS n'a pas été chargée.");
