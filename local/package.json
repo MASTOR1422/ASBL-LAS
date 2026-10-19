@@ -4,12 +4,15 @@
   "private": true,
   "description": "Serveur local ASBL-LAS avec SQLite, sans Supabase",
   "type": "module",
-  "engines": { "node": ">=22.13.0" },
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "init-db": "node init-db.js",
     "create-admin": "node create-admin.js",
     "start": "node server.js",
-    "check": "node --check server.js && node --check init-db.js && node --check create-admin.js"
+    "check": "node --check server.js && node --check init-db.js && node --check create-admin.js",
+    "test": "node test-db.js"
   },
   "dependencies": {
     "better-sqlite3": "12.2.0",
