@@ -11,7 +11,7 @@
     "init-db": "node init-db.js",
     "create-admin": "node create-admin.js",
     "start": "node server.js",
-    "check": "node --check server.js && node --check init-db.js && node --check create-admin.js",
+    "check": "node --check server.js && node --check init-db.js && node --check create-admin.js && node --check create-user.js && node --check import-data.js && node --check test-db.js",
     "test": "node test-db.js"
   },
   "dependencies": {
