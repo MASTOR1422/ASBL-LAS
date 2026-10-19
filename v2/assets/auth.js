@@ -34,7 +34,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  forgot?.addEventListener("click", () => {
-    say("La récupération automatique par e-mail n’est pas configurée dans le mode SQLite local. Contactez l’administrateur pour réinitialiser le mot de passe.");
+  forgot?.addEventListener("click", async () => {
+    const username = window.prompt("Saisissez votre nom d’utilisateur ASBL-LAS pour recevoir un lien de réinitialisation par e-mail :");
+    if (!username) return;
+    forgot.disabled = true;
+    say("Envoi de la demande…");
+    try {
+      const response = await fetch("/api/auth/recover", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ username: username.trim().toLowerCase() })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || "Le service de récupération est indisponible.");
+      say(data.message || "Si le compte est actif, un lien sera envoyé à l’adresse associée.", true);
+    } catch (error) {
+      say(error.message || "Impossible d’envoyer la demande.");
+    } finally {
+      forgot.disabled = false;
+    }
   });
 });
