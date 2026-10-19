@@ -2,7 +2,7 @@ import express from "express";
 import helmet from "helmet";
 import Database from "better-sqlite3";
 import bcrypt from "bcryptjs";
-import { createHash, randomBytes, randomUUID, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,6 +24,7 @@ const host = process.env.LAS_HOST || "127.0.0.1";
 const port = Number(process.env.PORT || process.env.LAS_PORT || 3000);
 const cookieName = "las_session";
 const sessionHours = Math.max(1, Math.min(168, Number(process.env.LAS_SESSION_HOURS || 12)));
+const dummyPasswordHash = await bcrypt.hash(randomBytes(32).toString("hex"), 12);
 const isHttps = process.env.LAS_HTTPS === "1";
 app.disable("x-powered-by");
 app.use(helmet({ contentSecurityPolicy: false, crossOriginEmbedderPolicy: false }));
@@ -81,7 +82,7 @@ app.post("/api/auth/login", requireOrigin, async (req, res) => {
   const valid = user && user.active === 1 && await bcrypt.compare(password, user.password_hash);
   if (!valid) {
     // Similar response and password hash work for missing users reduce account enumeration.
-    if (!user) await bcrypt.compare(password, "$2a$12$C6UzMDM.H6dfI/f/IKcEe.0m5s4t8V2X9G6wzN9y8jJw2m0p0Q6");
+    if (!user) await bcrypt.compare(password, dummyPasswordHash);
     return jsonError(res, 401, "Nom d'utilisateur ou mot de passe incorrect.");
   }
   const raw = randomBytes(32).toString("base64url");
