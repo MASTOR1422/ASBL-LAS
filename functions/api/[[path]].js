@@ -303,7 +303,7 @@ export async function onRequest({ request, env }) {
       await env.DB.prepare("INSERT INTO member_payments(id,member_id,payment_year,payment_month,paid,updated_by,updated_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(member_id,payment_year,payment_month) DO UPDATE SET paid=excluded.paid,updated_by=excluded.updated_by,updated_at=excluded.updated_at").bind(id,memberId,year,month,paid?1:0,result.user.id,now).run();
       return json({ok:true});
     }
-    const memberMatch=path.match(/^\\/api\\/admin\\/members\\/(\\d+)$/);
+    const memberMatch=path.match(/^\/api\/admin\/members\/(\d+)$/);
     if(memberMatch&&method==="PATCH"){
       if(!requireOrigin(request))return fail(403,"Requête refusée.");
       const result=await auth(request,env,["admin","secretaire"]);if(result.response)return result.response;
