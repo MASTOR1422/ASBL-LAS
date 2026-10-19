@@ -137,6 +137,8 @@ app.post("/api/me/aid", requireOrigin, authenticate, (req, res) => {
   res.status(201).json({id:info.lastInsertRowid,ok:true});
 });
 
+app.get("/api/admin/payments", authenticate, allow(...roles.management), (req,res) => res.json(db.prepare("SELECT p.*,m.name AS member_name FROM member_payments p JOIN members m ON m.id=p.member_id ORDER BY p.payment_year DESC,p.payment_month DESC LIMIT 1000").all()));
+app.get("/api/admin/contributions", authenticate, allow(...roles.management), (req,res) => res.json(db.prepare("SELECT c.*,m.name AS member_name FROM monthly_contributions c JOIN members m ON m.id=c.member_id ORDER BY c.contribution_year DESC,c.contribution_month DESC LIMIT 1000").all()));
 app.get("/api/admin/members", authenticate, allow(...roles.management), (req,res) => res.json(db.prepare("SELECT id,name,phone,email,profession,joined_on,position,status FROM members ORDER BY name LIMIT 1000").all()));
 app.post("/api/admin/members", requireOrigin, authenticate, allow("admin","secretaire"), (req,res) => {
   const name=String(req.body?.name||"").trim();
@@ -184,7 +186,7 @@ app.post("/api/admin/tontine/entries", requireOrigin, authenticate, allow(...rol
 app.get("/api/admin/audit", authenticate, allow("admin"), (req,res) => res.json(db.prepare("SELECT id,table_name,record_id,action,old_data,new_data,changed_by,changed_at FROM audit_logs ORDER BY changed_at DESC LIMIT 500").all()));
 
 app.use(express.static(resolve(repo, "v2"), { index: "index.html", dotfiles:"deny", fallthrough:true, setHeaders(res){res.setHeader("X-Content-Type-Options","nosniff");} }));
-app.get("*", (req,res,next) => {
+app.use((req,res,next) => {
   if(req.path.startsWith("/api/")) return jsonError(res,404,"API inconnue.");
   res.sendFile(resolve(repo,"v2/index.html"), err => { if(err) next(err); });
 });
