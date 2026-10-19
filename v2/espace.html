@@ -3,10 +3,24 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Mon espace | ASBL-LAS</title><link rel="stylesheet" href="./assets/site.css"></head>
 <body>
   <header class="site-header"><a class="brand" href="./index.html"><span class="brand-mark">LAS</span><span><strong>Les Amis de la Semence</strong><small>Espace membres</small></span></a><div class="account-actions"><span id="member-label" class="muted">Vérification de la session…</span><button id="logout-button" class="button button-small button-outline" type="button">Déconnexion</button></div></header>
-  <main class="portal-wrap"><div class="portal-heading"><p class="eyebrow">Espace privé</p><h1 id="welcome-title">Mon espace</h1><p class="muted">Les informations affichées ici doivent être limitées à votre compte et à votre rôle.</p></div>
-    <div id="portal-alert" class="notice" role="status">Vérification de votre session…</div>
-    <div id="portal-content" hidden><section class="cards portal-cards"><article class="feature-card"><span class="card-number">01</span><h2>Mon profil</h2><p>Vos informations personnelles et associatives.</p><p class="muted">Les champs du profil seront connectés après validation des règles RLS.</p></article><article class="feature-card"><span class="card-number">02</span><h2>Mes cotisations</h2><p>Consultez uniquement votre situation personnelle.</p><p class="muted">Aucun paiement ne peut être modifié par un membre ordinaire.</p></article><article class="feature-card"><span class="card-number">03</span><h2>Ma tontine</h2><p>Suivi des périodes et de votre participation selon les règles de l'association.</p><p class="muted">Le module financier sera activé après validation du schéma et de l'audit.</p></article><article class="feature-card"><span class="card-number">04</span><h2>Entraide</h2><p>Les demandes de soutien et les informations utiles aux membres.</p></article></section>
-    <section id="admin-panel" class="admin-panel" hidden><p class="eyebrow">Gestion</p><h2>Administration LAS</h2><p>Les fonctions de gestion seront affichées selon le rôle vérifié côté serveur. Les actions financières exigeront des politiques RLS et un journal d'audit opérationnel.</p></section></div>
+  <main class="portal-wrap">
+    <div class="portal-heading"><p class="eyebrow">Espace privé</p><h1 id="welcome-title">Mon espace</h1><p class="muted">Vos données personnelles sont affichées selon votre rôle et les règles d'accès de l'association.</p></div>
+    <div id="portal-alert" class="notice" role="status" aria-live="polite">Vérification de votre session…</div>
+    <div id="portal-content" hidden>
+      <section class="cards portal-cards">
+        <article class="feature-card"><span class="card-number">01</span><h2>Mon profil</h2><div id="profile-details"><p class="muted">Chargement du profil…</p></div></article>
+        <article class="feature-card"><span class="card-number">02</span><h2>Mes cotisations</h2><p id="contribution-summary" class="muted">Chargement…</p><div id="contributions-list"></div></article>
+        <article class="feature-card"><span class="card-number">03</span><h2>Ma tontine</h2><p class="muted">Consultez vos périodes et contributions enregistrées.</p><div id="tontine-list"><p class="muted">Chargement…</p></div></article>
+        <article class="feature-card"><span class="card-number">04</span><h2>Entraide</h2><p class="muted">Envoyez une demande confidentielle à l'équipe habilitée.</p>
+          <form id="aid-form"><label for="aid-subject">Objet</label><input id="aid-subject" name="subject" minlength="3" maxlength="160" required><label for="aid-description">Description</label><textarea id="aid-description" name="description" minlength="3" maxlength="5000" rows="4" required></textarea><button class="button button-small" type="submit">Envoyer la demande</button><p id="aid-message" class="form-message" role="status" aria-live="polite"></p></form>
+          <div id="aid-list"></div>
+        </article>
+      </section>
+      <section class="admin-panel" id="admin-panel" hidden><p class="eyebrow">Gestion sécurisée</p><h2>Administration LAS</h2><p class="muted">Les données affichées ici sont filtrées par les politiques de la base. Les modifications financières sont journalisées lorsqu'elles sont activées côté base.</p>
+        <div class="admin-grid"><article><h3>État des paiements</h3><div id="admin-payments"><p class="muted">Chargement…</p></div></article><article><h3>Demandes d'entraide à traiter</h3><div id="admin-aid"><p class="muted">Chargement…</p></div></article></div>
+      </section>
+      <p id="data-warning" class="fine-print"></p>
+    </div>
   </main>
   <script src="../supabase-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="../supabase-client.js"></script><script src="./assets/portal.js" defer></script>
 </body></html>
