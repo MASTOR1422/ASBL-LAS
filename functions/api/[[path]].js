@@ -170,6 +170,19 @@ export async function onRequest({ request, env }) {
       const u=result.user;
       return json({user:{id:u.id,username:u.username,email:u.email,role:u.role,member_id:u.member_id,display_name:u.display_name}});
     }
+    if (method === "POST" && path === "/api/auth/change-password") {
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env);if(result.response)return result.response;
+      const b=await bodyJson(request), current=String(b?.current_password||""), next=String(b?.new_password||"");
+      if(next.length<12||next.length>1024)return fail(400,"Le nouveau mot de passe doit contenir au moins 12 caractères.");
+      const row=await env.DB.prepare("SELECT password_hash FROM users WHERE id=?").bind(result.user.id).first();
+      if(!row||!(await verifyPassword(current,row.password_hash)))return fail(401,"Mot de passe actuel incorrect.");
+      const hash=await hashPassword(next), now=new Date().toISOString();
+      await env.DB.prepare("UPDATE users SET password_hash=?,updated_at=? WHERE id=?").bind(hash,now,result.user.id).run();
+      await env.DB.prepare("DELETE FROM sessions WHERE user_id=? AND id<>?").bind(result.user.id,result.user.session_id).run();
+      await audit(env,"users",result.user.id,"PASSWORD_RESET",null,{password_changed:true},result.user.id);
+      return json({ok:true,message:"Mot de passe modifié."});
+    }
     if (method === "POST" && path === "/api/auth/recover") {
       if (!requireOrigin(request)) return fail(403, "Requête refusée.");
       if (!env.RESEND_API_KEY || !env.LAS_MAIL_FROM) return fail(503, "La récupération par e-mail n’est pas encore configurée. Contactez l’administrateur LAS.");
@@ -279,6 +292,29 @@ export async function onRequest({ request, env }) {
     if (path === "/api/admin/aid" && method === "GET") {
       const result=await auth(request,env,MANAGEMENT);if(result.response)return result.response;
       const {results}=await env.DB.prepare("SELECT a.*,m.name AS member_name FROM aid_requests a JOIN members m ON m.id=a.member_id ORDER BY a.created_at DESC LIMIT 300").all();return json(results);
+    }
+    if (path === "/api/admin/payments" && method === "POST") {
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,FINANCE);if(result.response)return result.response;
+      const b=await bodyJson(request), memberId=Number(b?.member_id), year=Number(b?.payment_year), month=Number(b?.payment_month), paid=b?.paid===true||b?.paid===1||b?.paid==="1";
+      if(!Number.isInteger(memberId)||!intRange(year,2000,2200)||!intRange(month,1,12))return fail(400,"Données de paiement invalides.");
+      const member=await env.DB.prepare("SELECT id FROM members WHERE id=?").bind(memberId).first();if(!member)return fail(404,"Membre introuvable.");
+      const id=crypto.randomUUID(), now=new Date().toISOString();
+      await env.DB.prepare("INSERT INTO member_payments(id,member_id,payment_year,payment_month,paid,updated_by,updated_at) VALUES(?,?,?,?,?,?,?) ON CONFLICT(member_id,payment_year,payment_month) DO UPDATE SET paid=excluded.paid,updated_by=excluded.updated_by,updated_at=excluded.updated_at").bind(id,memberId,year,month,paid?1:0,result.user.id,now).run();
+      return json({ok:true});
+    }
+    const memberMatch=path.match(/^\\/api\\/admin\\/members\\/(\\d+)$/);
+    if(memberMatch&&method==="PATCH"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,["admin","secretaire"]);if(result.response)return result.response;
+      const b=await bodyJson(request), old=await env.DB.prepare("SELECT * FROM members WHERE id=?").bind(Number(memberMatch[1])).first();if(!old)return fail(404,"Membre introuvable.");
+      const fields=["name","phone","email","profession","birthdate","birthplace","address","joined_on","position","forum_status","asbl_status","meeting_status","note","photo_path","birthday_visible","status"];
+      const next={...old};for(const key of fields)if(Object.prototype.hasOwnProperty.call(b||{},key))next[key]=b[key];
+      if(String(next.name||"").trim().length<2||String(next.name||"").length>200||!["active","inactive","suspended"].includes(next.status)||!["OUI","NON"].includes(next.asbl_status))return fail(400,"Données membre invalides.");
+      if(next.birthday_visible!==0&&next.birthday_visible!==1&&next.birthday_visible!==true&&next.birthday_visible!==false)return fail(400,"Visibilité de l'anniversaire invalide.");
+      const now=new Date().toISOString();
+      await env.DB.prepare("UPDATE members SET name=?,phone=?,email=?,profession=?,birthdate=?,birthplace=?,address=?,joined_on=?,position=?,forum_status=?,asbl_status=?,meeting_status=?,note=?,photo_path=?,birthday_visible=?,status=?,updated_at=? WHERE id=?").bind(String(next.name).trim(),next.phone||null,next.email||null,next.profession||null,next.birthdate||null,next.birthplace||null,next.address||null,next.joined_on||null,next.position||null,next.forum_status||null,next.asbl_status,next.meeting_status||null,next.note||null,next.photo_path||null,(next.birthday_visible===true||next.birthday_visible===1)?1:0,next.status,now,old.id).run();
+      return json({ok:true});
     }
     const aidMatch=path.match(/^\/api\/admin\/aid\/(\d+)$/);
     if(aidMatch&&method==="PATCH"){
