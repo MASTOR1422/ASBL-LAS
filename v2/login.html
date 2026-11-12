@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#1b78b7">
+  <title>Connexion | ASBL-LAS</title>
+  <link rel="stylesheet" href="./assets/site.css">
+</head>
+<body class="auth-page">
+  <header class="site-header auth-header">
+    <a class="brand" href="./index.html" aria-label="Retour à l'accueil ASBL-LAS">
+      <span class="brand-mark">LAS</span>
+      <span><strong>Les Amis de la Semence</strong><small>Espace sécurisé des membres</small></span>
+    </a>
+    <a class="text-link" href="./index.html">← Retour au site</a>
+  </header>
+  <main class="auth-wrap">
+    <section class="auth-card" aria-labelledby="login-title">
+      <p class="eyebrow">Accès réservé aux membres</p>
+      <h1 id="login-title">Bienvenue</h1>
+      <p class="muted">Connectez-vous avec votre nom d’utilisateur et votre mot de passe ASBL-LAS.</p>
+      <form id="login-form" autocomplete="on">
+        <label for="username">Nom d’utilisateur</label>
+        <input id="username" name="username" type="text" autocomplete="username" minlength="3" maxlength="80" autocapitalize="none" spellcheck="false" required>
+        <label for="password">Mot de passe</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" maxlength="1024" required>
+        <button id="submit-button" class="button button-full" type="submit">Se connecter</button>
+        <p id="login-message" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+      <button id="forgot-button" class="text-button" type="button">Mot de passe oublié ?</button>
+      <p class="fine-print">Votre session est protégée. Ne partagez jamais vos identifiants. En cas de difficulté, contactez un responsable habilité de l’association.</p>
+    </section>
+  </main>
+  <script src="./assets/auth.js" defer></script>
+</body>
+</html>
