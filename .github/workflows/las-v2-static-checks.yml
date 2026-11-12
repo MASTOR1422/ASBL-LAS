@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - rewrite/asbl-las-v2
+      - design/windows7-refresh
   pull_request:
     branches:
       - main
+      - rewrite/asbl-las-v2
 permissions:
   contents: read
 jobs:
