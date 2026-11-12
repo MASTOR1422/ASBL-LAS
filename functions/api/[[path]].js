@@ -208,8 +208,6 @@ export async function onRequest({ request, env }) {
       const consumed=await env.DB.prepare("UPDATE password_reset_tokens SET used_at=? WHERE id=? AND used_at IS NULL AND expires_at > strftime('%Y-%m-%dT%H:%M:%fZ','now')").bind(usedAt,row.id).run();
       if (!consumed.meta?.changes) return fail(400,"Le lien a déjà été utilisé ou a expiré.");
       await env.DB.prepare("UPDATE users SET password_hash=?,updated_at=? WHERE id=?").bind(hash,usedAt,row.user_id).run();
-      await env.DB.prepare("UPDATE users SET active=1 WHERE id=?").bind(row.user_id).run();
-      await env.DB.prepare("UPDATE profiles SET active=1 WHERE id=?").bind(row.user_id).run();
       await env.DB.prepare("DELETE FROM sessions WHERE user_id=?").bind(row.user_id).run();
       await audit(env,"users",row.user_id,"PASSWORD_RESET",null,{password_reset:true},row.user_id);
       return json({ok:true,message:"Mot de passe modifié. Connectez-vous avec votre nouveau mot de passe."});
