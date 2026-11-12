@@ -46,3 +46,8 @@ All mutating browser requests require a same-origin HTTPS request. The API uses 
 ## Rollout caution
 
 This branch is a draft and the existing site root still contains legacy pages that use Supabase. Do not disable Supabase or switch the production site until the root UI and all remaining features have been migrated and end-to-end tests have passed. The existing Supabase database has not been modified or deleted.
+
+
+## Environnement de prévisualisation isolé
+
+Le projet Cloudflare Pages `asbl-las-api` utilise désormais une base D1 distincte pour les déploiements **Preview** : `asbl_las_preview_db`. La base de production `asbl_las_db` reste réservée à l'environnement **Production**. Les migrations 0001 à 0004 sont appliquées à la base Preview, sans copie de données personnelles ni financières de Production. Toute vérification fonctionnelle de la V2 doit d'abord être effectuée sur Preview.

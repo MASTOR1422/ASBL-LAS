@@ -3,9 +3,11 @@ on:
   push:
     branches:
       - rewrite/asbl-las-v2
+      - design/windows7-refresh
   pull_request:
     branches:
       - main
+      - rewrite/asbl-las-v2
 permissions:
   contents: read
 jobs:
@@ -32,7 +34,7 @@ jobs:
       - name: Check V2 browser JavaScript
         run: |
           set -eu
-          for file in v2/assets/site.js v2/assets/auth.js v2/assets/portal.js v2/assets/public-content.js; do
+          for file in v2/assets/site.js v2/assets/auth.js v2/assets/portal.js v2/assets/public-content.js v2/assets/member-pages.js; do
             test -f "$file"
             node --check "$file"
           done
