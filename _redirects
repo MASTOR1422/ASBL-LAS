@@ -1,3 +1,9 @@
 / /v2/ 302
 /login /v2/login.html 302
 /login.html /v2/login.html 302
+/espace.html /v2/espace.html 302
+/profil.html /v2/profil.html 302
+/cotisations.html /v2/cotisations.html 302
+/tontine-membre.html /v2/tontine-membre.html 302
+/entraide-membre.html /v2/entraide-membre.html 302
+/administration.html /v2/administration.html 302

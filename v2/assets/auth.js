@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok || !data.user) throw new Error(data.message || "Connexion refusée.");
-      window.location.assign("/espace.html");
+      window.location.assign("./espace.html");
     } catch (error) {
       say(error.message || "Connexion impossible.");
     } finally {
