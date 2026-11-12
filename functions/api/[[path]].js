@@ -502,6 +502,22 @@ export async function onRequest({ request, env }) {
       const {results}=await env.DB.prepare("SELECT u.id,u.username,u.email,u.role,u.member_id,u.active,u.display_name,u.created_at,u.updated_at,p.full_name FROM users u LEFT JOIN profiles p ON p.id=u.id ORDER BY u.created_at DESC LIMIT 500").all();return json(results);
     }
     const userMatch=path.match(/^\/api\/admin\/users\/([0-9a-f-]{36})$/i);
+    if(userMatch&&method==="POST"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,["admin"]);if(result.response)return result.response;
+      const id=userMatch[1];
+      if(id===result.user.id)return fail(400,"Pour votre propre compte, utilisez la rubrique Mon profil.");
+      const target=await env.DB.prepare("SELECT id,username,active FROM users WHERE id=?").bind(id).first();
+      if(!target)return fail(404,"Compte introuvable.");
+      const temporaryPassword=randomToken(24), passwordHash=await hashPassword(temporaryPassword), now=new Date().toISOString();
+      await env.DB.batch([
+        env.DB.prepare("UPDATE users SET password_hash=?,updated_at=? WHERE id=?").bind(passwordHash,now,id),
+        env.DB.prepare("DELETE FROM sessions WHERE user_id=?").bind(id),
+        env.DB.prepare("DELETE FROM password_reset_tokens WHERE user_id=?").bind(id)
+      ]);
+      await audit(env,"users",id,"PASSWORD_RESET",null,{password_reset:true,initiated_by_admin:true,account_active:Number(target.active)===1},result.user.id);
+      return json({ok:true,username:target.username,active:Number(target.active)===1,temporary_password:temporaryPassword,message:"Mot de passe provisoire créé. Le membre devra le changer après sa connexion."});
+    }
     if(userMatch&&method==="PATCH"){
       if(!requireOrigin(request))return fail(403,"Requête refusée.");
       const result=await auth(request,env,["admin"]);if(result.response)return result.response;
