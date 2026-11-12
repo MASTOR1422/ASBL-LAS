@@ -140,6 +140,10 @@ export async function onRequest({ request, env }) {
       const { results } = await env.DB.prepare("SELECT id,media_type,title,description,external_url,published_date,status FROM media_items WHERE status='published' AND external_url IS NOT NULL AND external_url LIKE 'https://%' ORDER BY published_date DESC LIMIT 200").all();
       return json(results);
     }
+    if (method === "GET" && path === "/api/public/tontine/periods") {
+      const { results } = await env.DB.prepare("SELECT id,title,starts_on,ends_on,contribution_amount,currency,status FROM tontine_periods WHERE status IN('planned','open') ORDER BY starts_on ASC LIMIT 100").all();
+      return json(results);
+    }
     if (method === "POST" && path === "/api/auth/login") {
       if (!requireOrigin(request)) return fail(403, "Requête refusée.");
       const body = await bodyJson(request);
@@ -238,6 +242,22 @@ export async function onRequest({ request, env }) {
       const {results}=await env.DB.prepare(`SELECT e.id,e.amount,e.currency,e.status,e.paid_at,e.note,p.title,p.starts_on,p.ends_on,p.status AS period_status
         FROM tontine_entries e JOIN tontine_periods p ON p.id=e.period_id WHERE e.member_id=? ORDER BY e.created_at DESC LIMIT 100`).bind(result.user.member_id).all();
       return json(results);
+    }
+    if (path === "/api/me/tontine" && method === "POST") {
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env);if(result.response)return result.response;
+      if(!result.user.member_id)return fail(400,"Votre compte doit être lié à une fiche membre.");
+      const body=await bodyJson(request), periodId=Number(body?.period_id);
+      if(!Number.isInteger(periodId))return fail(400,"Période invalide.");
+      const member=await env.DB.prepare("SELECT id,status FROM members WHERE id=?").bind(result.user.member_id).first();
+      if(!member||member.status!=="active")return fail(403,"Seuls les membres actifs peuvent rejoindre une tontine.");
+      const period=await env.DB.prepare("SELECT id,contribution_amount,currency,status FROM tontine_periods WHERE id=?").bind(periodId).first();
+      if(!period||period.status!=="open")return fail(409,"Cette période n'est pas ouverte aux inscriptions.");
+      try {
+        const info=await env.DB.prepare("INSERT INTO tontine_entries(period_id,member_id,amount,currency,status,recorded_by) VALUES(?,?,?,?,?,?)")
+          .bind(periodId,result.user.member_id,period.contribution_amount,period.currency,"due",result.user.id).run();
+        return json({id:info.meta.last_row_id,ok:true},201);
+      } catch { return fail(409,"Vous êtes déjà inscrit à cette période ou l'inscription est impossible."); }
     }
     if (path === "/api/me/aid" && method === "GET") {
       const result=await auth(request,env); if(result.response)return result.response;
@@ -349,6 +369,51 @@ export async function onRequest({ request, env }) {
       if(!Number.isInteger(periodId)||!Number.isInteger(memberId)||!amount(value)||!["CDF","USD"].includes(currency)||!["due","paid","late","cancelled","waived"].includes(status))return fail(400,"Données de participation invalides.");
       try {const info=await env.DB.prepare("INSERT INTO tontine_entries(period_id,member_id,amount,currency,status,recorded_by) VALUES(?,?,?,?,?,?)").bind(periodId,memberId,value,currency,status,result.user.id).run();return json({id:info.meta.last_row_id},201);}
       catch{return fail(409,"Période ou membre introuvable, ou membre déjà inscrit.");}
+    }
+    const periodMatch=path.match(/^\/api\/admin\/tontine\/periods\/(\d+)$/);
+    if(periodMatch&&method==="PATCH"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,FINANCE);if(result.response)return result.response;
+      const id=Number(periodMatch[1]), b=await bodyJson(request), old=await env.DB.prepare("SELECT * FROM tontine_periods WHERE id=?").bind(id).first();
+      if(!old)return fail(404,"Période introuvable.");
+      const title=String(b?.title??old.title).trim(), starts=String(b?.starts_on??old.starts_on), ends=String(b?.ends_on??old.ends_on);
+      const value=Number(b?.contribution_amount??old.contribution_amount), currency=String(b?.currency??old.currency), status=String(b?.status??old.status);
+      if(title.length<2||title.length>160||!(/^\d{4}-\d{2}-\d{2}$/.test(starts))||!(/^\d{4}-\d{2}-\d{2}$/.test(ends))||ends<starts||!amount(value)||!["CDF","USD"].includes(currency)||!["planned","open","closed","cancelled"].includes(status))return fail(400,"Données de période invalides.");
+      await env.DB.prepare("UPDATE tontine_periods SET title=?,starts_on=?,ends_on=?,contribution_amount=?,currency=?,status=?,updated_at=? WHERE id=?")
+        .bind(title,starts,ends,value,currency,status,new Date().toISOString(),id).run();
+      return json({ok:true});
+    }
+    if(periodMatch&&method==="DELETE"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,FINANCE);if(result.response)return result.response;
+      const id=Number(periodMatch[1]), old=await env.DB.prepare("SELECT id FROM tontine_periods WHERE id=?").bind(id).first();
+      if(!old)return fail(404,"Période introuvable.");
+      const entries=await env.DB.prepare("SELECT COUNT(*) AS n FROM tontine_entries WHERE period_id=?").bind(id).first();
+      if(Number(entries?.n||0)>0)return fail(409,"Impossible de supprimer une période qui contient des participations. Clôturez-la plutôt.");
+      await env.DB.prepare("DELETE FROM tontine_periods WHERE id=?").bind(id).run();
+      return json({ok:true});
+    }
+    const entryMatch=path.match(/^\/api\/admin\/tontine\/entries\/(\d+)$/);
+    if(entryMatch&&method==="PATCH"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,FINANCE);if(result.response)return result.response;
+      const id=Number(entryMatch[1]), b=await bodyJson(request), old=await env.DB.prepare("SELECT * FROM tontine_entries WHERE id=?").bind(id).first();
+      if(!old)return fail(404,"Participation introuvable.");
+      const value=Number(b?.amount??old.amount), currency=String(b?.currency??old.currency), status=String(b?.status??old.status);
+      const note=String(b?.note??old.note??"").trim();
+      if(!amount(value)||!["CDF","USD"].includes(currency)||!["due","paid","late","cancelled","waived"].includes(status)||note.length>1000)return fail(400,"Données de participation invalides.");
+      const paidAt=status==="paid"?(String(b?.paid_at??old.paid_at??new Date().toISOString())):null;
+      await env.DB.prepare("UPDATE tontine_entries SET amount=?,currency=?,status=?,paid_at=?,note=?,recorded_by=?,updated_at=? WHERE id=?")
+        .bind(value,currency,status,paidAt,note||null,result.user.id,new Date().toISOString(),id).run();
+      return json({ok:true});
+    }
+    if(entryMatch&&method==="DELETE"){
+      if(!requireOrigin(request))return fail(403,"Requête refusée.");
+      const result=await auth(request,env,FINANCE);if(result.response)return result.response;
+      const id=Number(entryMatch[1]), old=await env.DB.prepare("SELECT id FROM tontine_entries WHERE id=?").bind(id).first();
+      if(!old)return fail(404,"Participation introuvable.");
+      await env.DB.prepare("DELETE FROM tontine_entries WHERE id=?").bind(id).run();
+      return json({ok:true});
     }
     if (path === "/api/admin/posts" && method === "GET") {
       const result=await auth(request,env,MANAGEMENT);if(result.response)return result.response;
