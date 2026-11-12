@@ -410,8 +410,9 @@ export async function onRequest({ request, env }) {
     if(entryMatch&&method==="DELETE"){
       if(!requireOrigin(request))return fail(403,"Requête refusée.");
       const result=await auth(request,env,FINANCE);if(result.response)return result.response;
-      const id=Number(entryMatch[1]), old=await env.DB.prepare("SELECT id FROM tontine_entries WHERE id=?").bind(id).first();
+      const id=Number(entryMatch[1]), old=await env.DB.prepare("SELECT id,status,paid_at FROM tontine_entries WHERE id=?").bind(id).first();
       if(!old)return fail(404,"Participation introuvable.");
+      if(old.status==="paid"||old.paid_at)return fail(409,"Une participation payée ne peut pas être supprimée. Corrigez son statut ou ajoutez une note de régularisation.");
       await env.DB.prepare("DELETE FROM tontine_entries WHERE id=?").bind(id).run();
       return json({ok:true});
     }
@@ -524,20 +525,19 @@ export async function onRequest({ request, env }) {
     if (path === "/api/admin/users" && method === "POST") {
       if(!requireOrigin(request))return fail(403,"Requête refusée.");
       const result=await auth(request,env,["admin"]);if(result.response)return result.response;
-      const b=await bodyJson(request), username=String(b?.username||"").trim().toLowerCase(), email=String(b?.email||"").trim().toLowerCase(), role=String(b?.role||"membre"), memberId=b?.member_id?Number(b.member_id):null;
-      if(!validUsername(username)||!/^\S+@\S+\.\S+$/.test(email)||!["admin","secretaire","tresorier","membre"].includes(role))return fail(400,"Nom d’utilisateur, e-mail ou rôle invalide.");
+      const b=await bodyJson(request), username=String(b?.username||"").trim().toLowerCase(), email=String(b?.email||"").trim().toLowerCase(), role=String(b?.role||"membre"), memberId=b?.member_id?Number(b.member_id):null, temporaryPassword=String(b?.temporary_password||"");
+      if(!validUsername(username)||!/^\S+@\S+\.\S+$/.test(email)||!["admin","secretaire","tresorier","membre"].includes(role)||temporaryPassword.length<12||temporaryPassword.length>1024)return fail(400,"Nom d’utilisateur, e-mail, rôle ou mot de passe provisoire invalide (12 caractères minimum).");
       if(memberId!==null&&!Number.isInteger(memberId))return fail(400,"Fiche membre invalide.");
-      const id=crypto.randomUUID(), now=new Date().toISOString(), display=String(b?.display_name||username).trim().slice(0,180);
+      const id=crypto.randomUUID(), now=new Date().toISOString(), display=String(b?.display_name||username).trim().slice(0,180), passwordHash=await hashPassword(temporaryPassword);
       try {
         await env.DB.batch([
-          env.DB.prepare("INSERT INTO users(id,username,email,role,member_id,active,display_name,created_at,updated_at) VALUES(?,?,?,?,?,1,?,?,?)").bind(id,username,email,role,memberId,display,now,now),
+          env.DB.prepare("INSERT INTO users(id,username,email,password_hash,role,member_id,active,display_name,created_at,updated_at) VALUES(?,?,?,?,?,?,1,?,?,?)").bind(id,username,email,passwordHash,role,memberId,display,now,now),
           env.DB.prepare("INSERT INTO profiles(id,full_name,role,created_at,display_name,member_id,active) VALUES(?,?,?,?,?,?,1)").bind(id,display,role,now,display,memberId),
           env.DB.prepare("INSERT INTO auth_login_map(user_id,username,login_email,created_at,updated_at) VALUES(?,?,?,?,?)").bind(id,username,email,now,now)
         ]);
       } catch { return fail(409,"Un compte avec ce nom d’utilisateur ou cet e-mail existe déjà, ou la fiche membre est invalide."); }
       await audit(env,"users",id,"INSERT",null,{username,email,role,member_id:memberId},result.user.id);
-      const recoverySent=await createRecovery(env,{id,email,active:1},url.origin).catch(()=>false);
-      return json({ok:true,id,recovery_email_sent:recoverySent,message:recoverySent?"Compte créé. Un e-mail de création du mot de passe a été envoyé.":"Compte créé, mais l’e-mail de création du mot de passe n’a pas pu être envoyé. Vérifiez la configuration e-mail."},201);
+      return json({ok:true,id,temporary_password_set:true,message:"Compte créé. Communiquez le mot de passe provisoire par un canal privé et demandez au membre de le changer après sa première connexion."},201);
     }
     return fail(404,"API inconnue.");
   } catch (error) {
